@@ -232,6 +232,20 @@ namespace TiltedCarouselDemo
             }
         }
 
+        private int _additionalItemsToScale;
+        public int AdditionalItemsToScale
+        {
+            get { return _additionalItemsToScale; }
+            set
+            {
+                if (_additionalItemsToScale != value)
+                {
+                    _additionalItemsToScale = value;
+                    OnPropertyChanged(nameof(AdditionalItemsToScale));
+                }
+            }
+        }
+
         int _itemGap;
         public int ItemGap
         {
@@ -270,6 +284,20 @@ namespace TiltedCarouselDemo
                 {
                     _fliptychDegrees = value;
                     OnPropertyChanged(nameof(FliptychDegrees));
+                }
+            }
+        }
+
+        private int _additionalItemsToWarp = 4;
+        public int AdditionalItemsToWarp
+        {
+            get { return _additionalItemsToWarp; }
+            set
+            {
+                if (_additionalItemsToWarp != value)
+                {
+                    _additionalItemsToWarp = value;
+                    OnPropertyChanged(nameof(AdditionalItemsToWarp));
                 }
             }
         }

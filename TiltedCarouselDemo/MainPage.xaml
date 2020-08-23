@@ -6,10 +6,10 @@
     xmlns:tilted="using:Tilted"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    FontSize="20"
+    FontSize="20" Background="DimGray"
     mc:Ignorable="d" KeyDown="Page_KeyDown">
     <Viewbox>
-        <Grid Background="LightGray" Width="1400">
+        <Grid Width="1400" Background="LightGray">
             <Grid Padding="20" Width="400" HorizontalAlignment="Left">
                 <StackPanel VerticalAlignment="Center">
                     <ComboBox Header="Carousel Type"
@@ -38,6 +38,10 @@
                             Value="{x:Bind PageViewModel.SelectedItemScale, Mode=TwoWay}"
                             Minimum="1" Maximum="3.0"
                             StepFrequency="0.1"/>
+                    <Slider Header="Additional Items to Scale"  Margin="0 16"
+                            Value="{x:Bind PageViewModel.AdditionalItemsToScale, Mode=TwoWay}"
+                            Minimum="0" Maximum="12" 
+                            StepFrequency="2" />
                     <Slider Header="Density"  Margin="0 16"
                             Value="{x:Bind PageViewModel.Density, Mode=TwoWay}"
                             Minimum="12" Maximum="72"
@@ -47,15 +51,19 @@
                             Minimum="-30" Maximum="100"
                             StepFrequency="1"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
+                    <Slider Header="Additional Items to Warp"  Margin="0 16"
+                            Value="{x:Bind PageViewModel.AdditionalItemsToWarp, Mode=TwoWay}"
+                            Minimum="0" Maximum="12" 
+                            StepFrequency="2" />
                     <Slider Header="Warp Intensity"  Margin="0 16"
                             Value="{x:Bind PageViewModel.WarpIntensity, Mode=TwoWay}"
-                            Minimum="0" Maximum="50"
+                            Minimum="-1280" Maximum="1280"
                             StepFrequency="1"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
                     <Slider Header="Warp Curve"  Margin="0 16"
                             Value="{x:Bind PageViewModel.WarpCurve, Mode=TwoWay}"
-                            Minimum="0" Maximum="0.9"
-                            StepFrequency="0.01"
+                            Minimum="0.0001" Maximum="0.01" 
+                            StepFrequency="0.0001"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
                     <StackPanel Orientation="Horizontal" Margin="0 16">
                         <TextBlock Text="Enter Desired Index: "/>
@@ -90,8 +98,10 @@
                                  NavigationSpeed="{x:Bind PageViewModel.NavigationSpeed, Mode=OneWay}"
                                  FliptychDegrees="{x:Bind PageViewModel.FliptychDegrees, Mode=OneWay}"
                                  SelectedItemScale="{x:Bind PageViewModel.SelectedItemScale, Mode=OneWay}"
+                                 AdditionalItemsToScale="{x:Bind PageViewModel.AdditionalItemsToScale, Mode=OneWay}"
                                  Density="{x:Bind PageViewModel.Density, Mode=OneWay}"
                                  ItemGap="{x:Bind PageViewModel.ItemGap, Mode=OneWay}"
+                                 AdditionalItemsToWarp="{x:Bind PageViewModel.AdditionalItemsToWarp, Mode=OneWay}"
                                  WarpIntensity="{x:Bind PageViewModel.WarpIntensity, Mode=OneWay}"
                                  WarpCurve="{x:Bind PageViewModel.WarpCurve, Mode=OneWay}"
                                  HorizontalAlignment="Center"
