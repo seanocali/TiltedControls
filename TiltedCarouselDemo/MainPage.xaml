@@ -54,7 +54,8 @@
                     <Slider Header="Additional Items to Warp"  Margin="0 16"
                             Value="{x:Bind PageViewModel.AdditionalItemsToWarp, Mode=TwoWay}"
                             Minimum="0" Maximum="12" 
-                            StepFrequency="2" />
+                            StepFrequency="2" 
+                            Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
                     <Slider Header="Warp Intensity"  Margin="0 16"
                             Value="{x:Bind PageViewModel.WarpIntensity, Mode=TwoWay}"
                             Minimum="-1280" Maximum="1280"
