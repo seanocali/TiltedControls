@@ -15,10 +15,6 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using static Tilted.Common;
-using System.Collections.ObjectModel;
-using System.Runtime.CompilerServices;
-using Windows.UI.Xaml.Controls.Primitives;
-using System.Diagnostics;
 
 namespace Tilted
 {
@@ -34,13 +30,12 @@ namespace Tilted
             _restartExpressionsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             _restartExpressionsTimer.Tick += _restartExpressionsTimer_Tick;
             this.Background = new SolidColorBrush(Colors.Transparent);
-
         }
-
 
         #endregion
 
         #region FIELDS
+
         DispatcherTimer _restartExpressionsTimer;
         DispatcherTimer _delayedRefreshTimer;
         CancellationTokenSource _cancelTokenSource;
@@ -60,9 +55,9 @@ namespace Tilted
         long _currentColumnYPosTick;
         long _currentRowXPosTick;
         double? _savedOpacityState;
-        bool _singleStepMode;
         bool _manipulationStarted;
         bool _manipulationMode;
+        bool _selectedIndexSetInternally;
 
         #endregion
 
@@ -139,85 +134,9 @@ namespace Tilted
 
         #region PROPERTIES
 
-        public FrameworkElement SelectedItemElement { get; set; }
+        public FrameworkElement SelectedItemElement { get; private set; }
 
-        public IList<object> Items { get; set; }
-
-        bool _isCarouselMoving;
-        public bool IsCarouselMoving
-        {
-            get
-            {
-                return _isCarouselMoving;
-            }
-            set
-            {
-                if (_isCarouselMoving != value)
-                {
-                    if (value)
-                    {
-                        RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
-                    }
-                    else
-                    {
-                        StopCarouselMoving();
-                    }
-                    _isCarouselMoving = value;
-                }
-            }
-        }
-
-        public float CarouselRotationAngle
-        {
-            get { return (float)GetValue(CarouselRotationAngleProperty); }
-            set { SetValue(CarouselRotationAngleProperty, value); }
-        }
-
-        public static readonly DependencyProperty CarouselRotationAngleProperty = DependencyProperty.Register(nameof(CarouselRotationAngle), typeof(float), typeof(Carousel),
-            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                if (control._manipulationMode && e.NewValue is float v)
-                {
-                    control.UpdateWheelRotation(v);
-                }
-            })));
-
-        public double CarouselPositionY
-        {
-            get { return (double)GetValue(CarouselPositionYProperty); }
-            set { SetValue(CarouselPositionYProperty, value); }
-        }
-
-        public static readonly DependencyProperty CarouselPositionYProperty = DependencyProperty.Register(nameof(CarouselPositionY), typeof(double), typeof(Carousel),
-            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                if (!control._singleStepMode && control._dynamicGridVisual != null && e.NewValue is double v)
-                {
-                    control.UpdateCarouselVerticalScrolling(Convert.ToSingle(v));
-                }
-            })));
-
-
-
-        public double CarouselPositionX
-        {
-            get { return (double)GetValue(CarouselPositionXProperty); }
-            set { SetValue(CarouselPositionXProperty, value); }
-        }
-
-        public static readonly DependencyProperty CarouselPositionXProperty = DependencyProperty.Register(nameof(CarouselPositionX), typeof(double), typeof(Carousel),
-            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                if (!control._singleStepMode && control._dynamicGridVisual != null && e.NewValue is double v)
-                {
-                    control.UpdateCarouselHorizontalScrolling(Convert.ToSingle(v));
-                }
-            })));
-
-
+        public IList<object> Items { get; private set; }
 
         public int WheelSize
         {
@@ -267,8 +186,6 @@ namespace Tilted
 
         public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(Carousel), new PropertyMetadata(null));
 
-
-        volatile bool _selectedIndexSetInternally;
         public int SelectedIndex
         {
             get
@@ -299,7 +216,6 @@ namespace Tilted
                     {
                         control.SelectedItem = control.Items[newVal];
                     }
-                    control.UpdateZIndices();
                 }
             })));
 
@@ -358,89 +274,6 @@ namespace Tilted
                     var control = s as Carousel;
                     await control.AnimateSelection();
                 }
-            })));
-
-        public bool EnableGestures
-        {
-            get
-            {
-                return (bool)base.GetValue(EnableGesturesProperty);
-            }
-            set
-            {
-                if (value != EnableGestures)
-                {
-                    base.SetValue(EnableGesturesProperty, value);
-                    SetSizeAndGestureEvents();
-                }
-                else
-                {
-                    base.SetValue(EnableGesturesProperty, value);
-                }
-            }
-        }
-
-        public static readonly DependencyProperty EnableGesturesProperty = DependencyProperty.Register(nameof(EnableGestures), typeof(bool), typeof(Carousel),
-            new PropertyMetadata(true, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                control.Refresh();
-            })));
-
-
-        public bool EnableMouseWheel
-        {
-            get
-            {
-                return (bool)base.GetValue(EnableMouseWheelProperty);
-            }
-            set
-            {
-                if (value != EnableMouseWheel)
-                {
-                    base.SetValue(EnableMouseWheelProperty, value);
-                    SetSizeAndGestureEvents();
-                }
-                else
-                {
-                    base.SetValue(EnableMouseWheelProperty, value);
-                }
-            }
-        }
-
-        public static readonly DependencyProperty EnableMouseWheelProperty = DependencyProperty.Register(nameof(EnableMouseWheel), typeof(bool), typeof(Carousel),
-            new PropertyMetadata(true, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                control.Refresh();
-            })));
-
-
-        public bool EnableCursorChange
-        {
-            get
-            {
-                return (bool)base.GetValue(EnableCursorChangeProperty);
-            }
-            set
-            {
-                if (value != EnableCursorChange)
-                {
-                    base.SetValue(EnableCursorChangeProperty, value);
-                    SetSizeAndGestureEvents();
-                }
-                else
-                {
-                    base.SetValue(EnableCursorChangeProperty, value);
-                }
-            }
-        }
-
-        public static readonly DependencyProperty EnableCursorChangeProperty = DependencyProperty.Register(nameof(EnableCursorChange), typeof(bool), typeof(Carousel),
-            new PropertyMetadata(true, new PropertyChangedCallback((s, e) =>
-            {
-                var control = s as Carousel;
-                control.Refresh();
             })));
 
         public new double Width
@@ -716,6 +549,142 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        public object SelectNextTrigger
+        {
+            get
+            {
+                return base.GetValue(SelectNextTriggerProperty);
+            }
+            set
+            {
+                base.SetValue(SelectNextTriggerProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty SelectNextTriggerProperty = DependencyProperty.Register(nameof(SelectNextTrigger), typeof(object), typeof(Carousel),
+        new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        {
+            if (e.NewValue != null)
+            {
+                var control = s as Carousel;
+                control.SelectNext();
+            }
+        })));
+
+        public object SelectPreviousTrigger
+        {
+            get
+            {
+                return base.GetValue(SelectPreviousTriggerProperty);
+            }
+            set
+            {
+                base.SetValue(SelectPreviousTriggerProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty SelectPreviousTriggerProperty = DependencyProperty.Register(nameof(SelectPreviousTrigger), typeof(object), typeof(Carousel),
+        new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        {
+            if (e.NewValue != null)
+            {
+                var control = s as Carousel;
+                control.SelectPrevious();
+            }
+        })));
+
+        public object ManipulationStartedTrigger
+        {
+            get
+            {
+                return base.GetValue(ManipulationStartedTriggerProperty);
+            }
+            set
+            {
+                base.SetValue(ManipulationStartedTriggerProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty ManipulationStartedTriggerProperty = DependencyProperty.Register(nameof(ManipulationStartedTrigger), typeof(object), typeof(Carousel),
+        new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        {
+            if (e.NewValue != null)
+            {
+                var control = s as Carousel;
+                control.StartManipulationMode();
+            }
+        })));
+
+        public object ManipulationCompletedTrigger
+        {
+            get
+            {
+                return base.GetValue(ManipulationCompletedTriggerProperty);
+            }
+            set
+            {
+                base.SetValue(ManipulationCompletedTriggerProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty ManipulationCompletedTriggerProperty = DependencyProperty.Register(nameof(ManipulationCompletedTrigger), typeof(object), typeof(Carousel),
+        new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        {
+            if (e.NewValue != null)
+            {
+                var control = s as Carousel;
+                control.StopManipulationMode();
+            }
+        })));
+
+        public float CarouselRotationAngle
+        {
+            get { return (float)GetValue(CarouselRotationAngleProperty); }
+            set { SetValue(CarouselRotationAngleProperty, value); }
+        }
+
+        public static readonly DependencyProperty CarouselRotationAngleProperty = DependencyProperty.Register(nameof(CarouselRotationAngle), typeof(float), typeof(Carousel),
+            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+            {
+                var control = s as Carousel;
+                if (control._manipulationMode && e.NewValue is float v)
+                {
+                    control.UpdateWheelRotation(v);
+                }
+            })));
+
+        public double CarouselPositionY
+        {
+            get { return (double)GetValue(CarouselPositionYProperty); }
+            set { SetValue(CarouselPositionYProperty, value); }
+        }
+
+        public static readonly DependencyProperty CarouselPositionYProperty = DependencyProperty.Register(nameof(CarouselPositionY), typeof(double), typeof(Carousel),
+            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+            {
+                var control = s as Carousel;
+                if (control._manipulationMode && e.NewValue is double v)
+                {
+                    control.UpdateCarouselVerticalScrolling(Convert.ToSingle(v));
+                }
+            })));
+
+        public double CarouselPositionX
+        {
+            get { return (double)GetValue(CarouselPositionXProperty); }
+            set { SetValue(CarouselPositionXProperty, value); }
+        }
+
+        public static readonly DependencyProperty CarouselPositionXProperty = DependencyProperty.Register(nameof(CarouselPositionX), typeof(double), typeof(Carousel),
+            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+            {
+                var control = s as Carousel;
+                if (control._manipulationMode && e.NewValue is double v)
+                {
+                    control.UpdateCarouselHorizontalScrolling(Convert.ToSingle(v));
+                }
+            })));
+
         #endregion
 
         #region EVENT METHODS
@@ -731,46 +700,40 @@ namespace Tilted
             switch (point.Properties.MouseWheelDelta)
             {
                 case 120:
-                    StepPrevious();
+                    SelectPrevious();
                     break;
                 case -120:
-                    StepNext();
+                    SelectNext();
                     break;
             }
         }
 
-        private void GestureHitbox_PointerExited(object sender, PointerRoutedEventArgs e)
-        {
-            if (Window.Current.CoreWindow.PointerCursor != null)
-            {
-                // TODO: Implement cursor change
-            }
-        }
-
-        private void GestureHitbox_PointerEntered(object sender, PointerRoutedEventArgs e)
-        {
-            if (Window.Current.CoreWindow.PointerCursor != null)
-            {
-                // TODO: Implement cursor change
-            }
-        }
-
-
-        private void _gestureHitbox_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+        void StartManipulationMode()
         {
             _manipulationStarted = true;
             _manipulationMode = true;
+            RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
+        }
+
+        void StopManipulationMode()
+        {
+            _manipulationMode = false;
+            StopCarouselMoving();
+        }
+
+        private void _gestureHitbox_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+        {
+            StartManipulationMode();
         }
 
         private void _gestureHitbox_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            IsCarouselMoving = false;
-            _manipulationMode = false;
+            StopManipulationMode();
         }
 
         private void _gestureHitbox_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            if (ItemsSource != null && EnableGestures)
+            if (ItemsSource != null)
             {
                 double value = 0;
                 switch (CarouselType)
@@ -819,7 +782,6 @@ namespace Tilted
                 if (_manipulationStarted)
                 {
                     _manipulationStarted = false;
-                    IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (newValue > 0)
                     {
@@ -870,7 +832,6 @@ namespace Tilted
                 if (_manipulationStarted)
                 {
                     _manipulationStarted = false;
-                    IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (newValue > 0)
                     {
@@ -918,7 +879,6 @@ namespace Tilted
                 if (_manipulationStarted)
                 {
                     _manipulationStarted = false;
-                    IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (_deltaDirectionIsReverse)
                     {
@@ -1572,25 +1532,25 @@ namespace Tilted
                         case CarouselTypes.Row:
                             if (loFi)
                             {
-                                translateX = IsCarouselMoving ? precedingItemGridVisual.Offset.X - (_itemWidth + ItemGap)
+                                translateX = _manipulationMode ? precedingItemGridVisual.Offset.X - (_itemWidth + ItemGap)
                                     : translateX - (((Density / 2) * (_itemWidth + ItemGap)) + _itemWidth + ItemGap);
 
                             }
                             else
                             {
-                                translateX = IsCarouselMoving ? precedingItemGridVisual.Offset.X + _itemWidth + ItemGap :
+                                translateX = _manipulationMode ? precedingItemGridVisual.Offset.X + _itemWidth + ItemGap :
                                     (Density / 2) * (_itemWidth + ItemGap);
                             }
                             break;
                         case CarouselTypes.Column:
                             if (loFi)
                             {
-                                translateY = IsCarouselMoving ? precedingItemGridVisual.Offset.Y - (_itemHeight + ItemGap) :
+                                translateY = _manipulationMode ? precedingItemGridVisual.Offset.Y - (_itemHeight + ItemGap) :
                                     translateY - (((Density / 2) * (_itemHeight + ItemGap)) + _itemHeight + ItemGap);
                             }
                             else
                             {
-                                translateY = IsCarouselMoving ? precedingItemGridVisual.Offset.Y + _itemHeight + ItemGap :
+                                translateY = _manipulationMode ? precedingItemGridVisual.Offset.Y + _itemHeight + ItemGap :
                                     (Density / 2) * (_itemHeight + ItemGap);
                             }
                             break;
@@ -1598,7 +1558,7 @@ namespace Tilted
                     elementVisual.Offset = new System.Numerics.Vector3((float)translateX, (float)translateY, 0);
                     AddStandardImplicitItemAnimation(elementVisual);
 
-                    if (!IsCarouselMoving)
+                    if (!_manipulationMode)
                     {
                         var precedingItemZIndex = Canvas.GetZIndex(precedingItemElement);
                         Canvas.SetZIndex(element, precedingItemZIndex - 1);
@@ -1606,20 +1566,6 @@ namespace Tilted
 
                 }
             }
-        }
-
-        void StepNext()
-        {
-            _singleStepMode = true;
-            SelectNext();
-            _singleStepMode = false;
-        }
-
-        void StepPrevious()
-        {
-            _singleStepMode = true;
-            SelectPrevious();
-            _singleStepMode = false;
         }
 
         void SelectNext()
@@ -1635,6 +1581,7 @@ namespace Tilted
             _carouselInsertPosition = (_carouselInsertPosition + 1) % Density;
             var carouselIdx = Modulus((_carouselInsertPosition - 1), Density);
             ChangeSelection(startIdx, carouselIdx, true, false);
+            UpdateZIndices();
         }
 
         void SelectPrevious()
@@ -1650,11 +1597,12 @@ namespace Tilted
             _carouselInsertPosition = Modulus((_carouselInsertPosition - 1), Density);
             var carouselIdx = _carouselInsertPosition;
             ChangeSelection((int)startIdx, carouselIdx, false, true);
+            UpdateZIndices();
         }
 
         private void ChangeSelection(int startIdx, int carouselIdx, bool scrollbackwards, bool loFi)
         {
-            if (!IsCarouselMoving)
+            if (!_manipulationMode)
             {
                 switch (CarouselType)
                 {
@@ -1759,9 +1707,9 @@ namespace Tilted
             for (int i = (Density - 1); i > -1; i--)
             {
                 int idx = Modulus(((Density - 1) - i), Density);
-                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is Grid itemGrid)
+                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
-                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemGrid);
+                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemElement);
                     var currentX = itemGridVisual.Offset.X;
                     var currentY = itemGridVisual.Offset.Y;
                     itemGridVisual.Offset = new Vector3(currentX, currentY + endPosition, 0);
@@ -1775,9 +1723,9 @@ namespace Tilted
             for (int i = (Density - 1); i > -1; i--)
             {
                 int idx = Modulus(((Density - 1) - i), Density);
-                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is Grid itemGrid)
+                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
-                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemGrid);
+                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemElement);
                     var currentX = itemGridVisual.Offset.X;
                     var currentY = itemGridVisual.Offset.Y;
                     itemGridVisual.Offset = new System.Numerics.Vector3(currentX + endPosition, currentY, 0);
@@ -1795,28 +1743,16 @@ namespace Tilted
             _gestureHitbox.ManipulationDelta -= _gestureHitbox_ManipulationDelta;
             _gestureHitbox.ManipulationCompleted -= _gestureHitbox_ManipulationCompleted;
             this.PointerWheelChanged -= Carousel_PointerWheelChanged;
-            _gestureHitbox.ManipulationMode = this.EnableGestures ? ManipulationModes.All : ManipulationModes.None;
 
             if (Items != null && Items.Count() > 0)
             {
-                if (this.EnableGestures)
-                {
-                    _gestureHitbox.ManipulationStarted += _gestureHitbox_ManipulationStarted;
-                    _gestureHitbox.ManipulationDelta += _gestureHitbox_ManipulationDelta;
-                    _gestureHitbox.ManipulationCompleted += _gestureHitbox_ManipulationCompleted;
-                }
+                _gestureHitbox.ManipulationStarted += _gestureHitbox_ManipulationStarted;
+                _gestureHitbox.ManipulationDelta += _gestureHitbox_ManipulationDelta;
+                _gestureHitbox.ManipulationCompleted += _gestureHitbox_ManipulationCompleted;
+                _gestureHitbox.ManipulationMode = ManipulationModes.All;
 
-                if (EnableMouseWheel)
-                {
-                    this.PointerWheelChanged += Carousel_PointerWheelChanged;
-                }
 
-                if (EnableCursorChange)
-                {
-                    _gestureHitbox.PointerEntered += GestureHitbox_PointerEntered;
-                    _gestureHitbox.PointerExited += GestureHitbox_PointerExited;
-                }
-
+                this.PointerWheelChanged += Carousel_PointerWheelChanged;
 
                 switch (CarouselType)
                 {
@@ -1862,6 +1798,7 @@ namespace Tilted
                 {
                     var slot = Modulus(((Density - 1) - (displaySelectedIndex + i)), Density);
                     Canvas.SetZIndex((UIElement)_itemsLayerGrid.Children[slot], 10000 - Math.Abs(i));
+
                     if (i == 0)
                     {
                         SelectedItemElement = _itemsLayerGrid.Children[slot] as FrameworkElement;

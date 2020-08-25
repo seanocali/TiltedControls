@@ -350,7 +350,6 @@ namespace TiltedCarouselDemo
             }
         }
 
-
         private void CreateTestItems()
         {
             foreach (var prop in typeof(Colors).GetProperties())
