@@ -567,7 +567,7 @@ namespace Tilted
             if (e.NewValue != null)
             {
                 var control = s as Carousel;
-                control.SelectNext();
+                control.ChangeSingleSelection(false);
             }
         })));
 
@@ -589,7 +589,7 @@ namespace Tilted
             if (e.NewValue != null)
             {
                 var control = s as Carousel;
-                control.SelectPrevious();
+                control.ChangeSingleSelection(true);
             }
         })));
 
@@ -700,10 +700,10 @@ namespace Tilted
             switch (point.Properties.MouseWheelDelta)
             {
                 case 120:
-                    SelectPrevious();
+                    ChangeSingleSelection(true);
                     break;
                 case -120:
-                    SelectNext();
+                    ChangeSingleSelection(false);
                     break;
             }
         }
@@ -807,13 +807,13 @@ namespace Tilted
 
                 while (newValue > _currentColumnYPosTick + threshold)
                 {
-                    SelectPrevious();
+                    ChangeSelection(true);
                     Interlocked.Add(ref _currentColumnYPosTick, threshold);
                 }
 
                 while (newValue < _currentColumnYPosTick - threshold)
                 {
-                    SelectNext();
+                    ChangeSelection(false);
                     Interlocked.Add(ref _currentColumnYPosTick, -threshold);
                 }
 
@@ -857,12 +857,12 @@ namespace Tilted
 
                 while (newValue > _currentRowXPosTick + threshold)
                 {
-                    SelectPrevious();
+                    ChangeSelection(true);
                     Interlocked.Add(ref _currentRowXPosTick, threshold);
                 }
                 while (newValue < _currentRowXPosTick - threshold)
                 {
-                    SelectNext();
+                    ChangeSelection(false);
                     Interlocked.Add(ref _currentRowXPosTick, -threshold);
                 }
 
@@ -910,11 +910,11 @@ namespace Tilted
                     {
                         case WheelAlignments.Right:
                         case WheelAlignments.Top:
-                            SelectNext();
+                            ChangeSelection(false);
                             break;
                         case WheelAlignments.Left:
                         case WheelAlignments.Bottom:
-                            SelectPrevious();
+                            ChangeSelection(true);
                             break;
                     }
                 }
@@ -925,11 +925,11 @@ namespace Tilted
                     {
                         case WheelAlignments.Right:
                         case WheelAlignments.Top:
-                            SelectPrevious();
+                            ChangeSelection(true);
                             break;
                         case WheelAlignments.Left:
                         case WheelAlignments.Bottom:
-                            SelectNext();
+                            ChangeSelection(false);
                             break;
                     }
                 }
@@ -943,9 +943,9 @@ namespace Tilted
             for (int i = (Density - 1); i > -1; i--)
             {
                 int idx = Modulus(((Density - 1) - i), Density);
-                if (_itemsLayerGrid.Children[idx] is FrameworkElement itemGrid)
+                if (_itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
-                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemGrid);
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
                     if (itemElementVisual.ImplicitAnimations != null)
                     {
                         if (clearAll)
@@ -987,17 +987,17 @@ namespace Tilted
                 int j = Modulus((selectedIdx + i), Density);
                 if (_itemsLayerGrid != null && _itemsLayerGrid.Children[j] is FrameworkElement itemElement)
                 {
-                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    AddStandardImplicitItemAnimation(itemGridVisual);
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    AddStandardImplicitItemAnimation(itemElementVisual);
                     if (CarouselType == CarouselTypes.Column)
                     {
-                        var currentX = itemGridVisual.Offset.X;
-                        itemGridVisual.Offset = new System.Numerics.Vector3(currentX, offsetVertical * -i, (Density - Math.Abs(i)));
+                        var currentX = itemElementVisual.Offset.X;
+                        itemElementVisual.Offset = new System.Numerics.Vector3(currentX, offsetVertical * -i, (Density - Math.Abs(i)));
                     }
                     else if (CarouselType == CarouselTypes.Row)
                     {
-                        var currentY = itemGridVisual.Offset.Y;
-                        itemGridVisual.Offset = new System.Numerics.Vector3(offsetHorizontal * -i, currentY, (Density - Math.Abs(i)));
+                        var currentY = itemElementVisual.Offset.Y;
+                        itemElementVisual.Offset = new System.Numerics.Vector3(offsetHorizontal * -i, currentY, (Density - Math.Abs(i)));
                     }
                 }
             }
@@ -1523,7 +1523,7 @@ namespace Tilted
                     double translateY = 0;
                     var elementVisual = ElementCompositionPreview.GetElementVisual(element);
                     UIElement precedingItemElement = loFi ? _itemsLayerGrid.Children[Modulus(idx - 1, Density)] : _itemsLayerGrid.Children[(idx + 1) % Density];
-                    var precedingItemGridVisual = ElementCompositionPreview.GetElementVisual(precedingItemElement);
+                    var precedingItemElementVisual = ElementCompositionPreview.GetElementVisual(precedingItemElement);
 
                     if (elementVisual.ImplicitAnimations != null) { elementVisual.ImplicitAnimations.Clear(); }
 
@@ -1532,25 +1532,25 @@ namespace Tilted
                         case CarouselTypes.Row:
                             if (loFi)
                             {
-                                translateX = _manipulationMode ? precedingItemGridVisual.Offset.X - (_itemWidth + ItemGap)
+                                translateX = _manipulationMode ? precedingItemElementVisual.Offset.X - (_itemWidth + ItemGap)
                                     : translateX - (((Density / 2) * (_itemWidth + ItemGap)) + _itemWidth + ItemGap);
 
                             }
                             else
                             {
-                                translateX = _manipulationMode ? precedingItemGridVisual.Offset.X + _itemWidth + ItemGap :
+                                translateX = _manipulationMode ? precedingItemElementVisual.Offset.X + _itemWidth + ItemGap :
                                     (Density / 2) * (_itemWidth + ItemGap);
                             }
                             break;
                         case CarouselTypes.Column:
                             if (loFi)
                             {
-                                translateY = _manipulationMode ? precedingItemGridVisual.Offset.Y - (_itemHeight + ItemGap) :
+                                translateY = _manipulationMode ? precedingItemElementVisual.Offset.Y - (_itemHeight + ItemGap) :
                                     translateY - (((Density / 2) * (_itemHeight + ItemGap)) + _itemHeight + ItemGap);
                             }
                             else
                             {
-                                translateY = _manipulationMode ? precedingItemGridVisual.Offset.Y + _itemHeight + ItemGap :
+                                translateY = _manipulationMode ? precedingItemElementVisual.Offset.Y + _itemHeight + ItemGap :
                                     (Density / 2) * (_itemHeight + ItemGap);
                             }
                             break;
@@ -1568,39 +1568,32 @@ namespace Tilted
             }
         }
 
-        void SelectNext()
+
+        void ChangeSingleSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
-            SelectedIndex = (SelectedIndex + 1) % Items.Count();
-            SelectNext(currentStartIndexForwards);
+            SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
+            ChangeSelection(reverse ? currentStartIndexBackwards : currentStartIndexForwards, reverse);
             _selectedIndexSetInternally = false;
         }
 
-        void SelectNext(int startIdx)
-        {
-            _carouselInsertPosition = (_carouselInsertPosition + 1) % Density;
-            var carouselIdx = Modulus((_carouselInsertPosition - 1), Density);
-            ChangeSelection(startIdx, carouselIdx, true, false);
-            UpdateZIndices();
-        }
-
-        void SelectPrevious()
+        void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
-            SelectedIndex = Modulus(SelectedIndex - 1, Items.Count());
-            SelectPrevious(currentStartIndexBackwards);
+            SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
+            ChangeSelection(reverse? currentStartIndexBackwards : currentStartIndexForwards, reverse);
             _selectedIndexSetInternally = false;
         }
 
-        void SelectPrevious(int startIdx)
+        void ChangeSelection(int startIdx, bool reverse)
         {
-            _carouselInsertPosition = Modulus((_carouselInsertPosition - 1), Density);
-            var carouselIdx = _carouselInsertPosition;
-            ChangeSelection((int)startIdx, carouselIdx, false, true);
+            _carouselInsertPosition = reverse? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
+            var carouselIdx = reverse? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
+            InsertNewCarouselItem(startIdx, carouselIdx, !reverse, reverse);
             UpdateZIndices();
         }
 
-        private void ChangeSelection(int startIdx, int carouselIdx, bool scrollbackwards, bool loFi)
+        private void InsertNewCarouselItem(int startIdx, int carouselIdx, bool scrollbackwards, bool loFi)
         {
             if (!_manipulationMode)
             {
@@ -1655,7 +1648,7 @@ namespace Tilted
                 var startIdx = Modulus((newIdx + 1 - steps - (Density / 2)), count);
                 for (int i = 0; i < steps; i++)
                 {                   
-                    SelectNext((startIdx + i + (Density - 1)) % Items.Count());
+                    ChangeSelection((startIdx + i + (Density - 1)) % Items.Count(), false);
                 }
             }
             else
@@ -1663,7 +1656,7 @@ namespace Tilted
                 var startIdx = Modulus(newIdx - 1 + steps - (Density / 2), count);
                 for (int i = 0; i < steps; i++)
                 {
-                    SelectPrevious(Tilted.Common.Mod(startIdx - i, count));
+                    ChangeSelection(Tilted.Common.Mod(startIdx - i, count), true);
                 }
             }
         }
@@ -1709,10 +1702,10 @@ namespace Tilted
                 int idx = Modulus(((Density - 1) - i), Density);
                 if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
-                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    var currentX = itemGridVisual.Offset.X;
-                    var currentY = itemGridVisual.Offset.Y;
-                    itemGridVisual.Offset = new Vector3(currentX, currentY + endPosition, 0);
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    var currentX = itemElementVisual.Offset.X;
+                    var currentY = itemElementVisual.Offset.Y;
+                    itemElementVisual.Offset = new Vector3(currentX, currentY + endPosition, 0);
                 }
             }
         }
@@ -1725,10 +1718,10 @@ namespace Tilted
                 int idx = Modulus(((Density - 1) - i), Density);
                 if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
-                    var itemGridVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    var currentX = itemGridVisual.Offset.X;
-                    var currentY = itemGridVisual.Offset.Y;
-                    itemGridVisual.Offset = new System.Numerics.Vector3(currentX + endPosition, currentY, 0);
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    var currentX = itemElementVisual.Offset.X;
+                    var currentY = itemElementVisual.Offset.Y;
+                    itemElementVisual.Offset = new System.Numerics.Vector3(currentX + endPosition, currentY, 0);
                 }
             }
         }
