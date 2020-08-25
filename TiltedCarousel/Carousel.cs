@@ -61,6 +61,8 @@ namespace Tilted
         long _currentRowXPosTick;
         double? _savedOpacityState;
         bool _singleStepMode;
+        bool _manipulationStarted;
+        bool _manipulationMode;
 
         #endregion
 
@@ -117,7 +119,15 @@ namespace Tilted
                 return 360.0f / Density;
             }
         }
-        int startIndex
+        int currentStartIndexForwards
+        {
+            get
+            {
+                return Items != null ? (currentStartIndexBackwards + (Density - 1)) % Items.Count() : 0;
+            }
+        }
+
+        int currentStartIndexBackwards
         {
             get
             {
@@ -146,13 +156,11 @@ namespace Tilted
                 {
                     if (value)
                     {
-                        _singleStepMode = false;
                         RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
                     }
                     else
                     {
                         StopCarouselMoving();
-                        _singleStepMode = true;
                     }
                     _isCarouselMoving = value;
                 }
@@ -169,9 +177,9 @@ namespace Tilted
             new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 var control = s as Carousel;
-                if (!control._singleStepMode && control._dynamicGridVisual != null && e.NewValue is float v)
+                if (control._manipulationMode && e.NewValue is float v)
                 {
-                    control.UpdateWheelSpinning(v);
+                    control.UpdateWheelRotation(v);
                 }
             })));
 
@@ -205,7 +213,7 @@ namespace Tilted
                 var control = s as Carousel;
                 if (!control._singleStepMode && control._dynamicGridVisual != null && e.NewValue is double v)
                 {
-                    control.UpdateCarouselVerticalScrolling(Convert.ToSingle(v));
+                    control.UpdateCarouselHorizontalScrolling(Convert.ToSingle(v));
                 }
             })));
 
@@ -236,7 +244,7 @@ namespace Tilted
             }
         }
 
-        public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(object), typeof(Carousel),
+        public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(nameof(ItemsSource), typeof(object), typeof(Carousel),
             new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 var control = s as Carousel;
@@ -286,10 +294,6 @@ namespace Tilted
                     if (!control._selectedIndexSetInternally)
                     {
                         control.AnimateToSelectedIndex();
-                    }
-                    else
-                    {
-                        control._selectedIndexSetInternally = false;
                     }
                     if (control.Items != null)
                     {
@@ -727,10 +731,10 @@ namespace Tilted
             switch (point.Properties.MouseWheelDelta)
             {
                 case 120:
-                    SelectPrevious(true);
+                    StepPrevious();
                     break;
                 case -120:
-                    SelectNext(true);
+                    StepNext();
                     break;
             }
         }
@@ -754,12 +758,14 @@ namespace Tilted
 
         private void _gestureHitbox_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
-            _singleStepMode = false;
+            _manipulationStarted = true;
+            _manipulationMode = true;
         }
 
         private void _gestureHitbox_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
             IsCarouselMoving = false;
+            _manipulationMode = false;
         }
 
         private void _gestureHitbox_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -810,8 +816,9 @@ namespace Tilted
                 _scrollSnapshot = newValue;
                 var threshold = _itemHeight + ItemGap;
 
-                if (!IsCarouselMoving)
+                if (_manipulationStarted)
                 {
+                    _manipulationStarted = false;
                     IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (newValue > 0)
@@ -838,13 +845,13 @@ namespace Tilted
 
                 while (newValue > _currentColumnYPosTick + threshold)
                 {
-                    SelectPrevious(true);
+                    SelectPrevious();
                     Interlocked.Add(ref _currentColumnYPosTick, threshold);
                 }
 
                 while (newValue < _currentColumnYPosTick - threshold)
                 {
-                    SelectNext(true);
+                    SelectNext();
                     Interlocked.Add(ref _currentColumnYPosTick, -threshold);
                 }
 
@@ -860,8 +867,9 @@ namespace Tilted
                 _scrollSnapshot = newValue;
                 var threshold = _itemWidth + ItemGap;
 
-                if (!IsCarouselMoving)
+                if (_manipulationStarted)
                 {
+                    _manipulationStarted = false;
                     IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (newValue > 0)
@@ -888,12 +896,12 @@ namespace Tilted
 
                 while (newValue > _currentRowXPosTick + threshold)
                 {
-                    SelectPrevious(true);
+                    SelectPrevious();
                     Interlocked.Add(ref _currentRowXPosTick, threshold);
                 }
                 while (newValue < _currentRowXPosTick - threshold)
                 {
-                    SelectNext(true);
+                    SelectNext();
                     Interlocked.Add(ref _currentRowXPosTick, -threshold);
                 }
 
@@ -901,14 +909,15 @@ namespace Tilted
             }
         }
 
-        void UpdateWheelSpinning(float newValue)
+        void UpdateWheelRotation(float newValue)
         {
             if (Items != null && _itemsLayerGrid.Children.Count == Density)
             {
                 _scrollValue = newValue - _scrollSnapshot;
                 _scrollSnapshot = newValue;
-                if (!IsCarouselMoving)
+                if (_manipulationStarted)
                 {
+                    _manipulationStarted = false;
                     IsCarouselMoving = true;
                     _deltaDirectionIsReverse = _scrollValue < 0;
                     if (_deltaDirectionIsReverse)
@@ -941,11 +950,11 @@ namespace Tilted
                     {
                         case WheelAlignments.Right:
                         case WheelAlignments.Top:
-                            SelectNext(true);
+                            SelectNext();
                             break;
                         case WheelAlignments.Left:
                         case WheelAlignments.Bottom:
-                            SelectPrevious(true);
+                            SelectPrevious();
                             break;
                     }
                 }
@@ -956,11 +965,11 @@ namespace Tilted
                     {
                         case WheelAlignments.Right:
                         case WheelAlignments.Top:
-                            SelectPrevious(true);
+                            SelectPrevious();
                             break;
                         case WheelAlignments.Left:
                         case WheelAlignments.Bottom:
-                            SelectNext(true);
+                            SelectNext();
                             break;
                     }
                 }
@@ -1068,7 +1077,7 @@ namespace Tilted
                     for (int i = (Density - 1); i > -1; i--)
                     {
                         if (cancellationToken.IsCancellationRequested) { break; }
-                        int playlistIdx = (i + this.startIndex) % Items.Count();
+                        int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
                         var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
                         _itemsLayerGrid.Children.Add(itemElement);
                     }
@@ -1541,7 +1550,7 @@ namespace Tilted
 
         }
 
-        void UpdateItemInCarouselSlot(int carouselIdx, int sourceIdx, bool loFi, bool fastScroll)
+        void UpdateItemInCarouselSlot(int carouselIdx, int sourceIdx, bool loFi)
         {
             int idx = Modulus(((Density - 1) - carouselIdx), Density);
             if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement element)
@@ -1589,7 +1598,7 @@ namespace Tilted
                     elementVisual.Offset = new System.Numerics.Vector3((float)translateX, (float)translateY, 0);
                     AddStandardImplicitItemAnimation(elementVisual);
 
-                    if (fastScroll)
+                    if (!IsCarouselMoving)
                     {
                         var precedingItemZIndex = Canvas.GetZIndex(precedingItemElement);
                         Canvas.SetZIndex(element, precedingItemZIndex - 1);
@@ -1599,129 +1608,82 @@ namespace Tilted
             }
         }
 
-
-        public void SelectNext()
+        void StepNext()
         {
-            SelectNext(false);
+            _singleStepMode = true;
+            SelectNext();
+            _singleStepMode = false;
         }
-        void SelectNext(bool calledInternally, int? startIdx = null)
+
+        void StepPrevious()
         {
-            var animate = !IsCarouselMoving;
-            if (Items != null && Items.Count() > 0)
+            _singleStepMode = true;
+            SelectPrevious();
+            _singleStepMode = false;
+        }
+
+        void SelectNext()
+        {
+            _selectedIndexSetInternally = true;
+            SelectedIndex = (SelectedIndex + 1) % Items.Count();
+            SelectNext(currentStartIndexForwards);
+            _selectedIndexSetInternally = false;
+        }
+
+        void SelectNext(int startIdx)
+        {
+            _carouselInsertPosition = (_carouselInsertPosition + 1) % Density;
+            var carouselIdx = Modulus((_carouselInsertPosition - 1), Density);
+            ChangeSelection(startIdx, carouselIdx, true, false);
+        }
+
+        void SelectPrevious()
+        {
+            _selectedIndexSetInternally = true;
+            SelectedIndex = Modulus(SelectedIndex - 1, Items.Count());
+            SelectPrevious(currentStartIndexBackwards);
+            _selectedIndexSetInternally = false;
+        }
+
+        void SelectPrevious(int startIdx)
+        {
+            _carouselInsertPosition = Modulus((_carouselInsertPosition - 1), Density);
+            var carouselIdx = _carouselInsertPosition;
+            ChangeSelection((int)startIdx, carouselIdx, false, true);
+        }
+
+        private void ChangeSelection(int startIdx, int carouselIdx, bool scrollbackwards, bool loFi)
+        {
+            if (!IsCarouselMoving)
             {
-                _carouselInsertPosition = (_carouselInsertPosition + 1) % Density;
-
-                if (calledInternally)
+                switch (CarouselType)
                 {
-                    _selectedIndexSetInternally = true;
-                    SelectedIndex = (SelectedIndex + 1) % Items.Count();
-                }
-
-
-                int pIdx;
-                if (startIdx == null)
-                {
-                    pIdx = ((startIndex + (Density - 1)) % Items.Count());
-                }
-                else
-                {
-                    pIdx = (((int)startIdx + (Density - 1)) % Items.Count());
-                }
-
-                if (animate)
-                {
-                    switch (CarouselType)
-                    {
-                        default:
-                            switch (WheelAlignment)
-                            {
-                                default:
-                                    RotateWheel(true);
-                                    break;
-                                case WheelAlignments.Left:
-                                case WheelAlignments.Bottom:
-                                    RotateWheel(false);
-                                    break;
-                            }
-                            UpdateItemInCarouselSlot(Modulus((_carouselInsertPosition - 1), Density), pIdx, false, animate);
-                            break;
-                        case CarouselTypes.Column:
-                            UpdateItemInCarouselSlot(Modulus((_carouselInsertPosition - 1), Density), pIdx, false, animate);
-                            ScrollVerticalColumn(true);
-                            break;
-                        case CarouselTypes.Row:
-                            UpdateItemInCarouselSlot(Modulus((_carouselInsertPosition - 1), Density), pIdx, false, animate);
-                            ScrollHorizontalRow(true);
-                            break;
-                    }
-                    OnSelectionChanged(new CarouselSelectionChangedArgs { SelectedIndex = this.SelectedIndex });
-                }
-                else
-                {
-                    UpdateItemInCarouselSlot(Modulus((_carouselInsertPosition - 1), Density), pIdx, false, animate);
+                    default:
+                        switch (WheelAlignment)
+                        {
+                            default:
+                                RotateWheel(!loFi);
+                                break;
+                            case WheelAlignments.Left:
+                            case WheelAlignments.Bottom:
+                                RotateWheel(loFi);
+                                break;
+                        }
+                        UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
+                        break;
+                    case CarouselTypes.Column:
+                        UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
+                        ScrollVerticalColumn(scrollbackwards);
+                        break;
+                    case CarouselTypes.Row:
+                        UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
+                        ScrollHorizontalRow(scrollbackwards);
+                        break;
                 }
             }
-        }
-        public void SelectPrevious()
-        {
-            SelectPrevious(false);
-        }
-        void SelectPrevious(bool calledInternally, int? playlistStartIdx = null)
-        {
-            var animate = !IsCarouselMoving;
-            if (Items != null && Items.Count() > 0)
+            else
             {
-                _carouselInsertPosition = Modulus((_carouselInsertPosition - 1), Density);
-
-                if (calledInternally)
-                {
-                    _selectedIndexSetInternally = true;
-                    SelectedIndex = Modulus(SelectedIndex - 1, Items.Count());
-                }
-
-
-                int pIdx;
-                if (playlistStartIdx == null)
-                {
-                    pIdx = startIndex;
-                }
-                else
-                {
-                    pIdx = (int)playlistStartIdx;
-                }
-
-                if (animate)
-                {
-                    switch (CarouselType)
-                    {
-                        default:
-                            switch (WheelAlignment)
-                            {
-                                default:
-                                    RotateWheel(false);
-                                    break;
-                                case WheelAlignments.Left:
-                                case WheelAlignments.Bottom:
-                                    RotateWheel(true);
-                                    break;
-                            }
-                            UpdateItemInCarouselSlot(_carouselInsertPosition, pIdx, true, animate);
-                            break;
-                        case CarouselTypes.Column:
-                            UpdateItemInCarouselSlot(_carouselInsertPosition, pIdx, true, animate);
-                            ScrollVerticalColumn(false);
-                            break;
-                        case CarouselTypes.Row:
-                            UpdateItemInCarouselSlot(_carouselInsertPosition, pIdx, true, animate);
-                            ScrollHorizontalRow(false);
-                            break;
-                    }
-                    OnSelectionChanged(new CarouselSelectionChangedArgs { SelectedIndex = this.SelectedIndex });
-                }
-                else
-                {
-                    UpdateItemInCarouselSlot(_carouselInsertPosition, pIdx, true, animate);
-                }
+                UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
             }
         }
 
@@ -1744,8 +1706,8 @@ namespace Tilted
             {
                 var startIdx = Modulus((newIdx + 1 - steps - (Density / 2)), count);
                 for (int i = 0; i < steps; i++)
-                {
-                    SelectNext(false, startIdx + i);
+                {                   
+                    SelectNext((startIdx + i + (Density - 1)) % Items.Count());
                 }
             }
             else
@@ -1753,7 +1715,7 @@ namespace Tilted
                 var startIdx = Modulus(newIdx - 1 + steps - (Density / 2), count);
                 for (int i = 0; i < steps; i++)
                 {
-                    SelectPrevious(false, Tilted.Common.Mod(startIdx - i, count));
+                    SelectPrevious(Tilted.Common.Mod(startIdx - i, count));
                 }
             }
         }
