@@ -29,6 +29,8 @@ namespace Tilted
             _delayedRefreshTimer.Tick += _delayedRefreshTimer_Tick;
             _restartExpressionsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             _restartExpressionsTimer.Tick += _restartExpressionsTimer_Tick;
+            _delayedZIndexUpdateTimer = new DispatcherTimer();
+            _delayedZIndexUpdateTimer.Tick += _delayedZIndexUpdateTimer_Tick;
             this.Background = new SolidColorBrush(Colors.Transparent);
         }
 
@@ -38,6 +40,7 @@ namespace Tilted
 
         DispatcherTimer _restartExpressionsTimer;
         DispatcherTimer _delayedRefreshTimer;
+        DispatcherTimer _delayedZIndexUpdateTimer = new DispatcherTimer();
         CancellationTokenSource _cancelTokenSource;
         int _itemWidth;
         int _itemHeight;
@@ -337,6 +340,10 @@ namespace Tilted
         new PropertyMetadata(500, new PropertyChangedCallback((s, e) =>
         {
             var control = s as Carousel;
+            if (e.NewValue is int newValue && newValue > 1)
+            {
+                control._delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(newValue / 2);
+            }
             control.Refresh();
         })));
 
@@ -567,7 +574,7 @@ namespace Tilted
             if (e.NewValue != null)
             {
                 var control = s as Carousel;
-                control.ChangeSingleSelection(false);
+                control.ChangeSelection(false);
             }
         })));
 
@@ -589,7 +596,7 @@ namespace Tilted
             if (e.NewValue != null)
             {
                 var control = s as Carousel;
-                control.ChangeSingleSelection(true);
+                control.ChangeSelection(true);
             }
         })));
 
@@ -700,10 +707,10 @@ namespace Tilted
             switch (point.Properties.MouseWheelDelta)
             {
                 case 120:
-                    ChangeSingleSelection(true);
+                    ChangeSelection(true);
                     break;
                 case -120:
-                    ChangeSingleSelection(false);
+                    ChangeSelection(false);
                     break;
             }
         }
@@ -1132,6 +1139,12 @@ namespace Tilted
                 this.Opacity = (double)_savedOpacityState;
                 _savedOpacityState = null;
             }
+        }
+
+        private void _delayedZIndexUpdateTimer_Tick(object sender, object e)
+        {
+            _delayedZIndexUpdateTimer.Stop();
+            UpdateZIndices();
         }
         #endregion
 
@@ -1569,19 +1582,24 @@ namespace Tilted
         }
 
 
-        void ChangeSingleSelection(bool reverse)
-        {
-            _selectedIndexSetInternally = true;
-            SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
-            ChangeSelection(reverse ? currentStartIndexBackwards : currentStartIndexForwards, reverse);
-            _selectedIndexSetInternally = false;
-        }
-
         void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
             SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
             ChangeSelection(reverse? currentStartIndexBackwards : currentStartIndexForwards, reverse);
+            if (NavigationSpeed > 1)
+            {
+                _delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(NavigationSpeed / 2);
+                if (_delayedZIndexUpdateTimer.IsEnabled)
+                {
+                    UpdateZIndices();
+                }
+                _delayedZIndexUpdateTimer.Start();
+            }
+            else
+            {
+                UpdateZIndices();
+            }
             _selectedIndexSetInternally = false;
         }
 
@@ -1590,7 +1608,6 @@ namespace Tilted
             _carouselInsertPosition = reverse? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
             var carouselIdx = reverse? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
             InsertNewCarouselItem(startIdx, carouselIdx, !reverse, reverse);
-            UpdateZIndices();
         }
 
         private void InsertNewCarouselItem(int startIdx, int carouselIdx, bool scrollbackwards, bool loFi)
