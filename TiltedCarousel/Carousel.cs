@@ -219,6 +219,7 @@ namespace Tilted
                     {
                         control.SelectedItem = control.Items[newVal];
                     }
+                    control.OnSelectionChanged(new CarouselSelectionChangedArgs { SelectedIndex = newVal });
                 }
             })));
 
@@ -969,7 +970,6 @@ namespace Tilted
             }
         }
 
-
         public async void StopCarouselMoving()
 
         {
@@ -1015,7 +1015,6 @@ namespace Tilted
             _currentRowXPosTick = 0;
             _scrollValue = 0;
             _scrollSnapshot = 0;
-            OnSelectionChanged(new CarouselSelectionChangedArgs { SelectedIndex = this.SelectedIndex });
         }
 
         #endregion
@@ -1086,7 +1085,6 @@ namespace Tilted
             SetSizeAndGestureEvents();
         }
 
-
         void CreateContainers()
         {
             this.Children.Clear();
@@ -1119,7 +1117,6 @@ namespace Tilted
                 VerticalAlignment = VerticalAlignment.Center
             };
             this.Children.Add(_gestureHitbox);
-
         }
 
         public void _restartExpressionsTimer_Tick(object sender, object e)
@@ -1212,6 +1209,7 @@ namespace Tilted
             BooleanNode distanceIsNegativeValue = null;
             BooleanNode isWithinScaleThreshold = null;
             float scaleItemsthreshold = 0;
+
             if (CarouselType == CarouselTypes.Wheel)
             {
                 scaleItemsthreshold = AdditionalItemsToScale == 0 ? degrees : degrees * AdditionalItemsToScale;
@@ -1249,8 +1247,6 @@ namespace Tilted
                         break;
                 }
 
-
-
                 ScalarNode distanceToZero = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
                 ScalarNode distanceTo360 = 360 - distanceToZero;
                 BooleanNode isClosestToZero = distanceToZero <= distanceTo360;
@@ -1282,6 +1278,7 @@ namespace Tilted
                     visual.StartAnimation("Scale.Y", finalScaleValue);
                 }
             }
+
             else if (CarouselType == CarouselTypes.Row || CarouselType == CarouselTypes.Column)
             {
                 scaleItemsthreshold = isXaxisNavigation ? AdditionalItemsToScale * (_itemWidth + ItemGap) : AdditionalItemsToScale * (_itemHeight + ItemGap);
@@ -1410,7 +1407,6 @@ namespace Tilted
             }
         }
 
-
         private void AddStandardImplicitItemAnimation(Visual visual)
         {
             AddStandardImplicitItemAnimation(visual, NavigationSpeed, false);
@@ -1520,7 +1516,6 @@ namespace Tilted
 
             }
             return null;
-
         }
 
         void UpdateItemInCarouselSlot(int carouselIdx, int sourceIdx, bool loFi)
@@ -1580,7 +1575,6 @@ namespace Tilted
                 }
             }
         }
-
 
         void ChangeSelection(bool reverse)
         {
@@ -1647,13 +1641,11 @@ namespace Tilted
 
         public void AnimateToSelectedIndex()
         {
-            // Determine closest animation direction
             var count = Items != null && Items.Count >= 0 ? Items.Count() : 0;
-            var oldIdx = _previousSelectedIndex;
-            var newIdx = SelectedIndex;
-            var distance = ModularDistance(oldIdx, newIdx, count);
+            var distance = ModularDistance(_previousSelectedIndex, SelectedIndex, count);
             bool goForward = false;
-            if (Tilted.Common.Mod(oldIdx + distance, count) == newIdx)
+
+            if (Common.Mod(_previousSelectedIndex + distance, count) == SelectedIndex)
             {
                 goForward = true;
             }
@@ -1662,7 +1654,7 @@ namespace Tilted
 
             if (goForward)
             {
-                var startIdx = Modulus((newIdx + 1 - steps - (Density / 2)), count);
+                var startIdx = Modulus((SelectedIndex + 1 - steps - (Density / 2)), count);
                 for (int i = 0; i < steps; i++)
                 {                   
                     ChangeSelection((startIdx + i + (Density - 1)) % Items.Count(), false);
@@ -1670,12 +1662,14 @@ namespace Tilted
             }
             else
             {
-                var startIdx = Modulus(newIdx - 1 + steps - (Density / 2), count);
+                var startIdx = Modulus(SelectedIndex - 1 + steps - (Density / 2), count);
                 for (int i = 0; i < steps; i++)
                 {
-                    ChangeSelection(Tilted.Common.Mod(startIdx - i, count), true);
+                    ChangeSelection(Common.Mod(startIdx - i, count), true);
                 }
             }
+
+            UpdateZIndices();
         }
 
         public async Task AnimateSelection()
@@ -1760,8 +1754,6 @@ namespace Tilted
                 _gestureHitbox.ManipulationDelta += _gestureHitbox_ManipulationDelta;
                 _gestureHitbox.ManipulationCompleted += _gestureHitbox_ManipulationCompleted;
                 _gestureHitbox.ManipulationMode = ManipulationModes.All;
-
-
                 this.PointerWheelChanged += Carousel_PointerWheelChanged;
 
                 switch (CarouselType)
@@ -1890,7 +1882,6 @@ namespace Tilted
         #region EVENT HANDLERS
         public class CarouselSelectionChangedArgs : EventArgs
         {
-            public FrameworkElement SelectedItem { get; set; }
             public int SelectedIndex { get; set; }
         }
 

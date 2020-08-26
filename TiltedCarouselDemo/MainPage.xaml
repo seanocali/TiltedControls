@@ -11,7 +11,7 @@
     <Viewbox>
         <Grid Width="1400" Background="LightGray">
             <Grid Padding="20" Width="400" HorizontalAlignment="Left">
-                <StackPanel VerticalAlignment="Center">
+                <StackPanel VerticalAlignment="Top">
                     <ComboBox Header="Carousel Type"
                           Margin="0 16"
                           Width="120"
