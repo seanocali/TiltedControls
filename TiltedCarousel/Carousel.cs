@@ -20,7 +20,7 @@ namespace Tilted
 {
     public sealed partial class Carousel : Grid
     {
-        #region CONSTRUCTOR
+        #region CONSTRUCTOR & INITIALIZATION METHODS
 
         public Carousel()
         {
@@ -33,6 +33,139 @@ namespace Tilted
             _delayedZIndexUpdateTimer.Tick += _delayedZIndexUpdateTimer_Tick;
             this.Background = new SolidColorBrush(Colors.Transparent);
         }
+
+        void Refresh()
+        {
+            if (this.IsLoaded)
+            {
+                if (_savedOpacityState == null) { _savedOpacityState = this.Opacity; }
+                this.Opacity = 0;
+                _delayedRefreshTimer.Start();
+            }
+        }
+
+        void LoadNewCarousel()
+        {
+            _cancelTokenSource = new CancellationTokenSource();
+            var cancellationToken = _cancelTokenSource.Token;
+            CreateContainers();
+            if (Items != null && Items.Count() > 0)
+            {
+                try
+                {
+                    for (int i = (Density - 1); i > -1; i--)
+                    {
+                        if (cancellationToken.IsCancellationRequested) { break; }
+                        int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
+                        var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
+                        _itemsLayerGrid.Children.Add(itemElement);
+                    }
+                    if (cancellationToken.IsCancellationRequested) { return; }
+                    int slot = Density / 2;
+                    for (int i = 0; i < Density; i++)
+                    {
+                        if (slot < 0)
+                        {
+                            slot *= -1;
+                        }
+                        else if (slot > 0)
+                        {
+                            slot++;
+                            slot *= -1;
+                        }
+                        else
+                        {
+                            slot++;
+                        }
+                    }
+
+                    if (cancellationToken.IsCancellationRequested) { return; }
+
+                    foreach (var element in _itemsLayerGrid.Children)
+                    {
+                        StartExpressionItemAnimations(element as FrameworkElement);
+                    }
+                    UpdateZIndices();
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+            }
+            if (cancellationToken.IsCancellationRequested) { return; }
+            SetHitboxSize();
+        }
+
+        void CreateContainers()
+        {
+            this.Children.Clear();
+            _currentRowXPosTick = 0;
+            _currentWheelTick = 0;
+            _carouselInsertPosition = 0;
+
+            _dynamicContainerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            _dynamicGridVisual = ElementCompositionPreview.GetElementVisual(_dynamicContainerGrid);
+            _dynamicGridVisual.CenterPoint = new Vector3(_itemWidth / 2, _itemHeight / 2, 0);
+            ElementCompositionPreview.SetIsTranslationEnabled(_dynamicContainerGrid, true);
+            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
+            _itemsLayerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            _focusableDummyElement = new ContentControl { IsTabStop = true };
+            this.Children.Add(_focusableDummyElement);
+            _dynamicContainerGrid.Children.Add(_itemsLayerGrid);
+            this.Children.Add(_dynamicContainerGrid);
+            if (Hitbox != null)
+            {
+                Hitbox.Background = new SolidColorBrush(Colors.Transparent);
+                Hitbox.HorizontalAlignment = HorizontalAlignment.Center;
+                Hitbox.VerticalAlignment = VerticalAlignment.Center;
+                Hitbox.ManipulationMode = ManipulationModes.All;
+                this.Children.Add(Hitbox);
+            }
+
+            ElementCompositionPreview.SetIsTranslationEnabled(this, true);
+        }
+
+        public void SetHitboxSize()
+        {
+            if (Hitbox != null)
+            {
+                switch (CarouselType)
+                {
+                    default:
+                        Hitbox.Width = Width;
+                        Hitbox.Height = Height;
+                        break;
+                    case CarouselTypes.Wheel:
+                        float ws = 0;
+                        switch (WheelAlignment)
+                        {
+                            case WheelAlignments.Bottom:
+                            case WheelAlignments.Top:
+                                ws = WheelSize + (_itemHeight * SelectedItemScale);
+                                break;
+                            case WheelAlignments.Left:
+                            case WheelAlignments.Right:
+                                ws = WheelSize + (_itemWidth * SelectedItemScale);
+                                break;
+                        }
+                        Hitbox.Width = ws;
+                        Hitbox.Height = ws;
+                        break;
+                    case CarouselTypes.Column:
+                        Hitbox.Width = _itemWidth * SelectedItemScale;
+                        Hitbox.Height = Height;
+                        break;
+                    case CarouselTypes.Row:
+                        Hitbox.Width = Width;
+                        Hitbox.Height = _itemHeight * SelectedItemScale;
+                        break;
+                }
+
+            }
+        }
+
 
         #endregion
 
@@ -50,9 +183,8 @@ namespace Tilted
         int _carouselInsertPosition;
         Visual _dynamicGridVisual;
         Grid _dynamicContainerGrid;
-        ContentControl _dynamicWheelUnderlayGrid;
         Grid _itemsLayerGrid;
-        Canvas _gestureHitbox;
+        ContentControl _focusableDummyElement;
         volatile float _currentWheelTick;
         volatile float _currentWheelTickOffset;
         long _currentColumnYPosTick;
@@ -61,6 +193,7 @@ namespace Tilted
         bool _manipulationStarted;
         bool _manipulationMode;
         bool _selectedIndexSetInternally;
+        bool _deltaDirectionIsReverse;
 
         #endregion
 
@@ -153,6 +286,15 @@ namespace Tilted
         #endregion
 
         #region DEPENDENCY PROPERTIES
+
+        public Canvas Hitbox
+        {
+            get { return (Canvas)GetValue(GridProperty); }
+            set { SetValue(GridProperty, value); }
+        }
+
+        public static readonly DependencyProperty GridProperty = DependencyProperty.Register(nameof(Canvas), typeof(Grid), typeof(Carousel),
+            new PropertyMetadata(null));
 
         public object ItemsSource
         {
@@ -326,14 +468,7 @@ namespace Tilted
             }
             set
             {
-                if (value != NavigationSpeed)
-                {
-                    base.SetValue(NavigationSpeedProperty, value);
-                }
-                else
-                {
-                    base.SetValue(NavigationSpeedProperty, value);
-                }
+                base.SetValue(NavigationSpeedProperty, value);
             }
         }
 
@@ -347,6 +482,21 @@ namespace Tilted
             }
             control.Refresh();
         })));
+
+        public bool ZIndexUpdateWaitsForAnimation
+        {
+            get
+            {
+                return (bool)base.GetValue(ZIndexUpdateWaitsForAnimationProperty);
+            }
+            set
+            {
+                base.SetValue(ZIndexUpdateWaitsForAnimationProperty, value);
+            }
+        }
+
+        public static readonly DependencyProperty ZIndexUpdateWaitsForAnimationProperty = DependencyProperty.Register(nameof(ZIndexUpdateWaitsForAnimation), typeof(bool), typeof(Carousel),
+        new PropertyMetadata(false));
 
 
         public float SelectedItemScale
@@ -702,422 +852,9 @@ namespace Tilted
             LoadNewCarousel();
         }
 
-        private void Carousel_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
-        {
-            var point = e.GetCurrentPoint(this);
-            switch (point.Properties.MouseWheelDelta)
-            {
-                case 120:
-                    ChangeSelection(true);
-                    break;
-                case -120:
-                    ChangeSelection(false);
-                    break;
-            }
-        }
-
-        void StartManipulationMode()
-        {
-            _manipulationStarted = true;
-            _manipulationMode = true;
-            RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
-        }
-
-        void StopManipulationMode()
-        {
-            _manipulationMode = false;
-            StopCarouselMoving();
-        }
-
-        private void _gestureHitbox_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
-        {
-            StartManipulationMode();
-        }
-
-        private void _gestureHitbox_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
-        {
-            StopManipulationMode();
-        }
-
-        private void _gestureHitbox_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
-        {
-            if (ItemsSource != null)
-            {
-                double value = 0;
-                switch (CarouselType)
-                {
-                    case CarouselTypes.Wheel:
-                        switch (this.WheelAlignment)
-                        {
-                            case WheelAlignments.Right:
-                                value = -(e.Delta.Translation.Y / 4);
-                                break;
-                            case WheelAlignments.Left:
-                                value = e.Delta.Translation.Y / 4;
-                                break;
-                            case WheelAlignments.Top:
-                                value = -(e.Delta.Translation.X / 4);
-                                break;
-                            case WheelAlignments.Bottom:
-                                value = e.Delta.Translation.X / 4;
-                                break;
-                        }
-                        CarouselRotationAngle += Convert.ToSingle(value);
-                        break;
-                    case CarouselTypes.Column:
-                        value = e.Cumulative.Translation.Y * 2;
-                        CarouselPositionY = Convert.ToSingle(value);
-                        break;
-                    case CarouselTypes.Row:
-                        value = e.Cumulative.Translation.X * 2;
-                        CarouselPositionX = Convert.ToSingle(value);
-                        break;
-                }
-            }
-        }
         #endregion
 
-        #region SMOOTH SCROLL METHODS
-        bool _deltaDirectionIsReverse;
-        void UpdateCarouselVerticalScrolling(float newValue)
-        {
-            if (Items != null && _itemsLayerGrid.Children.Count == Density)
-            {
-                _scrollValue = newValue - _scrollSnapshot;
-                _scrollSnapshot = newValue;
-                var threshold = _itemHeight + ItemGap;
-
-                if (_manipulationStarted)
-                {
-                    _manipulationStarted = false;
-                    _deltaDirectionIsReverse = _scrollValue < 0;
-                    if (newValue > 0)
-                    {
-                        Interlocked.Add(ref _currentColumnYPosTick, -threshold / 2);
-                    }
-                    else if (newValue < 0)
-                    {
-                        Interlocked.Add(ref _currentColumnYPosTick, threshold / 2);
-                    }
-                }
-                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
-                {
-                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
-                    if (_deltaDirectionIsReverse)
-                    {
-                        Interlocked.Add(ref _currentColumnYPosTick, threshold);
-                    }
-                    else
-                    {
-                        Interlocked.Add(ref _currentColumnYPosTick, -threshold);
-                    }
-                }
-
-                while (newValue > _currentColumnYPosTick + threshold)
-                {
-                    ChangeSelection(true);
-                    Interlocked.Add(ref _currentColumnYPosTick, threshold);
-                }
-
-                while (newValue < _currentColumnYPosTick - threshold)
-                {
-                    ChangeSelection(false);
-                    Interlocked.Add(ref _currentColumnYPosTick, -threshold);
-                }
-
-                ClearImplicitOffsetAnimations(0, _scrollValue);
-            }
-        }
-
-        void UpdateCarouselHorizontalScrolling(float newValue)
-        {
-            if (Items != null && _itemsLayerGrid.Children.Count == Density)
-            {
-                _scrollValue = newValue - _scrollSnapshot;
-                _scrollSnapshot = newValue;
-                var threshold = _itemWidth + ItemGap;
-
-                if (_manipulationStarted)
-                {
-                    _manipulationStarted = false;
-                    _deltaDirectionIsReverse = _scrollValue < 0;
-                    if (newValue > 0)
-                    {
-                        Interlocked.Add(ref _currentRowXPosTick, -threshold / 2);
-                    }
-                    else if (newValue < 0)
-                    {
-                        Interlocked.Add(ref _currentRowXPosTick, threshold / 2);
-                    }
-                }
-                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
-                {
-                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
-                    if (_deltaDirectionIsReverse)
-                    {
-                        Interlocked.Add(ref _currentRowXPosTick, threshold);
-                    }
-                    else
-                    {
-                        Interlocked.Add(ref _currentRowXPosTick, -threshold);
-                    }
-                }
-
-                while (newValue > _currentRowXPosTick + threshold)
-                {
-                    ChangeSelection(true);
-                    Interlocked.Add(ref _currentRowXPosTick, threshold);
-                }
-                while (newValue < _currentRowXPosTick - threshold)
-                {
-                    ChangeSelection(false);
-                    Interlocked.Add(ref _currentRowXPosTick, -threshold);
-                }
-
-                ClearImplicitOffsetAnimations(_scrollValue, 0);
-            }
-        }
-
-        void UpdateWheelRotation(float newValue)
-        {
-            if (Items != null && _itemsLayerGrid.Children.Count == Density)
-            {
-                _scrollValue = newValue - _scrollSnapshot;
-                _scrollSnapshot = newValue;
-                if (_manipulationStarted)
-                {
-                    _manipulationStarted = false;
-                    _deltaDirectionIsReverse = _scrollValue < 0;
-                    if (_deltaDirectionIsReverse)
-                    {
-                        _currentWheelTickOffset = degrees / 2;
-                    }
-                    else
-                    {
-                        _currentWheelTickOffset = -degrees / 2;
-                    }
-                }
-                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
-                {
-                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
-                    if (_deltaDirectionIsReverse)
-                    {
-                        _currentWheelTickOffset += degrees;
-                    }
-                    else
-                    {
-                        _currentWheelTickOffset -= degrees;
-                    }
-                }
-
-                _dynamicGridVisual.RotationAngleInDegrees = newValue;
-                while (newValue > _currentWheelTick + degrees + _currentWheelTickOffset)
-                {
-                    _currentWheelTick += degrees;
-                    switch (WheelAlignment)
-                    {
-                        case WheelAlignments.Right:
-                        case WheelAlignments.Top:
-                            ChangeSelection(false);
-                            break;
-                        case WheelAlignments.Left:
-                        case WheelAlignments.Bottom:
-                            ChangeSelection(true);
-                            break;
-                    }
-                }
-                while (newValue < _currentWheelTick - degrees + _currentWheelTickOffset)
-                {
-                    _currentWheelTick -= degrees;
-                    switch (WheelAlignment)
-                    {
-                        case WheelAlignments.Right:
-                        case WheelAlignments.Top:
-                            ChangeSelection(true);
-                            break;
-                        case WheelAlignments.Left:
-                        case WheelAlignments.Bottom:
-                            ChangeSelection(false);
-                            break;
-                    }
-                }
-                ClearImplicitOffsetAnimations(0, 0, true);
-            }
-
-        }
-
-        private void ClearImplicitOffsetAnimations(float xDiff, float yDiff, bool clearAll = false)
-        {
-            for (int i = (Density - 1); i > -1; i--)
-            {
-                int idx = Modulus(((Density - 1) - i), Density);
-                if (_itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
-                {
-                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    if (itemElementVisual.ImplicitAnimations != null)
-                    {
-                        if (clearAll)
-                        {
-                            itemElementVisual.ImplicitAnimations.Clear();
-                        }
-                        else
-                        {
-                            itemElementVisual.ImplicitAnimations.Remove("Offset");
-                        }
-                    }
-                    itemElementVisual.Offset = new Vector3(itemElementVisual.Offset.X + xDiff, itemElementVisual.Offset.Y + yDiff, itemElementVisual.Offset.Z);
-                }
-            }
-        }
-
-        public async void StopCarouselMoving()
-
-        {
-            var selectedIdx = Modulus(((Density - 1) - (displaySelectedIndex)), Density);
-            if (CarouselType == CarouselTypes.Wheel)
-            {
-                AddImplicitWheelSnapToAnimation(_dynamicGridVisual);
-                _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
-                var animation = (ScalarKeyFrameAnimation)_dynamicGridVisual.ImplicitAnimations["RotationAngleInDegrees"];
-                await Task.Delay(animation.Duration);
-                _dynamicGridVisual.ImplicitAnimations.Clear();
-                _currentWheelTick = _currentWheelTick % 360;
-                _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
-                CarouselRotationAngle = _currentWheelTick;
-            }
-
-            var offsetVertical = _itemHeight + ItemGap;
-            var offsetHorizontal = _itemWidth + ItemGap;
-
-            for (int i = -((Density / 2) - 1); i <= (Density / 2); i++)
-            {
-                int j = Modulus((selectedIdx + i), Density);
-                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[j] is FrameworkElement itemElement)
-                {
-                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    AddStandardImplicitItemAnimation(itemElementVisual);
-                    if (CarouselType == CarouselTypes.Column)
-                    {
-                        var currentX = itemElementVisual.Offset.X;
-                        itemElementVisual.Offset = new System.Numerics.Vector3(currentX, offsetVertical * -i, (Density - Math.Abs(i)));
-                    }
-                    else if (CarouselType == CarouselTypes.Row)
-                    {
-                        var currentY = itemElementVisual.Offset.Y;
-                        itemElementVisual.Offset = new System.Numerics.Vector3(offsetHorizontal * -i, currentY, (Density - Math.Abs(i)));
-                    }
-                }
-            }
-            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
-            CarouselPositionY = 0;
-            _currentColumnYPosTick = 0;
-            CarouselPositionX = 0;
-            _currentRowXPosTick = 0;
-            _scrollValue = 0;
-            _scrollSnapshot = 0;
-        }
-
-        #endregion
-
-        #region INITIALIZATION
-
-        void Refresh()
-        {
-            if (this.IsLoaded)
-            {
-                if (_savedOpacityState == null) { _savedOpacityState = this.Opacity; }
-                this.Opacity = 0;
-                _delayedRefreshTimer.Start();
-            }
-        }
-
-        void LoadNewCarousel()
-        {
-            _cancelTokenSource = new CancellationTokenSource();
-            var cancellationToken = _cancelTokenSource.Token;
-            CreateContainers();
-            if (Items != null && Items.Count() > 0)
-            {
-                try
-                {
-                    for (int i = (Density - 1); i > -1; i--)
-                    {
-                        if (cancellationToken.IsCancellationRequested) { break; }
-                        int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
-                        var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
-                        _itemsLayerGrid.Children.Add(itemElement);
-                    }
-                    if (cancellationToken.IsCancellationRequested) { return; }
-                    int slot = Density / 2;
-                    for (int i = 0; i < Density; i++)
-                    {
-                        if (slot < 0)
-                        {
-                            slot *= -1;
-                        }
-                        else if (slot > 0)
-                        {
-                            slot++;
-                            slot *= -1;
-                        }
-                        else
-                        {
-                            slot++;
-                        }
-                    }
-
-                    if (cancellationToken.IsCancellationRequested) { return; }
-
-                    foreach (var element in _itemsLayerGrid.Children)
-                    {
-                        StartExpressionItemAnimations(element as FrameworkElement);
-                    }
-                    UpdateZIndices();
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
-
-            }
-            if (cancellationToken.IsCancellationRequested) { return; }
-            SetSizeAndGestureEvents();
-        }
-
-        void CreateContainers()
-        {
-            this.Children.Clear();
-            _currentRowXPosTick = 0;
-            _currentWheelTick = 0;
-            _carouselInsertPosition = 0;
-
-            _dynamicContainerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-            _dynamicGridVisual = ElementCompositionPreview.GetElementVisual(_dynamicContainerGrid);
-            _dynamicGridVisual.CenterPoint = new Vector3(_itemWidth / 2, _itemHeight / 2, 0);
-            ElementCompositionPreview.SetIsTranslationEnabled(_dynamicContainerGrid, true);
-            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
-            _dynamicWheelUnderlayGrid = new ContentControl();
-            _itemsLayerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-
-            if (CarouselType == CarouselTypes.Wheel)
-            {
-                _dynamicContainerGrid.Children.Add(_dynamicWheelUnderlayGrid);
-            }
-
-            _dynamicContainerGrid.Children.Add(_itemsLayerGrid);
-            this.Children.Add(_dynamicContainerGrid);
-            ElementCompositionPreview.SetIsTranslationEnabled(this, true);
-
-            _gestureHitbox = new Canvas
-            {
-                Name = "Hitbox",
-                Background = new SolidColorBrush(Colors.Transparent),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            this.Children.Add(_gestureHitbox);
-        }
+        #region TIMER METHODS
 
         public void _restartExpressionsTimer_Tick(object sender, object e)
         {
@@ -1143,6 +880,7 @@ namespace Tilted
             _delayedZIndexUpdateTimer.Stop();
             UpdateZIndices();
         }
+
         #endregion
 
         #region ANIMATION METHODS
@@ -1160,6 +898,30 @@ namespace Tilted
                 animationRotate.Duration = TimeSpan.FromMilliseconds(duration);
                 implicitAnimations["RotationAngleInDegrees"] = animationRotate;
                 visual.ImplicitAnimations = implicitAnimations;
+            }
+        }
+
+        private void ClearImplicitOffsetAnimations(float xDiff, float yDiff, bool clearAll = false)
+        {
+            for (int i = (Density - 1); i > -1; i--)
+            {
+                int idx = Modulus(((Density - 1) - i), Density);
+                if (_itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
+                {
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    if (itemElementVisual.ImplicitAnimations != null)
+                    {
+                        if (clearAll)
+                        {
+                            itemElementVisual.ImplicitAnimations.Clear();
+                        }
+                        else
+                        {
+                            itemElementVisual.ImplicitAnimations.Remove("Offset");
+                        }
+                    }
+                    itemElementVisual.Offset = new Vector3(itemElementVisual.Offset.X + xDiff, itemElementVisual.Offset.Y + yDiff, itemElementVisual.Offset.Z);
+                }
             }
         }
 
@@ -1492,6 +1254,234 @@ namespace Tilted
 
         #region NAVIGATION METHODS
 
+        public void StartManipulationMode()
+        {
+            _manipulationStarted = true;
+            _manipulationMode = true;
+            RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
+        }
+
+        public async void StopManipulationMode()
+        {
+            _manipulationMode = false;
+            await StopCarouselMoving().ConfigureAwait(false);
+        }
+
+        void UpdateCarouselVerticalScrolling(float newValue)
+        {
+            if (Items != null && _itemsLayerGrid.Children.Count == Density)
+            {
+                _scrollValue = newValue - _scrollSnapshot;
+                _scrollSnapshot = newValue;
+                var threshold = _itemHeight + ItemGap;
+
+                if (_manipulationStarted)
+                {
+                    _manipulationStarted = false;
+                    _deltaDirectionIsReverse = _scrollValue < 0;
+                    if (newValue > 0)
+                    {
+                        Interlocked.Add(ref _currentColumnYPosTick, -threshold / 2);
+                    }
+                    else if (newValue < 0)
+                    {
+                        Interlocked.Add(ref _currentColumnYPosTick, threshold / 2);
+                    }
+                }
+
+                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
+                {
+                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
+                    if (_deltaDirectionIsReverse)
+                    {
+                        Interlocked.Add(ref _currentColumnYPosTick, threshold);
+                    }
+                    else
+                    {
+                        Interlocked.Add(ref _currentColumnYPosTick, -threshold);
+                    }
+                }
+
+                while (newValue > _currentColumnYPosTick + threshold)
+                {
+                    ChangeSelection(true);
+                    Interlocked.Add(ref _currentColumnYPosTick, threshold);
+                }
+
+                while (newValue < _currentColumnYPosTick - threshold)
+                {
+                    ChangeSelection(false);
+                    Interlocked.Add(ref _currentColumnYPosTick, -threshold);
+                }
+
+                ClearImplicitOffsetAnimations(0, _scrollValue);
+            }
+        }
+
+        void UpdateCarouselHorizontalScrolling(float newValue)
+        {
+            if (Items != null && _itemsLayerGrid.Children.Count == Density)
+            {
+                _scrollValue = newValue - _scrollSnapshot;
+                _scrollSnapshot = newValue;
+                var threshold = _itemWidth + ItemGap;
+
+                if (_manipulationStarted)
+                {
+                    _manipulationStarted = false;
+                    _deltaDirectionIsReverse = _scrollValue < 0;
+                    if (newValue > 0)
+                    {
+                        Interlocked.Add(ref _currentRowXPosTick, -threshold / 2);
+                    }
+                    else if (newValue < 0)
+                    {
+                        Interlocked.Add(ref _currentRowXPosTick, threshold / 2);
+                    }
+                }
+
+                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
+                {
+                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
+                    if (_deltaDirectionIsReverse)
+                    {
+                        Interlocked.Add(ref _currentRowXPosTick, threshold);
+                    }
+                    else
+                    {
+                        Interlocked.Add(ref _currentRowXPosTick, -threshold);
+                    }
+                }
+
+                while (newValue > _currentRowXPosTick + threshold)
+                {
+                    ChangeSelection(true);
+                    Interlocked.Add(ref _currentRowXPosTick, threshold);
+                }
+
+                while (newValue < _currentRowXPosTick - threshold)
+                {
+                    ChangeSelection(false);
+                    Interlocked.Add(ref _currentRowXPosTick, -threshold);
+                }
+
+                ClearImplicitOffsetAnimations(_scrollValue, 0);
+            }
+        }
+
+        void UpdateWheelRotation(float newValue)
+        {
+            if (Items != null && _itemsLayerGrid.Children.Count == Density)
+            {
+                _scrollValue = newValue - _scrollSnapshot;
+                _scrollSnapshot = newValue;
+                if (_manipulationStarted)
+                {
+                    _manipulationStarted = false;
+                    _deltaDirectionIsReverse = _scrollValue < 0;
+                    if (_deltaDirectionIsReverse)
+                    {
+                        _currentWheelTickOffset = degrees / 2;
+                    }
+                    else
+                    {
+                        _currentWheelTickOffset = -degrees / 2;
+                    }
+                }
+                else if ((_deltaDirectionIsReverse && _scrollValue > 0) || (!_deltaDirectionIsReverse && _scrollValue < 0))
+                {
+                    _deltaDirectionIsReverse = !_deltaDirectionIsReverse;
+                    if (_deltaDirectionIsReverse)
+                    {
+                        _currentWheelTickOffset += degrees;
+                    }
+                    else
+                    {
+                        _currentWheelTickOffset -= degrees;
+                    }
+                }
+
+                _dynamicGridVisual.RotationAngleInDegrees = newValue;
+                while (newValue > _currentWheelTick + degrees + _currentWheelTickOffset)
+                {
+                    _currentWheelTick += degrees;
+                    switch (WheelAlignment)
+                    {
+                        case WheelAlignments.Right:
+                        case WheelAlignments.Top:
+                            ChangeSelection(false);
+                            break;
+                        case WheelAlignments.Left:
+                        case WheelAlignments.Bottom:
+                            ChangeSelection(true);
+                            break;
+                    }
+                }
+                while (newValue < _currentWheelTick - degrees + _currentWheelTickOffset)
+                {
+                    _currentWheelTick -= degrees;
+                    switch (WheelAlignment)
+                    {
+                        case WheelAlignments.Right:
+                        case WheelAlignments.Top:
+                            ChangeSelection(true);
+                            break;
+                        case WheelAlignments.Left:
+                        case WheelAlignments.Bottom:
+                            ChangeSelection(false);
+                            break;
+                    }
+                }
+                ClearImplicitOffsetAnimations(0, 0, true);
+            }
+        }
+
+        async Task StopCarouselMoving()
+        {
+            var selectedIdx = Modulus(((Density - 1) - (displaySelectedIndex)), Density);
+            if (CarouselType == CarouselTypes.Wheel)
+            {
+                AddImplicitWheelSnapToAnimation(_dynamicGridVisual);
+                _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
+                var animation = (ScalarKeyFrameAnimation)_dynamicGridVisual.ImplicitAnimations["RotationAngleInDegrees"];
+                await Task.Delay(animation.Duration);
+                _dynamicGridVisual.ImplicitAnimations.Clear();
+                _currentWheelTick = _currentWheelTick % 360;
+                _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
+                CarouselRotationAngle = _currentWheelTick;
+            }
+
+            var offsetVertical = _itemHeight + ItemGap;
+            var offsetHorizontal = _itemWidth + ItemGap;
+
+            for (int i = -((Density / 2) - 1); i <= (Density / 2); i++)
+            {
+                int j = Modulus((selectedIdx + i), Density);
+                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[j] is FrameworkElement itemElement)
+                {
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    AddStandardImplicitItemAnimation(itemElementVisual);
+                    if (CarouselType == CarouselTypes.Column)
+                    {
+                        var currentX = itemElementVisual.Offset.X;
+                        itemElementVisual.Offset = new System.Numerics.Vector3(currentX, offsetVertical * -i, (Density - Math.Abs(i)));
+                    }
+                    else if (CarouselType == CarouselTypes.Row)
+                    {
+                        var currentY = itemElementVisual.Offset.Y;
+                        itemElementVisual.Offset = new System.Numerics.Vector3(offsetHorizontal * -i, currentY, (Density - Math.Abs(i)));
+                    }
+                }
+            }
+            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
+            CarouselPositionY = 0;
+            _currentColumnYPosTick = 0;
+            CarouselPositionX = 0;
+            _currentRowXPosTick = 0;
+            _scrollValue = 0;
+            _scrollSnapshot = 0;
+        }
+
         FrameworkElement CreateItemInCarouselSlot(int i, int playlistIdx)
         {
             if (ItemTemplate != null)
@@ -1576,12 +1566,12 @@ namespace Tilted
             }
         }
 
-        void ChangeSelection(bool reverse)
+        public void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
             SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
             ChangeSelection(reverse? currentStartIndexBackwards : currentStartIndexForwards, reverse);
-            if (NavigationSpeed > 1)
+            if (NavigationSpeed > 1 && ZIndexUpdateWaitsForAnimation)
             {
                 _delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(NavigationSpeed / 2);
                 if (_delayedZIndexUpdateTimer.IsEnabled)
@@ -1597,7 +1587,7 @@ namespace Tilted
             _selectedIndexSetInternally = false;
         }
 
-        void ChangeSelection(int startIdx, bool reverse)
+        public void ChangeSelection(int startIdx, bool reverse)
         {
             _carouselInsertPosition = reverse? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
             var carouselIdx = reverse? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
@@ -1736,62 +1726,6 @@ namespace Tilted
                 }
             }
         }
-
-        #endregion
-
-        #region UPDATE UI METHODS
-
-        public void SetSizeAndGestureEvents()
-        {
-            _gestureHitbox.ManipulationStarted -= _gestureHitbox_ManipulationStarted;
-            _gestureHitbox.ManipulationDelta -= _gestureHitbox_ManipulationDelta;
-            _gestureHitbox.ManipulationCompleted -= _gestureHitbox_ManipulationCompleted;
-            this.PointerWheelChanged -= Carousel_PointerWheelChanged;
-
-            if (Items != null && Items.Count() > 0)
-            {
-                _gestureHitbox.ManipulationStarted += _gestureHitbox_ManipulationStarted;
-                _gestureHitbox.ManipulationDelta += _gestureHitbox_ManipulationDelta;
-                _gestureHitbox.ManipulationCompleted += _gestureHitbox_ManipulationCompleted;
-                _gestureHitbox.ManipulationMode = ManipulationModes.All;
-                this.PointerWheelChanged += Carousel_PointerWheelChanged;
-
-                switch (CarouselType)
-                {
-                    default:
-                        _gestureHitbox.Width = Width;
-                        _gestureHitbox.Height = Height;
-                        break;
-                    case CarouselTypes.Wheel:
-                        float ws = 0;
-                        switch (WheelAlignment)
-                        {
-                            case WheelAlignments.Bottom:
-                            case WheelAlignments.Top:
-                                ws = WheelSize + (_itemHeight * SelectedItemScale);
-                                break;
-                            case WheelAlignments.Left:
-                            case WheelAlignments.Right:
-                                ws = WheelSize + (_itemWidth * SelectedItemScale);
-                                break;
-                        }
-                        _gestureHitbox.Width = ws;
-                        _gestureHitbox.Height = ws;
-                        break;
-                    case CarouselTypes.Column:
-                        _gestureHitbox.Width = _itemWidth * SelectedItemScale;
-                        _gestureHitbox.Height = Height;
-                        break;
-                    case CarouselTypes.Row:
-                        _gestureHitbox.Width = Width;
-                        _gestureHitbox.Height = _itemHeight * SelectedItemScale;
-                        break;
-                }
-            }
-
-        }
-
-
         void UpdateZIndices()
         {
             if (Items != null && _itemsLayerGrid != null)

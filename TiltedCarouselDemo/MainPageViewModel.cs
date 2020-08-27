@@ -330,6 +330,20 @@ namespace TiltedCarouselDemo
             }
         }
 
+        private bool _zIndexUpdateWaitsForAnimation;
+        public bool ZIndexUpdateWaitsForAnimation
+        {
+            get { return _zIndexUpdateWaitsForAnimation; }
+            set
+            {
+                if (value != _zIndexUpdateWaitsForAnimation)
+                {
+                    _zIndexUpdateWaitsForAnimation = value;
+                    OnPropertyChanged(nameof(ZIndexUpdateWaitsForAnimation));
+                }
+            }
+        }
+
         private string _indexChooserInput;
         public string IndexChooserInput
         {
