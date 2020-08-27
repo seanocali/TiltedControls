@@ -8,10 +8,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/seanocali/TiltedCarousel</projectUrl>
-    <iconUrl>http://icon_url_here_or_delete_this_line/</iconUrl>
-    <description>$description$</description>
-    <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
+    <iconUrl>https://raw.githubusercontent.com/seanocali/TiltedCarousel/master/TiltedCarouselDemo/Assets/SplashScreen.scale-200.png</iconUrl>
+    <description>A powerful, CompositionAPI-based control for UWP that makes use of Expression Animations. This is a true carousel that loops content. It has unique features not found in other carousels such as wheel mode, warping, and brush animation support for custom controls that use CompositionBrush elements.</description>
     <copyright>Copyright 2020</copyright>
-    <tags>Tag1 Tag2</tags>
+    <releasenotes>Initial release.</releasenotes>
   </metadata>
 </package>

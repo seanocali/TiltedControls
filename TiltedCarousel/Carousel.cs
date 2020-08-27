@@ -18,10 +18,19 @@ using static Tilted.Common;
 
 namespace Tilted
 {
+    /// <summary>
+    /// UI control to visually present a collection of data.
+    /// </summary>
+    /// <remarks>
+    /// Inherits 'Grid' but works like an 'ItemsControl'. Visual tree contains an empty ContentControl for tab indexing and keyboard focus.
+    /// </remarks>
     public sealed partial class Carousel : Grid
     {
         #region CONSTRUCTOR & INITIALIZATION METHODS
 
+/// <summary>
+/// The class constructor.
+/// </summary>
         public Carousel()
         {
             this.DataContextChanged += Carousel_DataContextChanged;
@@ -127,7 +136,7 @@ namespace Tilted
             ElementCompositionPreview.SetIsTranslationEnabled(this, true);
         }
 
-        public void SetHitboxSize()
+        void SetHitboxSize()
         {
             if (Hitbox != null)
             {
@@ -227,6 +236,30 @@ namespace Tilted
             }
         }
 
+        int itemsToScale
+        {
+            get
+            {
+                if (AdditionalItemsToScale > Density / 2)
+                {
+                    return Density / 2;
+                }
+                return AdditionalItemsToScale;
+            }
+        }
+
+        int itemsToWarp
+        {
+            get
+            {
+                if (AdditionalItemsToWarp > Density / 2)
+                {
+                    return Density / 2;
+                }
+                return AdditionalItemsToWarp;
+            }
+        }
+
         bool useFliptych
         {
             get
@@ -270,10 +303,24 @@ namespace Tilted
 
         #region PROPERTIES
 
+        /// <summary>
+        /// The original object of the selected item in Items.
+        /// </summary>
+        public object SelectedItem { get; private set; }
+
+        /// <returns>
+        /// Returns the FrameworkElement of the SelectedItem.
+        /// </returns>
         public FrameworkElement SelectedItemElement { get; private set; }
 
+        /// <returns>
+        /// Returns a collection of items generated from the ItemsSource.
+        /// </returns>
         public IList<object> Items { get; private set; }
 
+        /// <returns>
+        /// Returns an integer value of the wheel diameter in pixels.
+        /// </returns>
         public int WheelSize
         {
             get
@@ -287,6 +334,9 @@ namespace Tilted
 
         #region DEPENDENCY PROPERTIES
 
+        /// <summary>
+        /// Use this element's Manipulation event handlers for gesture controls.
+        /// </summary>
         public Canvas Hitbox
         {
             get { return (Canvas)GetValue(GridProperty); }
@@ -296,6 +346,9 @@ namespace Tilted
         public static readonly DependencyProperty GridProperty = DependencyProperty.Register(nameof(Canvas), typeof(Grid), typeof(Carousel),
             new PropertyMetadata(null));
 
+        /// <summary>
+        /// Assign or bind the data source you wish to present to this property.
+        /// </summary>
         public object ItemsSource
         {
             get
@@ -323,6 +376,9 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// Assign a DataTempate here that will be used to present each item in your data collection.
+        /// </summary>
         public DataTemplate ItemTemplate
         {
             get { return (DataTemplate)GetValue(ItemTemplateProperty); }
@@ -331,6 +387,9 @@ namespace Tilted
 
         public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(Carousel), new PropertyMetadata(null));
 
+        /// <summary>
+        /// The index of the currently selected item in Items.
+        /// </summary>
         public int SelectedIndex
         {
             get
@@ -365,22 +424,21 @@ namespace Tilted
                 }
             })));
 
-        public object SelectedItem
-        {
-            get
-            {
-                return (object)base.GetValue(SelectedItemProperty);
-            }
-            set
-            {
-                base.SetValue(SelectedItemProperty, value);
-            }
-        }
 
-        public static readonly DependencyProperty SelectedItemProperty = DependencyProperty.Register(nameof(SelectedItem), typeof(object), typeof(Carousel),
-            new PropertyMetadata(null));
-
-
+        /// <summary>
+        /// This can be used to animate a CompositionBrush property of a custom control.
+        /// The control must have a container parent with a name that starts with "CarouselItemMedia."
+        /// The child element's property to animate must be of type CompositionColorBrush or CompositionLinearGradientBrush.
+        /// These types can be found in the namespace Windows.UI.Composition for legacy UWP, or Microsoft.UI.Composition for WinUI.
+        /// 
+        /// Set your control's brush property to what you want for the deselected state. For the selected state, set 
+        /// this this property.
+        /// 
+        /// An expression animation will be added which will create a smooth animated transition between the two brushes as
+        /// items animate in and out of the selected item position.
+        /// 
+        /// Win2D may be required to create a custom control that allows text with a CompositionBrush.
+        /// </summary>
         public Brush SelectedItemForegroundBrush
         {
             get
@@ -400,6 +458,19 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// MVVM: Bind this to a property and you can call the SelectionAnimation() method whenever you change its value to anything other than null.
+        /// </summary>
+        /// <example>
+        /// Bind a property like this (One-Way) and call OnPropertyChanged to trigger it.
+        /// <code>
+        /// private bool _animationTrigger;
+        /// public bool AnimationTrigger
+        /// {
+        ///     get { return !_animationTrigger;}
+        /// }
+        /// </code>
+        /// </example>
         public object TriggerSelectionAnimation
         {
             get
@@ -422,6 +493,9 @@ namespace Tilted
                 }
             })));
 
+        /// <summary>
+        /// Set the width of the control.
+        /// </summary>
         public new double Width
         {
             get
@@ -441,6 +515,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// Set the height of the control.
+        /// </summary>
         public new double Height
         {
             get
@@ -460,6 +537,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// The time it takes, in milliseconds, for a selection change to animate.
+        /// </summary>
         public int NavigationSpeed
         {
             get
@@ -483,6 +563,10 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// For carousel configurations with overlapping items. When this is disabled, the ZIndex of items update immediately upon interaction. 
+        /// Enable this so that it updates only after the animation is halfway complete (NavigationSpeed / 2).
+        /// </summary>
         public bool ZIndexUpdateWaitsForAnimation
         {
             get
@@ -498,7 +582,9 @@ namespace Tilted
         public static readonly DependencyProperty ZIndexUpdateWaitsForAnimationProperty = DependencyProperty.Register(nameof(ZIndexUpdateWaitsForAnimation), typeof(bool), typeof(Carousel),
         new PropertyMetadata(false));
 
-
+        /// <summary>
+        /// Sets the scale of the selected item to make it more prominent. The Framework's UIElement scaling does not do vector scaling of text or SVG images, unfortunately, so keep that in mind when using this.
+        /// </summary>
         public float SelectedItemScale
         {
             get
@@ -518,6 +604,10 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// Set the number of additional items surrounding the selected item to also scale, creating a 'falloff' effect.
+        /// This value also applies to Fliptych.
+        /// </summary>
         public int AdditionalItemsToScale
         {
             get
@@ -537,6 +627,9 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// Set the number of additional items surrounding the selected item to also warp, creating a 'falloff' effect.
+        /// </summary>
         public int AdditionalItemsToWarp
         {
             get
@@ -556,6 +649,9 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// Sets the type of carousel. Chose a Column, a Row, or a Wheel.
+        /// </summary>
         public CarouselTypes CarouselType
         {
             get
@@ -574,6 +670,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// When CarouselType is set to Wheel, use this property to set the conainer edge the wheel should be aligned to.
+        /// </summary>
         public WheelAlignments WheelAlignment
         {
             get
@@ -593,6 +692,10 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// Then number of presented items to be in the UI at once. Increasing this value may help hide visual lag associated with the lazy loading while scrolling. Decreasing it may improve performance.
+        /// When CarouselType is set to wheel, use this property to adjust the space between items.
+        /// </summary>
         public int Density
         {
             get
@@ -632,6 +735,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// Amount of 3-D rotation to apply to deselected items, creating a fliptych or "Coverflow" type of effect.
+        /// </summary>
         public float FliptychDegrees
         {
             get
@@ -651,7 +757,9 @@ namespace Tilted
             control.Refresh();
         })));
 
-
+        /// <summary>
+        /// For Row and Column mode only. Use this in combination with WarpCurve and AdditionalItemsToWarp to create an effect where the selected item juts out from the rest.
+        /// </summary>
         public int WarpIntensity
         {
             get
@@ -670,6 +778,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// For Row and Column mode only. Use this in combination with WarpIntensity and AdditionalItemsToWarp to create an effect where the selected item juts out from the rest.
+        /// </summary>
         public double WarpCurve
         {
             get
@@ -688,6 +799,9 @@ namespace Tilted
             control.Refresh();
         })));
 
+        /// <summary>
+        /// For Row and Column mode only. Increase or decrease (overlap) space between items.
+        /// </summary>
         public int ItemGap
         {
             get
@@ -707,6 +821,19 @@ namespace Tilted
                 control.Refresh();
             })));
 
+        /// <summary>
+        /// For MVVM. Bind this to a property and you can call the SelectNext() method whenever you change its value to anything other than null.
+        /// </summary>
+        /// <example>
+        /// Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it.
+        /// <code>
+        /// private bool _selectNextTrigger;
+        /// public bool SelectNextTrigger
+        /// {
+        ///     get { return !_selectNextTrigger;}
+        /// }
+        /// </code>
+        /// </example>
         public object SelectNextTrigger
         {
             get
@@ -729,6 +856,19 @@ namespace Tilted
             }
         })));
 
+        /// <summary>
+        /// For MVVM. Bind this to a property and you can call the SelectPrevious() method whenever you change its value to anything other than null.
+        /// </summary>
+        /// <example>
+        /// Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it.
+        /// <code>
+        /// private bool _selectPreviousTrigger;
+        /// public bool SelectPreviousTrigger
+        /// {
+        ///     get { return !_selectPreviousTrigger;}
+        /// }
+        /// </code>
+        /// </example>
         public object SelectPreviousTrigger
         {
             get
@@ -750,6 +890,20 @@ namespace Tilted
                 control.ChangeSelection(true);
             }
         })));
+
+        /// <summary>
+        /// For MVVM. Bind this to a property and you can call the ManipulationStarted() method whenever you change its value to anything other than null.
+        /// </summary>
+        /// <example>
+        /// Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it.
+        /// <code>
+        /// private bool _manipulationStartedTrigger;
+        /// public bool ManipulationStartedTrigger
+        /// {
+        ///     get { return !_manipulationStartedTrigger;}
+        /// }
+        /// </code>
+        /// </example>
 
         public object ManipulationStartedTrigger
         {
@@ -773,6 +927,19 @@ namespace Tilted
             }
         })));
 
+        /// <summary>
+        /// For MVVM. Bind this to a property and you can call the ManipulationCompleted() method whenever you change its value to anything other than null.
+        /// </summary>
+        /// <example>
+        /// Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it.
+        /// <code>
+        /// private bool _manipulationCompletedTrigger;
+        /// public bool ManipulationCompletedTrigger
+        /// {
+        ///     get { return !_manipulationCompletedTrigger;}
+        /// }
+        /// </code>
+        /// </example>
         public object ManipulationCompletedTrigger
         {
             get
@@ -795,6 +962,11 @@ namespace Tilted
             }
         })));
 
+        /// <summary>
+        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
+        /// Use ManipulationStarted and ManipulationCompleted events accordingly.
+        /// </summary>
         public float CarouselRotationAngle
         {
             get { return (float)GetValue(CarouselRotationAngleProperty); }
@@ -811,6 +983,11 @@ namespace Tilted
                 }
             })));
 
+        /// <summary>
+        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
+        /// Use ManipulationStarted and ManipulationCompleted events accordingly.
+        /// </summary>
         public double CarouselPositionY
         {
             get { return (double)GetValue(CarouselPositionYProperty); }
@@ -827,6 +1004,11 @@ namespace Tilted
                 }
             })));
 
+        /// <summary>
+        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
+        /// Use ManipulationStarted and ManipulationCompleted events accordingly.
+        /// </summary>
         public double CarouselPositionX
         {
             get { return (double)GetValue(CarouselPositionXProperty); }
@@ -856,7 +1038,7 @@ namespace Tilted
 
         #region TIMER METHODS
 
-        public void _restartExpressionsTimer_Tick(object sender, object e)
+        private void _restartExpressionsTimer_Tick(object sender, object e)
         {
             _restartExpressionsTimer.Stop();
             if (this.IsLoaded)
@@ -974,7 +1156,7 @@ namespace Tilted
 
             if (CarouselType == CarouselTypes.Wheel)
             {
-                scaleItemsthreshold = AdditionalItemsToScale == 0 ? degrees : degrees * AdditionalItemsToScale;
+                scaleItemsthreshold = itemsToScale == 0 ? degrees : degrees * itemsToScale;
 
                 var slotDegrees = ((Int32.Parse(element.Name) + (Density / 2)) % Density) * degrees;
 
@@ -1043,7 +1225,7 @@ namespace Tilted
 
             else if (CarouselType == CarouselTypes.Row || CarouselType == CarouselTypes.Column)
             {
-                scaleItemsthreshold = isXaxisNavigation ? AdditionalItemsToScale * (_itemWidth + ItemGap) : AdditionalItemsToScale * (_itemHeight + ItemGap);
+                scaleItemsthreshold = isXaxisNavigation ? itemsToScale * (_itemWidth + ItemGap) : itemsToScale * (_itemHeight + ItemGap);
                 if (scaleItemsthreshold == 0)
                 {
                     scaleItemsthreshold = isXaxisNavigation ? _itemWidth + ItemGap : _itemHeight + ItemGap;
@@ -1070,7 +1252,7 @@ namespace Tilted
 
                 if (WarpIntensity != 0)
                 {
-                    var warpItemsthreshold = isXaxisNavigation ? AdditionalItemsToWarp * (_itemWidth + ItemGap) : AdditionalItemsToWarp * (_itemHeight + ItemGap);
+                    var warpItemsthreshold = isXaxisNavigation ? itemsToWarp * (_itemWidth + ItemGap) : itemsToWarp * (_itemHeight + ItemGap);
                     if (warpItemsthreshold == 0)
                     {
                         warpItemsthreshold = isXaxisNavigation ? _itemWidth + ItemGap : _itemHeight + ItemGap;
@@ -1103,18 +1285,6 @@ namespace Tilted
                 ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfScaleThreshold * rotatedValue, rotatedValue);
                 visual.StartAnimation("RotationAngleInDegrees", finalValue);
             }
-
-
-            /// This can be used to animate a CompositionBrush property of a custom control.
-            /// The control must have a container parent with a name that starts with "CarouselItemMedia"
-            /// The child element's property to animate must be of type CompositionColorBrush or CompositionLinearGradientBrush.
-            /// These types can be found in the namespace Windows.UI.Composition for legacy UWP, or Microsoft.UI.Composition for WinUI.
-            /// 
-            /// Set your control's brush property to what you want for the deselected state. For the selected state, set 
-            /// your highlight brush to "SelectedItemForegroundBrush' here in this class.
-            /// 
-            /// An expression animation will be added which will create a smooth animated transition between the two brushes as
-            /// items animate in and out of the selected item position.
 
             if (SelectedItemForegroundBrush != null)
             {
@@ -1254,6 +1424,9 @@ namespace Tilted
 
         #region NAVIGATION METHODS
 
+        /// <summary>
+        /// This must be called before updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
+        /// </summary>
         public void StartManipulationMode()
         {
             _manipulationStarted = true;
@@ -1261,6 +1434,9 @@ namespace Tilted
             RemoveImplicitWheelRotationAnimation(_dynamicGridVisual);
         }
 
+        /// <summary>
+        /// This must be called after updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
+        /// </summary>
         public async void StopManipulationMode()
         {
             _manipulationMode = false;
@@ -1566,7 +1742,7 @@ namespace Tilted
             }
         }
 
-        public void ChangeSelection(bool reverse)
+        void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
             SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
@@ -1587,7 +1763,7 @@ namespace Tilted
             _selectedIndexSetInternally = false;
         }
 
-        public void ChangeSelection(int startIdx, bool reverse)
+        void ChangeSelection(int startIdx, bool reverse)
         {
             _carouselInsertPosition = reverse? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
             var carouselIdx = reverse? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
@@ -1629,7 +1805,7 @@ namespace Tilted
             }
         }
 
-        public void AnimateToSelectedIndex()
+        void AnimateToSelectedIndex()
         {
             var count = Items != null && Items.Count >= 0 ? Items.Count() : 0;
             var distance = ModularDistance(_previousSelectedIndex, SelectedIndex, count);
@@ -1662,6 +1838,11 @@ namespace Tilted
             UpdateZIndices();
         }
 
+        /// <summary>
+        /// This is used to trigger a storyboard animation for the selected item. 
+        /// Add a storyboard to resources of the root element of your ItemTemplate and assign the key "SelectionAnimation".
+        /// </summary>
+        /// <returns></returns>
         public async Task AnimateSelection()
         {
             if (this.SelectedItemElement is FrameworkElement selectedItemContent)
@@ -1696,7 +1877,7 @@ namespace Tilted
             _currentWheelTick += endAngle;
         }
 
-        public void ScrollVerticalColumn(bool scrollUp)
+        void ScrollVerticalColumn(bool scrollUp)
         {
             long endPosition = (scrollUp) ? -(_itemHeight + ItemGap) : (_itemHeight + ItemGap);
             for (int i = (Density - 1); i > -1; i--)
@@ -1712,7 +1893,7 @@ namespace Tilted
             }
         }
 
-        public void ScrollHorizontalRow(bool scrollLeft)
+        void ScrollHorizontalRow(bool scrollLeft)
         {
             long endPosition = (scrollLeft) ? -(_itemWidth + ItemGap) : (_itemWidth + ItemGap);
             for (int i = (Density - 1); i > -1; i--)
@@ -1815,11 +1996,20 @@ namespace Tilted
         #endregion
 
         #region EVENT HANDLERS
+        /// <summary>
+        /// Class used to define custom EventArgs so the SelectedItem can be passed.
+        /// </summary>
         public class CarouselSelectionChangedArgs : EventArgs
         {
+            /// <summary>
+            /// The index of Items that represents the selected item.
+            /// </summary>
             public int SelectedIndex { get; set; }
         }
 
+        /// <summary>
+        /// Raises whenever the selection changes.
+        /// </summary>
         public event EventHandler SelectionChanged;
 
         void OnSelectionChanged(CarouselSelectionChangedArgs e)

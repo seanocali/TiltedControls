@@ -7,15 +7,15 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="e410f0dd-0c9c-478a-866c-93183527b1b7"
+    Name="TiltedCarouselControl"
     Publisher="CN=seano"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="e410f0dd-0c9c-478a-866c-93183527b1b7" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>TiltedCarouselDemo</DisplayName>
-    <PublisherDisplayName>seano</PublisherDisplayName>
+    <DisplayName>Tilted Carousel Demo</DisplayName>
+    <PublisherDisplayName>Sean K. O&apos;Neil</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
