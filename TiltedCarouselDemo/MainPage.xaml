@@ -91,6 +91,11 @@
                         <TextBlock Margin="4 0" Text="{x:Bind PageViewModel.SelectedIndexText, Mode=OneWay}" />
                     </StackPanel>
                 </StackPanel>
+                <TextBlock VerticalAlignment="Bottom"
+                           HorizontalAlignment="Left"
+                           FontStyle="Italic"
+                           FontSize="12"
+                           Margin="4 0">Icon by Saloni Sinha</TextBlock>
             </Grid>
 
             <Grid Width="1000" Height="1000" Background="White"
