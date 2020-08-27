@@ -108,49 +108,50 @@ namespace TiltedCarouselDemo
             }
         }
 
-        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
+        private async void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
         {
-            if (args.VirtualKey == Windows.System.VirtualKey.Up || args.VirtualKey == Windows.System.VirtualKey.Down)
+            switch (args.VirtualKey)
             {
-                switch (myCarousel.CarouselType)
-                {
-                    case CarouselTypes.Wheel:
-                        switch (myCarousel.WheelAlignment)
-                        {
-                            case WheelAlignments.Right:
-                            case WheelAlignments.Left:
-                                myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
-                                break;
-                        }
-                        break;
-                    case CarouselTypes.Column:
-                        myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
-                        break;
-                }
+                case Windows.System.VirtualKey.Up:
+                case Windows.System.VirtualKey.Down:
+                    switch (myCarousel.CarouselType)
+                    {
+                        case CarouselTypes.Wheel:
+                            switch (myCarousel.WheelAlignment)
+                            {
+                                case WheelAlignments.Right:
+                                case WheelAlignments.Left:
+                                    myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                    break;
+                            }
+                            break;
+                        case CarouselTypes.Column:
+                            myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                            break;
+                    }
+                    break;
+                case Windows.System.VirtualKey.Left:
+                case Windows.System.VirtualKey.Right:
+                    switch (myCarousel.CarouselType)
+                    {
+                        case CarouselTypes.Wheel:
+                            switch (myCarousel.WheelAlignment)
+                            {
+                                case WheelAlignments.Top:
+                                case WheelAlignments.Bottom:
+                                    myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                    break;
+                            }
+                            break;
+                        case CarouselTypes.Row:
+                            myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                            break;
+                    }
+                    break;
+                case Windows.System.VirtualKey.Enter:
+                    myCarousel.AnimateSelection();
+                    break;
             }
-
-            else if (args.VirtualKey == Windows.System.VirtualKey.Left || args.VirtualKey == Windows.System.VirtualKey.Right)
-            {
-                switch (myCarousel.CarouselType)
-                {
-                    case CarouselTypes.Wheel:
-                        switch (myCarousel.WheelAlignment)
-                        {
-                            case WheelAlignments.Top:
-                            case WheelAlignments.Bottom:
-                                myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
-                                break;
-                        }
-                        break;
-                    case CarouselTypes.Row:
-                        myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
-                        break;
-                }
-            }
-        }
-        private void Canvas_KeyDown(object sender, KeyRoutedEventArgs e)
-        {
-
         }
     }
 }

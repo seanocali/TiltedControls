@@ -4,10 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:TiltedCarouselDemo"
     xmlns:tilted="using:Tilted"
-    xmlns:developerTools="using:Microsoft.Toolkit.Uwp.DeveloperTools"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    FontSize="20" Background="DimGray"
+    Background="DimGray"
     mc:Ignorable="d">
     <Viewbox>
         <Grid Width="1400" Background="LightGray">
@@ -83,8 +82,8 @@
                                   Margin="0 8"
                                   IsOn="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=TwoWay}" />
                     <StackPanel Orientation="Horizontal" Margin="0 8">
-                        <TextBlock Text="Enter Desired Index: "/>
-                        <TextBox Margin="4 0" 
+                        <TextBlock Text="Enter Desired Index and Press Tab: "/>
+                        <TextBox Margin="6 0" 
                              Text="{x:Bind PageViewModel.IndexChooserInput, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"  Margin="0 8">
@@ -107,13 +106,14 @@
                     <TextBlock FontSize="30" Margin="2"
                            Text="{x:Bind PageViewModel.SelectedItemText, Mode=OneWay}"/>
                     <TextBlock FontSize="20"
-                               HorizontalTextAlignment="Center"
+                               TextWrapping="WrapWholeWords"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center">
-                        To Change Selection,<LineBreak/>
-                        Use the Arrow Keys,<LineBreak/>
-                        The Mouse Wheel,<LineBreak />
-                        Or Drag the Carousel.
+                        To change selection
+                        use the arrow keys, 
+                        the mouse wheel while hovering,
+                        or drag the carousel.<LineBreak/><LineBreak/>
+                        Press Enter to animate selection.
                     </TextBlock>
                 </Grid>
                 <tilted:Carousel x:Name="myCarousel"
@@ -143,15 +143,36 @@
                     </tilted:Carousel.Hitbox>
                     <tilted:Carousel.RenderTransform>
                         <TranslateTransform X="{x:Bind PageViewModel.OffsetX, Mode=OneWay}"
-                                        Y="{x:Bind PageViewModel.OffsetY, Mode=OneWay}"/>
+                                            Y="{x:Bind PageViewModel.OffsetY, Mode=OneWay}"/>
                     </tilted:Carousel.RenderTransform>
                     <tilted:Carousel.ItemTemplate>
                         <DataTemplate x:DataType="local:ItemModel">
-                            <Grid Width="100" Height="40" 
+                            <Grid x:Name="carouselItem"
+                                  RenderTransformOrigin="0.5, 0.5"
+                                  Width="100" Height="40" 
                                   BorderBrush="Black"
                                   BorderThickness="1"
                                   Background="{Binding BackgroundColor}">
                                 <TextBlock Text="{Binding Text}" />
+                                <Grid.Resources>
+                                    <Storyboard x:Key="SelectionAnimation">
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="AnimatedScaleTransform"
+                                                         Storyboard.TargetProperty="ScaleX"
+                                                         Duration="0:0:0.5">
+                                            <LinearDoubleKeyFrame Value="1.5" KeyTime="0:0:0.25" />
+                                            <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.5" />
+                                        </DoubleAnimationUsingKeyFrames>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="AnimatedScaleTransform"
+                                                         Storyboard.TargetProperty="ScaleY"
+                                                          Duration="0:0:0.5">
+                                            <LinearDoubleKeyFrame Value="1.5" KeyTime="0:0:0.25" />
+                                            <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.5" />
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </Grid.Resources>
+                                <Grid.RenderTransform>
+                                    <ScaleTransform x:Name="AnimatedScaleTransform" />
+                                </Grid.RenderTransform>
                             </Grid>
                         </DataTemplate>
                     </tilted:Carousel.ItemTemplate>

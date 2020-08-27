@@ -1678,11 +1678,12 @@ namespace Tilted
                 if (sb != null)
                 {
                     sb.Begin();
-                    if (sb.Duration.TimeSpan != null)
+                    if (sb.Duration.HasTimeSpan && sb.Duration.TimeSpan != null)
                     {
                         await Task.Delay((int)sb.Duration.TimeSpan.TotalMilliseconds);
                     }
                 }
+                
             }
         }
 
