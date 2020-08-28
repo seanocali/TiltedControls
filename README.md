@@ -14,21 +14,21 @@
 ---
 #### SelectedItemElement
 
-**Returns**:  Returns the FrameworkElement of the SelectedItem. 
+ Returns the FrameworkElement of the SelectedItem. 
 
 
 
 ---
 #### Items
 
-**Returns**:  Returns a collection of items generated from the ItemsSource. 
+ Returns a collection of items generated from the ItemsSource. 
 
 
 
 ---
 #### WheelSize
 
-**Returns**:  Returns an integer value of the wheel diameter in pixels. 
+ Returns an integer value of the wheel diameter in pixels. 
 
 
 
