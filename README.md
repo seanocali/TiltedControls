@@ -175,7 +175,7 @@ For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnima
 ---
 #### SelectNextTrigger
 
- For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(false)' method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(false)' whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
