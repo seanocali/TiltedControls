@@ -1,6 +1,6 @@
 # Tilted Carousel
 
-#### A powerful, CompositionAPI-based control for UWP that makes use of Expression Animations. This is a true carousel that loops content. It has unique features not found in other carousels such as wheel mode, warping, and CompositionBrush animation support.
+#### A true (looping) carousel control that makes use of UWP's Composition API. It has unique features not found in other carousels such as wheel mode, warping, and CompositionBrush animation support.
 
 
 ## Properties
