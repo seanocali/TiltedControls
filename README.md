@@ -4,7 +4,7 @@
 
 #### This is a true carousel that loops content.
 
-#### It has unique features not found in other carousels such as wheel mode, warping, and brush animation support for custom controls that use CompositionBrush elements.
+#### It has unique features not found in other carousels such as wheel mode, warping, and CompositionBrush animation support.
 
 
 ## Properties
