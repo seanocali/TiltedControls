@@ -72,7 +72,7 @@
 
 For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnimation()' method whenever you change its value to anything other than null. 
 
-##### Example:  Bind a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
@@ -177,7 +177,7 @@ For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnima
 
  For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(false)' whenever you change its value to anything other than null. 
 
-##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind to a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
@@ -198,7 +198,7 @@ For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnima
 
  For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(true)' whenever you change its value to anything other than null. 
 
-##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind to a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
