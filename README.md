@@ -259,21 +259,21 @@ For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnima
 ---
 #### CarouselRotationAngle
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
 ---
 #### CarouselPositionY
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
 ---
 #### CarouselPositionX
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
