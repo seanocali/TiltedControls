@@ -89,20 +89,6 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 
 
 ---
-#### Width
-
- Set the width of the control. 
-
-
-
----
-#### Height
-
- Set the height of the control. 
-
-
-
----
 #### NavigationSpeed
 
  The time it takes, in milliseconds, for a selection change to animate. 
