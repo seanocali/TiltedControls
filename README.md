@@ -70,7 +70,7 @@
 ---
 #### TriggerSelectionAnimation
 
-For MVVM. Bind this to a property and you can call the SelectionAnimation() method whenever you change its value to anything other than null. 
+For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnimation()' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -175,7 +175,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### SelectNextTrigger
 
- For MVVM. Bind this to a property and you can call the SelectNext() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(false)' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -196,7 +196,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### SelectPreviousTrigger
 
- For MVVM. Bind this to a property and you can call the SelectPrevious() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(true)' whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -217,7 +217,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### ManipulationStartedTrigger
 
- For MVVM. Bind this to a property and you can call the ManipulationStarted() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call the 'ManipulationStarted()' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -238,7 +238,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### ManipulationCompletedTrigger
 
- For MVVM. Bind this to a property and you can call the ManipulationCompleted() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call the 'ManipulationCompleted()' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
