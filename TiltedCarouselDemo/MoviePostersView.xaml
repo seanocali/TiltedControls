@@ -1,13 +1,13 @@
 ﻿<Page
-    x:Class="TiltedCarouselDemo.MainPage"
+    x:Class="TiltedCarouselDemo.MoviePostersView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:TiltedCarouselDemo"
     xmlns:tilted="using:Tilted"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Background="DimGray"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="Black">
     <Viewbox>
         <Grid Width="1400" Background="LightGray">
             <Grid Padding="20" Width="400" 
@@ -98,12 +98,7 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Margin="16">
-                        <Button Content="Poster Gallery" 
-                                Margin="20 0"
-                                Tapped="PostersButton_Tapped"/>
-                        <Button Content="Album Gallery" 
-                                Margin="20 0"
-                                Tapped="AlbumsButton_Tapped"/>
+
                     </StackPanel>
                     <TextBlock HorizontalAlignment="Left"
                                FontStyle="Italic"
@@ -150,7 +145,7 @@
                                  AdditionalItemsToWarp="{x:Bind PageViewModel.AdditionalItemsToWarp, Mode=OneWay}"
                                  WarpIntensity="{x:Bind PageViewModel.WarpIntensity, Mode=OneWay}"
                                  WarpCurve="{x:Bind PageViewModel.WarpCurve, Mode=OneWay}"
-                                 ZIndexUpdateWaitsForAnimation="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=OneWay}" >
+                                 ZIndexUpdateWaitsForAnimation="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=OneWay}">
                     <tilted:Carousel.Hitbox>
                         <Canvas ManipulationStarted="Grid_ManipulationStarted"
                                 ManipulationCompleted="Grid_ManipulationCompleted"
@@ -196,5 +191,4 @@
             </Grid>
 
         </Grid>
-    </Viewbox>
-</Page>
+    </Viewbox></Page>

@@ -34,6 +34,7 @@ namespace Tilted
         public Carousel()
         {
             this.DataContextChanged += Carousel_DataContextChanged;
+            this.Loaded += Carousel_Loaded;
             _delayedRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
             _delayedRefreshTimer.Tick += _delayedRefreshTimer_Tick;
             _restartExpressionsTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
@@ -41,6 +42,11 @@ namespace Tilted
             _delayedZIndexUpdateTimer = new DispatcherTimer();
             _delayedZIndexUpdateTimer.Tick += _delayedZIndexUpdateTimer_Tick;
             this.Background = new SolidColorBrush(Colors.Transparent);
+        }
+
+        private void Carousel_Loaded(object sender, RoutedEventArgs e)
+        {
+            Refresh();
         }
 
         void Refresh()
@@ -115,8 +121,10 @@ namespace Tilted
             _carouselInsertPosition = 0;
 
             _dynamicContainerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
+            _dynamicContainerGrid.Width = this.ActualWidth;
+            _dynamicContainerGrid.Height = this.ActualHeight;
             _dynamicGridVisual = ElementCompositionPreview.GetElementVisual(_dynamicContainerGrid);
-            _dynamicGridVisual.CenterPoint = new Vector3(_itemWidth / 2, _itemHeight / 2, 0);
+            _dynamicGridVisual.CenterPoint = new Vector3((float)ActualWidth / 2, (float)ActualHeight / 2, 0);
             ElementCompositionPreview.SetIsTranslationEnabled(_dynamicContainerGrid, true);
             AddImplicitWheelRotationAnimation(_dynamicGridVisual);
             _itemsLayerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
@@ -143,8 +151,8 @@ namespace Tilted
                 switch (CarouselType)
                 {
                     default:
-                        Hitbox.Width = Width;
-                        Hitbox.Height = Height;
+                        Hitbox.Width = ActualWidth;
+                        Hitbox.Height = ActualHeight;
                         break;
                     case CarouselTypes.Wheel:
                         float ws = 0;
@@ -164,10 +172,10 @@ namespace Tilted
                         break;
                     case CarouselTypes.Column:
                         Hitbox.Width = _itemWidth * SelectedItemScale;
-                        Hitbox.Height = Height;
+                        Hitbox.Height = ActualHeight;
                         break;
                     case CarouselTypes.Row:
-                        Hitbox.Width = Width;
+                        Hitbox.Width = ActualWidth;
                         Hitbox.Height = _itemHeight * SelectedItemScale;
                         break;
                 }
@@ -325,7 +333,7 @@ namespace Tilted
         {
             get
             {
-                var maxDimension = (Height > Width) ? Height : Width;
+                var maxDimension = (ActualHeight > ActualWidth) ? ActualHeight : ActualWidth;
                 return Convert.ToInt32(maxDimension);
             }
         }
@@ -484,58 +492,58 @@ namespace Tilted
         }
 
         public static readonly DependencyProperty TriggerSelectionAnimationProperty = DependencyProperty.Register(nameof(TriggerSelectionAnimation), typeof(object), typeof(Carousel),
-            new PropertyMetadata(null, new PropertyChangedCallback(async (s, e) =>
+            new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 if (e.NewValue != null)
                 {
                     var control = s as Carousel;
-                    await control.AnimateSelection();
+                    control.AnimateSelection();
                 }
             })));
 
-        /// <summary>
-        /// Set the width of the control.
-        /// </summary>
-        public new double Width
-        {
-            get
-            {
-                return (double)GetValue(WidthProperty);
-            }
-            set
-            {
-                SetValue(WidthProperty, value);
-            }
-        }
+        ///// <summary>
+        ///// Set the width of the control.
+        ///// </summary>
+        //public new double Width
+        //{
+        //    get
+        //    {
+        //        return (double)GetValue(WidthProperty);
+        //    }
+        //    set
+        //    {
+        //        SetValue(WidthProperty, value);
+        //    }
+        //}
 
-        private static new readonly DependencyProperty WidthProperty = DependencyProperty.Register(nameof(Width), typeof(double), typeof(Carousel),
-        new PropertyMetadata(100.0, new PropertyChangedCallback((s, e) =>
-        {
-            var control = s as Carousel;
-            control.Refresh();
-        })));
+        //private static new readonly DependencyProperty WidthProperty = DependencyProperty.Register(nameof(Width), typeof(double), typeof(Carousel),
+        //new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        //{
+        //    var control = s as Carousel;
+        //    control.Refresh();
+        //})));
 
-        /// <summary>
-        /// Set the height of the control.
-        /// </summary>
-        public new double Height
-        {
-            get
-            {
-                return (double)GetValue(HeightProperty);
-            }
-            set
-            {
-                SetValue(HeightProperty, value);
-            }
-        }
+        ///// <summary>
+        ///// Set the height of the control.
+        ///// </summary>
+        //public new double Height
+        //{
+        //    get
+        //    {
+        //        return (double)GetValue(HeightProperty);
+        //    }
+        //    set
+        //    {
+        //        SetValue(HeightProperty, value);
+        //    }
+        //}
 
-        private static new readonly DependencyProperty HeightProperty = DependencyProperty.Register(nameof(Height), typeof(double), typeof(Carousel),
-        new PropertyMetadata(100.0, new PropertyChangedCallback((s, e) =>
-        {
-            var control = s as Carousel;
-            control.Refresh();
-        })));
+        //private static new readonly DependencyProperty HeightProperty = DependencyProperty.Register(nameof(Height), typeof(double), typeof(Carousel),
+        //new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
+        //{
+        //    var control = s as Carousel;
+        //    control.Refresh();
+        //})));
 
         /// <summary>
         /// The time it takes, in milliseconds, for a selection change to animate.
@@ -1031,7 +1039,7 @@ namespace Tilted
 
         private void Carousel_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
-            LoadNewCarousel();
+            Refresh();
         }
 
         #endregion
@@ -1847,7 +1855,7 @@ namespace Tilted
         /// Add a storyboard to resources of the root element of your ItemTemplate and assign the key "SelectionAnimation".
         /// </summary>
         /// <returns></returns>
-        public async Task AnimateSelection()
+        public void AnimateSelection()
         {
             if (this.SelectedItemElement is FrameworkElement selectedItemContent)
             {
@@ -1863,10 +1871,6 @@ namespace Tilted
                 if (sb != null)
                 {
                     sb.Begin();
-                    if (sb.Duration.HasTimeSpan && sb.Duration.TimeSpan != null)
-                    {
-                        await Task.Delay((int)sb.Duration.TimeSpan.TotalMilliseconds);
-                    }
                 }
                 
             }

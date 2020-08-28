@@ -1,10 +1,8 @@
-﻿using Microsoft.Toolkit.Uwp.UI.Extensions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -16,37 +14,32 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using static Tilted.Carousel;
 using static Tilted.Common;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace TiltedCarouselDemo
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class MainPage : Page
+    public sealed partial class MoviePostersView : Page
     {
-        MainPageViewModel PageViewModel { get; set; }
+        MainPageViewModel PageViewModel;
         Input _input;
 
-        public MainPage()
+        public MoviePostersView()
         {
             PageViewModel = new MainPageViewModel();
             CreateTestItems();
             DataContext = PageViewModel;
-            this.Loaded += MainPage_Loaded;
+            this.Loaded += MoviePostersView_Loaded;
             this.InitializeComponent();
-            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
         }
 
-        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
+        private void MoviePostersView_Loaded(object sender, RoutedEventArgs e)
         {
             _input = new Input(this.myCarousel);
-            await Task.Delay(1500);
-            var focusableElement = myCarousel.FindDescendant<ContentControl>();
-            focusableElement.Focus(FocusState.Programmatic);
         }
 
         private void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
@@ -95,5 +88,17 @@ namespace TiltedCarouselDemo
         {
 
         }
+
+        //private void CreateTestItems()
+        //{
+        //    foreach (var prop in typeof(Colors).GetProperties())
+        //    {
+        //        if (prop.GetValue(null) is Color color)
+        //        {
+        //            var file = new FileInfo("TestData/MoviePosterLinks.txt");
+        //            PageViewModel.Items.Add(new ItemModel { BackgroundColor = new SolidColorBrush(color), Text = prop.Name });
+        //        }
+        //    }
+        //}
     }
 }
