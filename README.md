@@ -282,14 +282,14 @@ For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnima
 ---
 #### StartManipulationMode
 
- This must be called before updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it. 
+ This must be called before updating the carousel with a ManipulationDelta event. MMVM implementations can use the trigger property to call it. 
 
 
 
 ---
 #### StopManipulationMode
 
- This must be called after updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it. 
+ This must be called after updating the carousel with a sequence of ManipulationDelta events from a single gesture. MMVM implementations can use the trigger property to call it. 
 
 
 
