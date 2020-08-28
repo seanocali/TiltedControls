@@ -17,7 +17,6 @@ namespace TiltedCarouselDemo
     {
         public MainPageViewModel()
         {
-            CreateTestItems();
         }
 
         public IList<ItemModel> Items { get; set; } = new List<ItemModel>();
@@ -360,17 +359,6 @@ namespace TiltedCarouselDemo
                     OnPropertyChanged(nameof(SelectedIndex));
                     _indexChooserInput = value;
 
-                }
-            }
-        }
-
-        private void CreateTestItems()
-        {
-            foreach (var prop in typeof(Colors).GetProperties())
-            {
-                if (prop.GetValue(null) is Color color)
-                {
-                    Items.Add(new ItemModel { BackgroundColor = new SolidColorBrush(color), Text = prop.Name });
                 }
             }
         }

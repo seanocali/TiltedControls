@@ -108,7 +108,7 @@ namespace TiltedCarouselDemo
             }
         }
 
-        private async void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
+        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
         {
             switch (args.VirtualKey)
             {
@@ -151,6 +151,18 @@ namespace TiltedCarouselDemo
                 case Windows.System.VirtualKey.Enter:
                     myCarousel.AnimateSelection();
                     break;
+            }
+        }
+
+
+        private void CreateTestItems()
+        {
+            foreach (var prop in typeof(Colors).GetProperties())
+            {
+                if (prop.GetValue(null) is Color color)
+                {
+                    PageViewModel.Items.Add(new ItemModel { BackgroundColor = new SolidColorBrush(color), Text = prop.Name });
+                }
             }
         }
     }

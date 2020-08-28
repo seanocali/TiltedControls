@@ -1742,7 +1742,11 @@ namespace Tilted
             }
         }
 
-        void ChangeSelection(bool reverse)
+        /// <summary>
+        /// Changes the selction a single step.
+        /// </summary>
+        /// <param name="reverse"></param>
+        public void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
             SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
