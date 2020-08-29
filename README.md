@@ -1,6 +1,6 @@
 # Tilted Carousel
 
-#### A powerful, CompositionAPI-based control for UWP that makes use of Expression Animations. This is a true carousel that loops content. It has unique features not found in other carousels such as wheel mode, warping, and CompositionBrush animation support.
+#### A true (looping) carousel control that makes use of UWP's Composition API. It has unique features not found in other carousels such as wheel mode, warping, adjustible lazy loading, and CompositionBrush animation support.
 
 
 ## Properties
@@ -14,21 +14,21 @@
 ---
 #### SelectedItemElement
 
-**Returns**:  Returns the FrameworkElement of the SelectedItem. 
+ Returns the FrameworkElement of the SelectedItem. 
 
 
 
 ---
 #### Items
 
-**Returns**:  Returns a collection of items generated from the ItemsSource. 
+ Returns a collection of items generated from the ItemsSource. 
 
 
 
 ---
 #### WheelSize
 
-**Returns**:  Returns an integer value of the wheel diameter in pixels. 
+ Returns an integer value of the wheel diameter in pixels. 
 
 
 
@@ -70,9 +70,9 @@
 ---
 #### TriggerSelectionAnimation
 
-For MVVM. Bind this to a property and you can call the SelectionAnimation() method whenever you change its value to anything other than null. 
+For MVVM. Bind this to a viewmodel property and you can call the 'SelectionAnimation()' method whenever you change its value to anything other than null. 
 
-##### Example:  Bind a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
@@ -85,20 +85,6 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ```
 
 
-
-
-
----
-#### Width
-
- Set the width of the control. 
-
-
-
----
-#### Height
-
- Set the height of the control. 
 
 
 
@@ -189,9 +175,9 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### SelectNextTrigger
 
- For MVVM. Bind this to a property and you can call the SelectNext() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(false)' whenever you change its value to anything other than null. 
 
-##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind to a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
@@ -210,9 +196,9 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### SelectPreviousTrigger
 
- For MVVM. Bind this to a property and you can call the SelectPrevious() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call 'ChangeSelection(true)' whenever you change its value to anything other than null. 
 
-##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
+##### Example:  Bind to a property like this (One-Way) and use an INotifyPropertyChanged handler to trigger it. 
 
 ######  code
 
@@ -231,7 +217,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### ManipulationStartedTrigger
 
- For MVVM. Bind this to a property and you can call the ManipulationStarted() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call the 'ManipulationStarted()' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -252,7 +238,7 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### ManipulationCompletedTrigger
 
- For MVVM. Bind this to a property and you can call the ManipulationCompleted() method whenever you change its value to anything other than null. 
+ For MVVM. Bind this to a viewmodel property and you can call the 'ManipulationCompleted()' method whenever you change its value to anything other than null. 
 
 ##### Example:  Bind to a property like this (One-Way) and call OnPropertyChanged to trigger it. 
 
@@ -273,21 +259,21 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### CarouselRotationAngle
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
 ---
 #### CarouselPositionY
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
 ---
 #### CarouselPositionX
 
- Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
+ Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade. It is important to call 'StartManipulationMode()' and 'StopManipulationMode()' before and after (respectively) updating this with a ManipulationDelta. Use ManipulationStarted and ManipulationCompleted events accordingly. 
 
 
 
@@ -296,14 +282,14 @@ For MVVM. Bind this to a property and you can call the SelectionAnimation() meth
 ---
 #### StartManipulationMode
 
- This must be called before updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it. 
+ This must be called prior updating the carousel with ManipulationDelta events. MMVM implementations can use the trigger property to call it. 
 
 
 
 ---
 #### StopManipulationMode
 
- This must be called after updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it. 
+ This must be called after updating the carousel with a sequence of ManipulationDelta events from a single gesture. MMVM implementations can use the trigger property to call it. 
 
 
 
