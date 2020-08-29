@@ -122,6 +122,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Carousel.cs" />
+    <Compile Include="CarouselItem.xaml.cs">
+      <DependentUpon>CarouselItem.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\TiltedCarousel.rd.xml" />
@@ -133,6 +136,12 @@
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Animations">
       <Version>6.1.1</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="CarouselItem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

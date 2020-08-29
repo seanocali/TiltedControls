@@ -163,14 +163,15 @@
                     </tilted:Carousel.RenderTransform>
                     <tilted:Carousel.ItemTemplate>
                         <DataTemplate x:DataType="local:ItemModel">
-                            <Grid x:Name="carouselItem"
-                                  RenderTransformOrigin="0.5, 0.5"
-                                  Width="100" Height="40" 
-                                  BorderBrush="Black"
-                                  BorderThickness="1"
-                                  Background="{Binding BackgroundColor}">
-                                <TextBlock Text="{Binding Text}" />
-                                <Grid.Resources>
+                            <tilted:CarouselItem x:Name="carouselItem"
+                                                 RenderTransformOrigin="0.5, 0.5"
+                                                 Width="100" Height="40" >
+                                <Grid BorderBrush="Black"
+                                                 BorderThickness="1"
+                                                 Background="{Binding BackgroundColor}">
+                                    <TextBlock Text="{Binding Text}" />
+                                </Grid>
+                                <UserControl.Resources>
                                     <Storyboard x:Key="SelectionAnimation">
                                         <DoubleAnimationUsingKeyFrames Storyboard.TargetName="AnimatedScaleTransform"
                                                          Storyboard.TargetProperty="ScaleX"
@@ -185,11 +186,11 @@
                                             <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.5" />
                                         </DoubleAnimationUsingKeyFrames>
                                     </Storyboard>
-                                </Grid.Resources>
-                                <Grid.RenderTransform>
+                                </UserControl.Resources>
+                                <UserControl.RenderTransform>
                                     <ScaleTransform x:Name="AnimatedScaleTransform" />
-                                </Grid.RenderTransform>
-                            </Grid>
+                                </UserControl.RenderTransform>
+                            </tilted:CarouselItem>
                         </DataTemplate>
                     </tilted:Carousel.ItemTemplate>
                 </tilted:Carousel>

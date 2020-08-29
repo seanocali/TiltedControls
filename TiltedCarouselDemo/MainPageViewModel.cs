@@ -41,7 +41,7 @@ namespace TiltedCarouselDemo
         {
             get
             {
-                return Items != null ? Items[SelectedIndex] : null;
+                return Items != null && Items.Count > SelectedIndex ? Items[SelectedIndex] : null;
             }
         }
 

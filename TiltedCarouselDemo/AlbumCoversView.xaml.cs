@@ -6,7 +6,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,16 +14,20 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using static Tilted.Common;
+
+// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace TiltedCarouselDemo
 {
-    public sealed partial class MoviePostersView : Page
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class AlbumCoversView : Page
     {
         MainPageViewModel PageViewModel;
         Input _input;
 
-        public MoviePostersView()
+        public AlbumCoversView()
         {
             PageViewModel = new MainPageViewModel();
             Load();
@@ -32,7 +35,7 @@ namespace TiltedCarouselDemo
 
         async void Load()
         {
-            await CreateTestItemsPosters();
+            await CreateTestItemsAlbums();
             DataContext = PageViewModel;
             this.Loaded += MoviePostersView_Loaded;
             Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
@@ -70,10 +73,10 @@ namespace TiltedCarouselDemo
         }
 
 
-        private async Task CreateTestItemsPosters()
+        private async Task CreateTestItemsAlbums()
         {
             PageViewModel.Items = new List<ItemModel>();
-            var posterLinks = await File.ReadAllLinesAsync("TestData/MoviePosterLinks.txt");
+            var posterLinks = await File.ReadAllLinesAsync("TestData/AlbumCoverLinks.txt");
             foreach (var link in posterLinks)
             {
                 var item = new ItemModel

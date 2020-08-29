@@ -34,7 +34,7 @@ namespace TiltedCarouselDemo
         public MainPage()
         {
             PageViewModel = new MainPageViewModel();
-            CreateTestItems();
+            CreateTestItemsColors();
             DataContext = PageViewModel;
             this.Loaded += MainPage_Loaded;
             this.InitializeComponent();
@@ -75,7 +75,7 @@ namespace TiltedCarouselDemo
         }
 
 
-        private void CreateTestItems()
+        private void CreateTestItemsColors()
         {
             foreach (var prop in typeof(Colors).GetProperties())
             {
@@ -86,6 +86,7 @@ namespace TiltedCarouselDemo
             }
         }
 
+
         private void PostersButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
             Frame.Navigate(typeof(MoviePostersView));
@@ -93,7 +94,7 @@ namespace TiltedCarouselDemo
 
         private void AlbumsButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
-
+            Frame.Navigate(typeof(AlbumCoversView));
         }
     }
 }
