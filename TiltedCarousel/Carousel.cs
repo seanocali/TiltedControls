@@ -30,9 +30,9 @@ namespace Tilted
     {
         #region CONSTRUCTOR & INITIALIZATION METHODS
 
-/// <summary>
-/// The class constructor.
-/// </summary>
+        /// <summary>
+        /// The class constructor.
+        /// </summary>
         public Carousel()
         {
             this.Loaded += Carousel_Loaded;
@@ -61,8 +61,6 @@ namespace Tilted
             }
         }
 
-        TaskCompletionSource<bool> _itemsLoadedTCS;
-
         async Task LoadNewCarousel()
         {
             _uIItemsCreated = false;
@@ -77,6 +75,7 @@ namespace Tilted
             var cancellationToken = _cancelTokenSource.Token;
             CreateContainers();
             _elementsToResizeCount = 0;
+            _elementsToLoadCount = Density;
             if (Items != null && Items.Count() > 0)
             {
                 try
@@ -86,11 +85,11 @@ namespace Tilted
                         if (cancellationToken.IsCancellationRequested) { break; }
                         int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
                         var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
+                        itemElement.Loaded += ItemElement_Loaded;
                         _itemsLayerGrid.Children.Add(itemElement);
                     }
-                    if (_elementsToResizeCount < 1) { _itemsLoadedTCS.SetResult(true); }
                     _uIItemsCreated = true;
-                    await Task.WhenAny(_itemsLoadedTCS.Task, Task.Delay(5000), cancellationToken.AsTask());           
+                    await Task.WhenAny(_itemsLoadedTCS.Task, Task.Delay(5000), cancellationToken.AsTask());
                     if (_itemsLoadedTCS.Task.IsCompletedSuccessfully)
                     {
                         if (cancellationToken.IsCancellationRequested) { return; }
@@ -109,7 +108,7 @@ namespace Tilted
                         OnItemsLoadFailed();
                         Debug.WriteLine("Tilted Carousel: Carousel Items Failed to Load!");
                     }
-                    
+
                 }
                 catch (Exception ex)
                 {
@@ -117,6 +116,19 @@ namespace Tilted
                     Debug.WriteLine(ex.Message);
                 }
 
+            }
+        }
+
+        private void ItemElement_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                element.Loaded -= ItemElement_Loaded;
+                _elementsToLoadCount--;
+                if (_elementsToLoadCount < 1)
+                {
+                    _itemsLoadedTCS.SetResult(true);
+                }
             }
         }
 
@@ -222,6 +234,8 @@ namespace Tilted
         bool _deltaDirectionIsReverse;
         bool _uIItemsCreated;
         volatile int _elementsToResizeCount;
+        volatile int _elementsToLoadCount;
+        TaskCompletionSource<bool> _itemsLoadedTCS;
 
         #endregion
 
@@ -426,30 +440,6 @@ namespace Tilted
         public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(int), typeof(Carousel),
     new PropertyMetadata(0, OnSelectedIndexChanged));
 
-
-        //public static readonly DependencyProperty SelectedIndexProperty = DependencyProperty.Register(nameof(SelectedIndex), typeof(int), typeof(Carousel),
-        //    new PropertyMetadata(0, new PropertyChangedCallback((s, e) =>
-        //    {
-        //        var control = s as Carousel;
-        //        if (e.OldValue is int oldVal)
-        //        {
-        //            control._previousSelectedIndex = oldVal;
-        //        }
-        //        if (e.NewValue is int newVal)
-        //        {
-        //            if (!control._selectedIndexSetInternally)
-        //            {
-        //                control.AnimateToSelectedIndex();
-        //            }
-        //            if (control.Items != null)
-        //            {
-        //                control.SelectedItem = control.Items[newVal];
-        //            }
-        //            control.OnSelectionChanged();
-        //        }
-        //    })));
-
-
         /// <summary>
         /// This can be used to animate a CompositionBrush property of a custom control.
         /// The control must have a container parent with a name that starts with "CarouselItemMedia."
@@ -478,6 +468,7 @@ namespace Tilted
 
         public static readonly DependencyProperty ForegroundHighlightColorProperty = DependencyProperty.Register(nameof(SelectedItemForegroundBrush), typeof(Brush), typeof(Carousel),
             new PropertyMetadata(null, OnCaptionPropertyChanged));
+
 
         /// <summary>
         /// MVVM: Bind this to a property and you can call the SelectionAnimation() method whenever you change its value to anything other than null.
@@ -1088,10 +1079,6 @@ namespace Tilted
                 {
                     slotNum = i;
                 }
-                else if (element.Parent is FrameworkElement parent && parent.Tag is int j)
-                {
-                    slotNum = j;
-                }
 
                 if (slotNum != null)
                 {
@@ -1219,26 +1206,7 @@ namespace Tilted
             {
                 if (element.Transform3D is PerspectiveTransform3D perspectiveTransform3D)
                 {
-                    FrameworkElement child = null;
-                    if (element is ContentControl contentControl)
-                    {
-                        child = contentControl.Content as FrameworkElement;
-                    }
-                    else if (element is Panel panel)
-                    {
-                        child = panel.Children.FirstOrDefault() as FrameworkElement;
-                    }
-
-                    else if (element is UserControl userControl)
-                    {
-                        child = userControl;
-                    }
-                    else if (element is ItemsControl itemsControl && itemsControl.ItemsPanelRoot != null)
-                    {
-                        child = itemsControl.ItemsPanelRoot.Children.FirstOrDefault() as FrameworkElement;
-                    }
-
-                    if (child != null)
+                    if (element is UserControl uc && uc.Content is UIElement child)
                     {
                         var childVisual = ElementCompositionPreview.GetElementVisual(child);
                         var fliptychDegrees = isXaxisNavigation ? Convert.ToSingle(FliptychDegrees) : Convert.ToSingle(-FliptychDegrees);
@@ -1631,19 +1599,33 @@ namespace Tilted
                 FrameworkElement element = ItemTemplate.LoadContent() as FrameworkElement;
                 element.DataContext = Items[playlistIdx];
                 element.Tag = i;
+                int w = 0;
+                int h = 0;
                 if (Double.IsNaN(element.Height) || Double.IsNaN(element.Width))
                 {
                     if (!Double.IsInfinity(element.MaxWidth) && !Double.IsInfinity(element.MaxHeight))
                     {
-                        var w = Convert.ToInt32(element.MaxWidth + element.Margin.Left + element.Margin.Right);
-                        var h = Convert.ToInt32(element.MaxHeight + element.Margin.Top + element.Margin.Bottom);
-                        if (_maxItemWidth < element.MaxWidth) { _maxItemWidth = w; }
-                        if (_maxItemHeight < element.MaxHeight) { _maxItemHeight = h; }
-                        PositionElement(element, i, (float)w, (float)h);
+                        w = Convert.ToInt32(element.MaxWidth);
+                        h = Convert.ToInt32(element.MaxHeight);
+                    }
+                    else if (element is UserControl uc && uc.Content is FrameworkElement childElement)
+                    {
+                        if (Double.IsNaN(childElement.Width) || Double.IsNaN(childElement.Height))
+                        {
+                            if (Double.IsInfinity(childElement.MaxWidth) || Double.IsInfinity(childElement.MaxHeight))
+                            {
+                                w = Convert.ToInt32(childElement.MaxWidth + childElement.Margin.Left + childElement.Margin.Right);
+                                h = Convert.ToInt32(childElement.MaxHeight + childElement.Margin.Top + childElement.Margin.Bottom);
+                            }
+                        }
+                        else
+                        {
+                            w = Convert.ToInt32(childElement.Width + childElement.Margin.Left + childElement.Margin.Right);
+                            h = Convert.ToInt32(childElement.Height + childElement.Margin.Top + childElement.Margin.Bottom);
+                        }
                     }
                     else
                     {
-                        Debug.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
                         // NOT IMPLEMENTED
                         //_elementsToResizeCount++;
                         //element.SizeChanged += Element_SizeChanged;
@@ -1651,13 +1633,21 @@ namespace Tilted
                 }
                 else
                 {
-                    var w = Convert.ToInt32(element.Width + element.Margin.Left + element.Margin.Right);
-                    var h = Convert.ToInt32(element.Height + element.Margin.Top + element.Margin.Bottom);
-                    if (_maxItemWidth < element.Width) { _maxItemWidth = w; }
-                    if (_maxItemHeight < element.Height) { _maxItemHeight = h; }
-                    PositionElement(element, i, (float)w, (float)h);
+                    w = Convert.ToInt32(element.Width + element.Margin.Left + element.Margin.Right);
+                    h = Convert.ToInt32(element.Height + element.Margin.Top + element.Margin.Bottom);
                 }
-                return element;
+
+                if (w > 0 && h > 0)
+                {
+                    if (_maxItemWidth < element.MaxWidth) { _maxItemWidth = w; }
+                    if (_maxItemHeight < element.MaxHeight) { _maxItemHeight = h; }
+                    PositionElement(element, i, (float)w, (float)h);
+                    return element;
+                }
+                else
+                {
+                    Debug.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
+                }
             }
             return null;
         }
@@ -1778,8 +1768,8 @@ namespace Tilted
         public void ChangeSelection(bool reverse)
         {
             _selectedIndexSetInternally = true;
-            SelectedIndex = reverse? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
-            ChangeSelection(reverse? currentStartIndexBackwards : currentStartIndexForwards, reverse);
+            SelectedIndex = reverse ? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
+            ChangeSelection(reverse ? currentStartIndexBackwards : currentStartIndexForwards, reverse);
             if (NavigationSpeed > 1 && ZIndexUpdateWaitsForAnimation)
             {
                 _delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(NavigationSpeed / 2);
@@ -1798,8 +1788,8 @@ namespace Tilted
 
         void ChangeSelection(int startIdx, bool reverse)
         {
-            _carouselInsertPosition = reverse? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
-            var carouselIdx = reverse? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
+            _carouselInsertPosition = reverse ? Modulus((_carouselInsertPosition - 1), Density) : (_carouselInsertPosition + 1) % Density;
+            var carouselIdx = reverse ? _carouselInsertPosition : Modulus((_carouselInsertPosition - 1), Density);
             InsertNewCarouselItem(startIdx, carouselIdx, !reverse, reverse);
         }
 
@@ -1855,7 +1845,7 @@ namespace Tilted
             {
                 var startIdx = Modulus((SelectedIndex + 1 - steps - (Density / 2)), count);
                 for (int i = 0; i < steps; i++)
-                {                   
+                {
                     ChangeSelection((startIdx + i + (Density - 1)) % Items.Count(), false);
                 }
             }
@@ -1893,7 +1883,7 @@ namespace Tilted
                 {
                     sb.Begin();
                 }
-                
+
             }
         }
 

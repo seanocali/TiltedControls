@@ -26,10 +26,11 @@
                 </tilted:Carousel.Hitbox>
                 <tilted:Carousel.ItemTemplate>
                     <DataTemplate x:DataType="local:ItemModel">
-                        <tilted:CarouselItem Height="120"
-                                             Width="120">
-                            <Grid>
-                                <Image  Source="{x:Bind ImageSourcePath}"/>
+                        <tilted:CarouselItem>
+                            <Grid Height="120"
+                                   Padding="8" 
+                                  Width="120">
+                                <Image Source="{x:Bind ImageSourcePath}"/>
                             </Grid>
                         </tilted:CarouselItem>
                         <!--<Grid x:Name="carouselItem"

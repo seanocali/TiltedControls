@@ -19,17 +19,23 @@ namespace TiltedCarouselDemo
         }
         public void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
-            _myCarousel.StartManipulationMode();
+            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            {
+                _myCarousel.StartManipulationMode();
+            }
         }
 
         public void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            _myCarousel.StopManipulationMode();
+            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            {
+                _myCarousel.StopManipulationMode();
+            }
         }
 
         public void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            if (_myCarousel.ItemsSource != null)
+            if (_myCarousel != null && _myCarousel.AreItemsLoaded && _myCarousel.ItemsSource != null)
             {
                 double value = 0;
                 switch (_myCarousel.CarouselType)
@@ -67,61 +73,67 @@ namespace TiltedCarouselDemo
 
         public void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
-            var point = e.GetCurrentPoint(_myCarousel);
-            switch (point.Properties.MouseWheelDelta)
+            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
             {
-                case 120:
-                    _myCarousel.ChangeSelection(true);
-                    break;
-                case -120:
-                    _myCarousel.ChangeSelection(false);
-                    break;
+                var point = e.GetCurrentPoint(_myCarousel);
+                switch (point.Properties.MouseWheelDelta)
+                {
+                    case 120:
+                        _myCarousel.ChangeSelection(true);
+                        break;
+                    case -120:
+                        _myCarousel.ChangeSelection(false);
+                        break;
+                }
             }
         }
 
         public void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
         {
-            switch (args.VirtualKey)
+            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
             {
-                case Windows.System.VirtualKey.Up:
-                case Windows.System.VirtualKey.Down:
-                    switch (_myCarousel.CarouselType)
-                    {
-                        case CarouselTypes.Wheel:
-                            switch (_myCarousel.WheelAlignment)
-                            {
-                                case WheelAlignments.Right:
-                                case WheelAlignments.Left:
-                                    _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
-                                    break;
-                            }
-                            break;
-                        case CarouselTypes.Column:
-                            _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
-                            break;
-                    }
-                    break;
-                case Windows.System.VirtualKey.Left:
-                case Windows.System.VirtualKey.Right:
-                    switch (_myCarousel.CarouselType)
-                    {
-                        case CarouselTypes.Wheel:
-                            switch (_myCarousel.WheelAlignment)
-                            {
-                                case WheelAlignments.Top:
-                                case WheelAlignments.Bottom:
-                                    _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
-                                    break;
-                            }
-                            break;
-                        case CarouselTypes.Row:
-                            _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
-                            break;
-                    }
-                    break;
-                case Windows.System.VirtualKey.Enter:
-                    _myCarousel.AnimateSelection();
-                    break;
+                switch (args.VirtualKey)
+                {
+                    case Windows.System.VirtualKey.Up:
+                    case Windows.System.VirtualKey.Down:
+                        switch (_myCarousel.CarouselType)
+                        {
+                            case CarouselTypes.Wheel:
+                                switch (_myCarousel.WheelAlignment)
+                                {
+                                    case WheelAlignments.Right:
+                                    case WheelAlignments.Left:
+                                        _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                        break;
+                                }
+                                break;
+                            case CarouselTypes.Column:
+                                _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                break;
+                        }
+                        break;
+                    case Windows.System.VirtualKey.Left:
+                    case Windows.System.VirtualKey.Right:
+                        switch (_myCarousel.CarouselType)
+                        {
+                            case CarouselTypes.Wheel:
+                                switch (_myCarousel.WheelAlignment)
+                                {
+                                    case WheelAlignments.Top:
+                                    case WheelAlignments.Bottom:
+                                        _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                        break;
+                                }
+                                break;
+                            case CarouselTypes.Row:
+                                _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                break;
+                        }
+                        break;
+                    case Windows.System.VirtualKey.Enter:
+                        _myCarousel.AnimateSelection();
+                        break;
+                }
             }
         }
     }
