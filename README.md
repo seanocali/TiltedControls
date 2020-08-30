@@ -1,7 +1,13 @@
 # Tilted Carousel
 
-#### A true (looping) carousel control that makes use of UWP's Composition API. It has unique features not found in other carousels such as wheel mode, warping, adjustible lazy loading, and CompositionBrush animation support.
+#### A true (looping) carousel control that makes use of UWP's Composition API. 
 
+It has unique features not found in other carousel controls such as wheel mode, warping, adjustible lazy loading, and CompositionBrush animation support.
+
+![SettingsAnimation](https://raw.githubusercontent.com/seanocali/TiltedCarousel/master/settings.webp)
+![ColumnAnimation](https://raw.githubusercontent.com/seanocali/TiltedCarousel/master/column.webp)
+![RowAnimation](https://raw.githubusercontent.com/seanocali/TiltedCarousel/master/row.webp)
+![WheelAnimation](https://raw.githubusercontent.com/seanocali/TiltedCarousel/master/wheel.webp)
 
 ## Properties
 
