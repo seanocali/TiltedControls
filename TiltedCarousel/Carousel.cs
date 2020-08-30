@@ -52,6 +52,7 @@ namespace Tilted
 
         void Refresh()
         {
+            _inputAllowed = false;
             if (IsLoaded || (!Double.IsNaN(Width) && !Double.IsNaN(Height)))
             {
                 AreItemsLoaded = false;
@@ -132,6 +133,7 @@ namespace Tilted
                     Debug.WriteLine(ex.Message);
                 }
             }
+            _inputAllowed = true;
         }
 
         void AddCarouselItemToUI(int idx)
@@ -239,6 +241,7 @@ namespace Tilted
 
         #region FIELDS
 
+        volatile bool _inputAllowed;
         double _width;
         double _height;
         DispatcherTimer _restartExpressionsTimer;
@@ -938,7 +941,7 @@ namespace Tilted
             new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 var control = s as Carousel;
-                if (control._manipulationMode && e.NewValue is float v)
+                if (control._inputAllowed && control._manipulationMode && e.NewValue is float v)
                 {
                     control.UpdateWheelRotation(v);
                 }
@@ -959,7 +962,7 @@ namespace Tilted
             new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 var control = s as Carousel;
-                if (control._manipulationMode && e.NewValue is double v)
+                if (control._inputAllowed && control._manipulationMode && e.NewValue is double v)
                 {
                     control.UpdateCarouselVerticalScrolling(Convert.ToSingle(v));
                 }
@@ -980,7 +983,7 @@ namespace Tilted
             new PropertyMetadata(null, new PropertyChangedCallback((s, e) =>
             {
                 var control = s as Carousel;
-                if (control._manipulationMode && e.NewValue is double v)
+                if (control._inputAllowed && control._manipulationMode && e.NewValue is double v)
                 {
                     control.UpdateCarouselHorizontalScrolling(Convert.ToSingle(v));
                 }
@@ -1794,23 +1797,26 @@ namespace Tilted
         /// <param name="reverse"></param>
         public void ChangeSelection(bool reverse)
         {
-            _selectedIndexSetInternally = true;
-            SelectedIndex = reverse ? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
-            ChangeSelection(reverse ? currentStartIndexBackwards : currentStartIndexForwards, reverse);
-            if (NavigationSpeed > 1 && ZIndexUpdateWaitsForAnimation)
+            if (_inputAllowed)
             {
-                _delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(NavigationSpeed / 2);
-                if (_delayedZIndexUpdateTimer.IsEnabled)
+                _selectedIndexSetInternally = true;
+                SelectedIndex = reverse ? Modulus(SelectedIndex - 1, Items.Count()) : (SelectedIndex + 1) % Items.Count();
+                ChangeSelection(reverse ? currentStartIndexBackwards : currentStartIndexForwards, reverse);
+                if (NavigationSpeed > 1 && ZIndexUpdateWaitsForAnimation)
+                {
+                    _delayedZIndexUpdateTimer.Interval = TimeSpan.FromMilliseconds(NavigationSpeed / 2);
+                    if (_delayedZIndexUpdateTimer.IsEnabled)
+                    {
+                        UpdateZIndices();
+                    }
+                    _delayedZIndexUpdateTimer.Start();
+                }
+                else
                 {
                     UpdateZIndices();
                 }
-                _delayedZIndexUpdateTimer.Start();
+                _selectedIndexSetInternally = false;
             }
-            else
-            {
-                UpdateZIndices();
-            }
-            _selectedIndexSetInternally = false;
         }
 
         void ChangeSelection(int startIdx, bool reverse)
