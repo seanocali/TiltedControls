@@ -19,9 +19,25 @@ namespace Tilted
 {
     public sealed partial class CarouselItem : UserControl
     {
+        /// <summary>
+        /// Default constructor.
+        /// </summary>
         public CarouselItem()
         {
             this.InitializeComponent();
         }
+
+        /// <summary>
+        /// Margin for carousel items is not supported at this time. Setting it will stomp visual layer properties, so the base class property is being hidden.
+        /// Use ItemGap or Padding.
+        /// </summary>
+        public new Thickness Margin
+        {
+            get { return (Thickness)GetValue(MarginProperty); }
+            set { SetValue(MarginProperty, value); }
+        }
+
+        public new static readonly DependencyProperty MarginProperty = DependencyProperty.Register(nameof(Thickness), typeof(Grid), typeof(Carousel),
+            new PropertyMetadata(null));
     }
 }

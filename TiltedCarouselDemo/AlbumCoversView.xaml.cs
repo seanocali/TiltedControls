@@ -25,7 +25,6 @@ namespace TiltedCarouselDemo
     public sealed partial class AlbumCoversView : Page
     {
         MainPageViewModel PageViewModel;
-        Input _input;
 
         public AlbumCoversView()
         {
@@ -37,39 +36,52 @@ namespace TiltedCarouselDemo
         {
             await CreateTestItemsAlbums();
             DataContext = PageViewModel;
-            this.Loaded += MoviePostersView_Loaded;
-            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
             this.InitializeComponent();
-        }
-
-        private void MoviePostersView_Loaded(object sender, RoutedEventArgs e)
-        {
-            _input = new Input(this.myCarousel);
         }
 
         private void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
         {
-            _input.Grid_ManipulationStarted(sender, e);
+            try
+            {
+                Input.Grid_ManipulationStarted(myCarousel, sender, e);
+            }
+            catch { }
         }
 
         private void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            _input.Grid_ManipulationCompleted(sender, e);
+            try
+            {
+                Input.Grid_ManipulationCompleted(myCarousel, sender, e);
+            }
+            catch { }
         }
 
         private void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            _input.Grid_ManipulationDelta(sender, e);
+            try
+            {
+                Input.Grid_ManipulationDelta(myCarousel, sender, e);
+            }
+            catch { }
         }
 
         private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
-            _input.Canvas_PointerWheelChanged(sender, e);
+            try
+            {
+                Input.Canvas_PointerWheelChanged(myCarousel, sender, e);
+            }
+            catch { }
         }
 
         private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
         {
-            _input.CoreWindow_KeyDown(sender, args);
+            try
+            {
+                Input.CoreWindow_KeyDown(myCarousel, sender, args);
+            }
+            catch { }
         }
 
 

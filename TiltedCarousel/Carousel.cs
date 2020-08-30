@@ -55,8 +55,6 @@ namespace Tilted
             if (IsLoaded || (!Double.IsNaN(Width) && !Double.IsNaN(Height)))
             {
                 AreItemsLoaded = false;
-                if (_savedOpacityState == null) { _savedOpacityState = Opacity; }
-                Opacity = 0;
                 _delayedRefreshTimer.Start();
             }
         }
@@ -80,14 +78,33 @@ namespace Tilted
             {
                 try
                 {
-                    for (int i = (Density - 1); i > -1; i--)
+                    // Fill the UIElementCollection with empty elements so we can use insert later
+                    _itemsLayerGrid.Children.Clear();
+
+                    for (int i = 0; i < Density; i++)
                     {
-                        if (cancellationToken.IsCancellationRequested) { break; }
-                        int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
-                        var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
-                        itemElement.Loaded += ItemElement_Loaded;
-                        _itemsLayerGrid.Children.Add(itemElement);
+                        _itemsLayerGrid.Children.Add(new ContentControl());
                     }
+                    //for (int i = (Density - 1); i > -1; i--)
+                    //{
+                    //    if (cancellationToken.IsCancellationRequested) { break; }
+                    //    int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
+                    //    var itemElement = CreateItemInCarouselSlot(i, playlistIdx);
+                    //    itemElement.Tag = i;
+                    //    itemElement.Loaded += ItemElement_Loaded;
+                    //    _itemsLayerGrid.Children[Density - 1 - (int)itemElement.Tag] = itemElement;
+                    //}
+
+                    for (int i = 0; i < Density / 2; i++)
+                    {
+                        var idx1 = (i + (Density / 2)) % Density;
+                        var idx2 = Density - 1 - idx1;
+                        if (cancellationToken.IsCancellationRequested) { break; }
+                        AddCarouselItemToUI(idx1);
+                        if (cancellationToken.IsCancellationRequested) { break; }
+                        AddCarouselItemToUI(idx2);
+                    }
+
                     _uIItemsCreated = true;
                     await Task.WhenAny(_itemsLoadedTCS.Task, Task.Delay(5000), cancellationToken.AsTask());
                     if (_itemsLoadedTCS.Task.IsCompletedSuccessfully)
@@ -98,9 +115,8 @@ namespace Tilted
                         {
                             StartExpressionItemAnimations(element as FrameworkElement);
                         }
-
-                        SetHitboxSize();
                         UpdateZIndices();
+                        SetHitboxSize();
                         OnItemsLoaded();
                     }
                     else
@@ -115,8 +131,16 @@ namespace Tilted
                     _cancelTokenSource.Cancel();
                     Debug.WriteLine(ex.Message);
                 }
-
             }
+        }
+
+        void AddCarouselItemToUI(int idx)
+        {
+            int playlistIdx = (idx + this.currentStartIndexBackwards) % Items.Count();
+            var itemElement = CreateCarouselItemElement(idx, playlistIdx);
+            itemElement.Tag = idx;
+            itemElement.Loaded += ItemElement_Loaded;
+            _itemsLayerGrid.Children[Density - 1 - idx] = itemElement;
         }
 
         private void ItemElement_Loaded(object sender, RoutedEventArgs e)
@@ -190,12 +214,20 @@ namespace Tilted
                         Hitbox.Height = ws;
                         break;
                     case CarouselTypes.Column:
-                        Hitbox.Width = _maxItemWidth * SelectedItemScale;
                         Hitbox.Height = _height;
+                        Hitbox.Width = _maxItemWidth * SelectedItemScale;
+                        if (WarpIntensity != 0 && WarpCurve != 0 && this.SelectedItemElement != null)
+                        {
+                            Hitbox.Width += (int)(Math.Abs((-WarpCurve) + Math.Abs(WarpIntensity)));
+                        }
                         break;
                     case CarouselTypes.Row:
                         Hitbox.Width = _width;
                         Hitbox.Height = _maxItemHeight * SelectedItemScale;
+                        if (WarpIntensity != 0 && WarpCurve != 0 && this.SelectedItemElement != null)
+                        {
+                            Hitbox.Height += (int)(Math.Abs((-WarpCurve) + Math.Abs(WarpIntensity)));
+                        }
                         break;
                 }
 
@@ -227,7 +259,6 @@ namespace Tilted
         volatile float _currentWheelTickOffset;
         long _currentColumnYPosTick;
         long _currentRowXPosTick;
-        double? _savedOpacityState;
         bool _manipulationStarted;
         bool _manipulationMode;
         bool _selectedIndexSetInternally;
@@ -374,11 +405,11 @@ namespace Tilted
         /// </summary>
         public Canvas Hitbox
         {
-            get { return (Canvas)GetValue(GridProperty); }
-            set { SetValue(GridProperty, value); }
+            get { return (Canvas)GetValue(HitboxProperty); }
+            set { SetValue(HitboxProperty, value); }
         }
 
-        public static readonly DependencyProperty GridProperty = DependencyProperty.Register(nameof(Canvas), typeof(Grid), typeof(Carousel),
+        public static readonly DependencyProperty HitboxProperty = DependencyProperty.Register(nameof(Hitbox), typeof(Canvas), typeof(Carousel),
             new PropertyMetadata(null));
 
         /// <summary>
@@ -505,6 +536,9 @@ namespace Tilted
                 }
             })));
 
+        /// <summary>
+        /// The duration in milliseconds for the selection change animation.
+        /// </summary>
         public int NavigationSpeed
         {
             get
@@ -968,11 +1002,6 @@ namespace Tilted
         {
             _delayedRefreshTimer.Stop();
             await LoadNewCarousel();
-            if (_savedOpacityState != null)
-            {
-                this.Opacity = (double)_savedOpacityState;
-                _savedOpacityState = null;
-            }
         }
 
         private void _delayedZIndexUpdateTimer_Tick(object sender, object e)
@@ -1188,7 +1217,6 @@ namespace Tilted
                     var distanceAsPercentOfWarpThreshold = ExpressionFunctions.Abs(warpThresholdDistanceRaw);
                     var isWithinWarpThreshold = isXaxisNavigation ? offset.X > -warpItemsthreshold & offset.X < warpItemsthreshold : offset.Y > -warpItemsthreshold & offset.Y < warpItemsthreshold;
                     ScalarNode y = WarpIntensity - (distanceAsPercentOfWarpThreshold * WarpIntensity);
-                    //ScalarNode WarpOffset = Convert.ToSingle(-WarpCurve) * warpThresholdDistanceRaw * warpThresholdDistanceRaw + WarpIntensity;
                     ScalarNode finalWarpValue = ExpressionFunctions.Conditional(isWithinWarpThreshold, y * ExpressionFunctions.Abs(y) * (float)WarpCurve, 0);
                     if (isXaxisNavigation)
                     {
@@ -1592,13 +1620,12 @@ namespace Tilted
             _scrollSnapshot = 0;
         }
 
-        FrameworkElement CreateItemInCarouselSlot(int i, int playlistIdx)
+        FrameworkElement CreateCarouselItemElement(int i, int playlistIdx)
         {
             if (ItemTemplate != null)
             {
                 FrameworkElement element = ItemTemplate.LoadContent() as FrameworkElement;
                 element.DataContext = Items[playlistIdx];
-                element.Tag = i;
                 int w = 0;
                 int h = 0;
                 if (Double.IsNaN(element.Height) || Double.IsNaN(element.Width))

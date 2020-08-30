@@ -3,45 +3,41 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tilted;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Input;
 using static Tilted.Common;
 
 namespace TiltedCarouselDemo
 {
-    public class Input
+    public static class Input
     {
-        Tilted.Carousel _myCarousel;
 
-        public Input(Tilted.Carousel myCarousel)
+        public static void Grid_ManipulationStarted(Carousel carousel, object sender, ManipulationStartedRoutedEventArgs e)
         {
-            _myCarousel = myCarousel;
-        }
-        public void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
-        {
-            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            if (carousel != null && carousel.AreItemsLoaded)
             {
-                _myCarousel.StartManipulationMode();
+                carousel.StartManipulationMode();
             }
         }
 
-        public void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        public static void Grid_ManipulationCompleted(Carousel carousel, object sender, ManipulationCompletedRoutedEventArgs e)
         {
-            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            if (carousel != null && carousel.AreItemsLoaded)
             {
-                _myCarousel.StopManipulationMode();
+                carousel.StopManipulationMode();
             }
         }
 
-        public void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
+        public static void Grid_ManipulationDelta(Carousel carousel, object sender, ManipulationDeltaRoutedEventArgs e)
         {
-            if (_myCarousel != null && _myCarousel.AreItemsLoaded && _myCarousel.ItemsSource != null)
+            if (carousel != null && carousel.AreItemsLoaded && carousel.ItemsSource != null)
             {
                 double value = 0;
-                switch (_myCarousel.CarouselType)
+                switch (carousel.CarouselType)
                 {
                     case CarouselTypes.Wheel:
-                        switch (_myCarousel.WheelAlignment)
+                        switch (carousel.WheelAlignment)
                         {
                             case WheelAlignments.Right:
                                 value = -(e.Delta.Translation.Y / 4);
@@ -56,82 +52,82 @@ namespace TiltedCarouselDemo
                                 value = e.Delta.Translation.X / 4;
                                 break;
                         }
-                        _myCarousel.CarouselRotationAngle += Convert.ToSingle(value);
+                        carousel.CarouselRotationAngle += Convert.ToSingle(value);
                         break;
                     case CarouselTypes.Column:
                         value = e.Cumulative.Translation.Y * 2;
-                        _myCarousel.CarouselPositionY = Convert.ToSingle(value);
+                        carousel.CarouselPositionY = Convert.ToSingle(value);
                         break;
                     case CarouselTypes.Row:
                         value = e.Cumulative.Translation.X * 2;
-                        _myCarousel.CarouselPositionX = Convert.ToSingle(value);
+                        carousel.CarouselPositionX = Convert.ToSingle(value);
                         break;
                 }
             }
 
         }
 
-        public void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+        public static void Canvas_PointerWheelChanged(Carousel carousel, object sender, PointerRoutedEventArgs e)
         {
-            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            if (carousel != null && carousel.AreItemsLoaded)
             {
-                var point = e.GetCurrentPoint(_myCarousel);
+                var point = e.GetCurrentPoint(carousel);
                 switch (point.Properties.MouseWheelDelta)
                 {
                     case 120:
-                        _myCarousel.ChangeSelection(true);
+                        carousel.ChangeSelection(true);
                         break;
                     case -120:
-                        _myCarousel.ChangeSelection(false);
+                        carousel.ChangeSelection(false);
                         break;
                 }
             }
         }
 
-        public void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
+        public static void CoreWindow_KeyDown(Carousel carousel, CoreWindow sender, KeyEventArgs args)
         {
-            if (_myCarousel != null && _myCarousel.AreItemsLoaded)
+            if (carousel != null && carousel.AreItemsLoaded)
             {
                 switch (args.VirtualKey)
                 {
                     case Windows.System.VirtualKey.Up:
                     case Windows.System.VirtualKey.Down:
-                        switch (_myCarousel.CarouselType)
+                        switch (carousel.CarouselType)
                         {
                             case CarouselTypes.Wheel:
-                                switch (_myCarousel.WheelAlignment)
+                                switch (carousel.WheelAlignment)
                                 {
                                     case WheelAlignments.Right:
                                     case WheelAlignments.Left:
-                                        _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                        carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
                                         break;
                                 }
                                 break;
                             case CarouselTypes.Column:
-                                _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
                                 break;
                         }
                         break;
                     case Windows.System.VirtualKey.Left:
                     case Windows.System.VirtualKey.Right:
-                        switch (_myCarousel.CarouselType)
+                        switch (carousel.CarouselType)
                         {
                             case CarouselTypes.Wheel:
-                                switch (_myCarousel.WheelAlignment)
+                                switch (carousel.WheelAlignment)
                                 {
                                     case WheelAlignments.Top:
                                     case WheelAlignments.Bottom:
-                                        _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                        carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
                                         break;
                                 }
                                 break;
                             case CarouselTypes.Row:
-                                _myCarousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
                                 break;
                         }
                         break;
                     case Windows.System.VirtualKey.Enter:
-                        _myCarousel.AnimateSelection();
+                        carousel.AnimateSelection();
                         break;
                 }
             }
