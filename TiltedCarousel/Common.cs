@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Tilted
 {
-    public static class Common
+    public static partial class Common
     {
         public enum CarouselTypes
         {

@@ -17,6 +17,8 @@ using System.Threading.Tasks;
 using static Tilted.Common;
 using System.Diagnostics;
 using Windows.UI.Xaml.Media.Media3D;
+using Windows.UI.Core;
+using Windows.ApplicationModel.SocialInfo;
 
 namespace Tilted
 {
@@ -140,9 +142,12 @@ namespace Tilted
         {
             int playlistIdx = (idx + this.currentStartIndexBackwards) % Items.Count();
             var itemElement = CreateCarouselItemElement(idx, playlistIdx);
-            itemElement.Tag = idx;
-            itemElement.Loaded += ItemElement_Loaded;
-            _itemsLayerGrid.Children[Density - 1 - idx] = itemElement;
+            if (itemElement != null)
+            {
+                itemElement.Tag = idx;
+                itemElement.Loaded += ItemElement_Loaded;
+                _itemsLayerGrid.Children[Density - 1 - idx] = itemElement;
+            }
         }
 
         private void ItemElement_Loaded(object sender, RoutedEventArgs e)
@@ -473,7 +478,7 @@ namespace Tilted
 
         //public static readonly DependencyProperty HitboxProperty = DependencyProperty.Register(nameof(Hitbox), typeof(Canvas), typeof(Carousel),
         //    new PropertyMetadata(null));
-        
+
 
 
 
@@ -536,7 +541,23 @@ namespace Tilted
             set { SetValue(ItemTemplateProperty, value); }
         }
 
-        public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(Carousel), new PropertyMetadata(null));
+        public static readonly DependencyProperty ItemTemplateProperty = DependencyProperty.Register(nameof(ItemTemplate), typeof(DataTemplate), typeof(Carousel),
+            new PropertyMetadata(null, OnCaptionPropertyChanged));
+
+
+        /// <summary>
+        /// Add a style to the style's first matching target type in the ItemTemplate's visual tree
+        /// </summary>
+        public Style ItemContentStyle
+        {
+            get { return (Style)GetValue(ItemContentStyleProperty); }
+            set { SetValue(ItemContentStyleProperty, value); }
+        }
+
+        public static readonly DependencyProperty ItemContentStyleProperty = DependencyProperty.Register(nameof(ItemContentStyle), typeof(Style), typeof(Carousel),
+            new PropertyMetadata(null, OnCaptionPropertyChanged));
+
+
 
         /// <summary>
         /// The index of the currently selected item in Items.
@@ -1317,19 +1338,42 @@ namespace Tilted
             // Fliptych
             if (useFliptych && CarouselType != CarouselTypes.Wheel) // TODO: Implement Fliptych on Wheel
             {
-                if (element.Transform3D is PerspectiveTransform3D perspectiveTransform3D)
+                UIElement child = null;
+                if (element.Transform3D == null)
                 {
-                    if (element is UserControl uc && uc.Content is UIElement child)
-                    {
-                        var childVisual = ElementCompositionPreview.GetElementVisual(child);
-                        var fliptychDegrees = isXaxisNavigation ? Convert.ToSingle(FliptychDegrees) : Convert.ToSingle(-FliptychDegrees);
-                        if (CarouselType == CarouselTypes.Wheel) { fliptychDegrees *= -1; }
-                        childVisual.RotationAxis = isXaxisNavigation ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
-                        childVisual.CenterPoint = new Vector3(_maxItemWidth / 2, _maxItemHeight / 2, 0);
-                        ScalarNode rotatedValue = ExpressionFunctions.Conditional(distanceIsNegativeValue, fliptychDegrees, -fliptychDegrees);
-                        ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfScaleThreshold * rotatedValue, rotatedValue);
-                        childVisual.StartAnimation("RotationAngleInDegrees", finalValue);
-                    }
+                    element.Transform3D = new PerspectiveTransform3D { Depth = 1000 };
+                }
+                if (element is UserControl uc && uc.Content is UIElement ucElement)
+                {
+                    child = ucElement;
+                }
+                else if (element is ContentControl cc && cc.Content is UIElement ccElement)
+                {
+                    child = ccElement;
+                }
+                else if (element is Grid g && g.Children.Count == 1 && g.Children.First() is UIElement gElement)
+                {
+                    child = gElement;
+                }
+                else if (element is Panel p && p.Children.Count == 1 && p.Children.First() is UIElement pElement)
+                {
+                    child = pElement;
+                }
+                else if (element is Canvas c && c.Children.Count == 1 && c.Children.First() is UIElement cElement)
+                {
+                    child = cElement;
+                }
+
+                if (child != null)
+                {
+                    var childVisual = ElementCompositionPreview.GetElementVisual(child);
+                    var fliptychDegrees = isXaxisNavigation ? Convert.ToSingle(FliptychDegrees) : Convert.ToSingle(-FliptychDegrees);
+                    if (CarouselType == CarouselTypes.Wheel) { fliptychDegrees *= -1; }
+                    childVisual.RotationAxis = isXaxisNavigation ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
+                    childVisual.CenterPoint = new Vector3(_maxItemWidth / 2, _maxItemHeight / 2, 0);
+                    ScalarNode rotatedValue = ExpressionFunctions.Conditional(distanceIsNegativeValue, fliptychDegrees, -fliptychDegrees);
+                    ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfScaleThreshold * rotatedValue, rotatedValue);
+                    childVisual.StartAnimation("RotationAngleInDegrees", finalValue);
                 }
             }
 
@@ -1712,6 +1756,15 @@ namespace Tilted
             if (ItemTemplate != null)
             {
                 FrameworkElement element = ItemTemplate.LoadContent() as FrameworkElement;
+                if (ItemContentStyle != null)
+                {
+                    var child = element.FindDescendants<FrameworkElement>().Where(x => x.GetType() == ItemContentStyle.TargetType).FirstOrDefault();
+                    if (child != null)
+                    {
+                        Convert.ChangeType(child, ItemContentStyle.TargetType);
+                        child.Style = ItemContentStyle;
+                    }
+                }
                 element.DataContext = Items[playlistIdx];
                 int w = 0;
                 int h = 0;
@@ -1726,7 +1779,7 @@ namespace Tilted
                     {
                         if (Double.IsNaN(childElement.Width) || Double.IsNaN(childElement.Height))
                         {
-                            if (Double.IsInfinity(childElement.MaxWidth) || Double.IsInfinity(childElement.MaxHeight))
+                            if (!Double.IsInfinity(childElement.MaxWidth) && !Double.IsInfinity(childElement.MaxHeight))
                             {
                                 w = Convert.ToInt32(childElement.MaxWidth + childElement.Margin.Left + childElement.Margin.Right);
                                 h = Convert.ToInt32(childElement.MaxHeight + childElement.Margin.Top + childElement.Margin.Bottom);
