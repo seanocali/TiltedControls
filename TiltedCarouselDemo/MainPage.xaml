@@ -151,12 +151,6 @@
                                  WarpIntensity="{x:Bind PageViewModel.WarpIntensity, Mode=OneWay}"
                                  WarpCurve="{x:Bind PageViewModel.WarpCurve, Mode=OneWay}"
                                  ZIndexUpdateWaitsForAnimation="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=OneWay}" >
-                    <tilted:Carousel.Hitbox>
-                        <Canvas ManipulationStarted="Grid_ManipulationStarted"
-                                ManipulationCompleted="Grid_ManipulationCompleted"
-                                ManipulationDelta="Grid_ManipulationDelta"
-                                PointerWheelChanged="Canvas_PointerWheelChanged"/>
-                    </tilted:Carousel.Hitbox>
                     <tilted:Carousel.RenderTransform>
                         <TranslateTransform X="{x:Bind PageViewModel.OffsetX, Mode=OneWay}"
                                             Y="{x:Bind PageViewModel.OffsetY, Mode=OneWay}"/>

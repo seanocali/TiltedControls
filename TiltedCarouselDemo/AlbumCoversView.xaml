@@ -18,12 +18,6 @@
                              CarouselType="Row"
                              FliptychDegrees="80"
                              NavigationSpeed="500">
-                <tilted:Carousel.Hitbox>
-                    <Canvas ManipulationStarted="Grid_ManipulationStarted"
-                            ManipulationCompleted="Grid_ManipulationCompleted"
-                            ManipulationDelta="Grid_ManipulationDelta"
-                            PointerWheelChanged="Canvas_PointerWheelChanged"/>
-                </tilted:Carousel.Hitbox>
                 <tilted:Carousel.ItemTemplate>
                     <DataTemplate x:DataType="local:ItemModel">
                         <tilted:CarouselItem>

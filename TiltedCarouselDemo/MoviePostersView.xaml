@@ -11,18 +11,12 @@
     <Viewbox>
         <Grid Width="1000" Height="1000">
             <tilted:Carousel x:Name="myCarousel"
-                                 ItemsSource="{x:Bind PageViewModel.Items}"
-                                 SelectedIndex="{x:Bind PageViewModel.SelectedIndex, Mode=TwoWay}"
-                                 CarouselType="Column"
-                                 NavigationSpeed="500"
-                                 SelectedItemScale="1.8"
-                                 ItemGap="12">
-                <tilted:Carousel.Hitbox>
-                    <Canvas ManipulationStarted="Grid_ManipulationStarted"
-                                ManipulationCompleted="Grid_ManipulationCompleted"
-                                ManipulationDelta="Grid_ManipulationDelta"
-                                PointerWheelChanged="Canvas_PointerWheelChanged"/>
-                </tilted:Carousel.Hitbox>
+                             ItemsSource="{x:Bind PageViewModel.Items}"
+                             SelectedIndex="{x:Bind PageViewModel.SelectedIndex, Mode=TwoWay}"
+                             CarouselType="Column"
+                             NavigationSpeed="500"
+                             SelectedItemScale="1.8"
+                             ItemGap="12">
                 <tilted:Carousel.ItemTemplate>
                     <DataTemplate x:DataType="local:ItemModel">
                         <tilted:CarouselItem>

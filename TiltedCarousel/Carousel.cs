@@ -19,6 +19,7 @@ using System.Diagnostics;
 using Windows.UI.Xaml.Media.Media3D;
 using Windows.UI.Core;
 using Windows.ApplicationModel.SocialInfo;
+using Windows.Devices.Bluetooth;
 
 namespace Tilted
 {
