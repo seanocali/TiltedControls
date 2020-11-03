@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Tilted;
+using TiltedCarousel;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Input;
-using static Tilted.Common;
+using static TiltedCarousel.Common;
 
 namespace TiltedCarouselDemo
 {
