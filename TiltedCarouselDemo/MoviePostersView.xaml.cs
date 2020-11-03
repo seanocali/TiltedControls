@@ -32,50 +32,25 @@ namespace TiltedCarouselDemo
         {
             await CreateTestItemsPosters();
             DataContext = PageViewModel;
-            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
+            this.KeyDown += MoviePostersView_KeyDown;
+            this.PointerWheelChanged += MoviePostersView_PointerWheelChanged;
             this.InitializeComponent();
         }
-        private void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
+
+        private void MoviePostersView_KeyDown(object sender, KeyRoutedEventArgs e)
         {
             try
             {
-                Input.Grid_ManipulationStarted(myCarousel, sender, e);
+                Input.KeyDown(myCarousel, e.Key);
             }
             catch { }
         }
 
-        private void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
+        private void MoviePostersView_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
         {
             try
             {
-                Input.Grid_ManipulationCompleted(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationDelta(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Canvas_PointerWheelChanged(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
-        {
-            try
-            {
-                Input.CoreWindow_KeyDown(myCarousel, sender, args);
+                Input.WheelChanged(myCarousel, e.GetCurrentPoint(myCarousel));
             }
             catch { }
         }

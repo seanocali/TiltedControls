@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TiltedCarousel;
+using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.Input;
 using Windows.UI.Xaml.Input;
 using static TiltedCarousel.Common;
 
@@ -67,11 +69,10 @@ namespace TiltedCarouselDemo
 
         }
 
-        public static void Canvas_PointerWheelChanged(Carousel carousel, object sender, PointerRoutedEventArgs e)
+        public static void WheelChanged(Carousel carousel, PointerPoint point)
         {
             if (carousel != null && carousel.AreItemsLoaded)
             {
-                var point = e.GetCurrentPoint(carousel);
                 switch (point.Properties.MouseWheelDelta)
                 {
                     case 120:
@@ -84,11 +85,11 @@ namespace TiltedCarouselDemo
             }
         }
 
-        public static void CoreWindow_KeyDown(Carousel carousel, CoreWindow sender, KeyEventArgs args)
+        internal static void KeyDown(Carousel carousel, VirtualKey key)
         {
             if (carousel != null && carousel.AreItemsLoaded)
             {
-                switch (args.VirtualKey)
+                switch (key)
                 {
                     case Windows.System.VirtualKey.Up:
                     case Windows.System.VirtualKey.Down:
@@ -99,12 +100,12 @@ namespace TiltedCarouselDemo
                                 {
                                     case WheelAlignments.Right:
                                     case WheelAlignments.Left:
-                                        carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                        carousel.ChangeSelection(key == Windows.System.VirtualKey.Up);
                                         break;
                                 }
                                 break;
                             case CarouselTypes.Column:
-                                carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Up);
+                                carousel.ChangeSelection(key == Windows.System.VirtualKey.Up);
                                 break;
                         }
                         break;
@@ -117,12 +118,12 @@ namespace TiltedCarouselDemo
                                 {
                                     case WheelAlignments.Top:
                                     case WheelAlignments.Bottom:
-                                        carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                        carousel.ChangeSelection(key == Windows.System.VirtualKey.Left);
                                         break;
                                 }
                                 break;
                             case CarouselTypes.Row:
-                                carousel.ChangeSelection(args.VirtualKey == Windows.System.VirtualKey.Left);
+                                carousel.ChangeSelection(key == Windows.System.VirtualKey.Left);
                                 break;
                         }
                         break;
@@ -131,6 +132,7 @@ namespace TiltedCarouselDemo
                         break;
                 }
             }
+
         }
     }
 }

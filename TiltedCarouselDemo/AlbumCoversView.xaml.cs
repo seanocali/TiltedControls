@@ -29,7 +29,19 @@ namespace TiltedCarouselDemo
         public AlbumCoversView()
         {
             PageViewModel = new MainPageViewModel();
+            this.KeyDown += AlbumCoversView_KeyDown;
+            this.PointerWheelChanged += AlbumCoversView_PointerWheelChanged;
             Load();
+        }
+
+        private void AlbumCoversView_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+        {
+            Input.WheelChanged(myCarousel, e.GetCurrentPoint(myCarousel));
+        }
+
+        private void AlbumCoversView_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            Input.KeyDown(myCarousel, e.Key);
         }
 
         async void Load()
@@ -38,52 +50,6 @@ namespace TiltedCarouselDemo
             DataContext = PageViewModel;
             this.InitializeComponent();
         }
-
-        private void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationStarted(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationCompleted(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationDelta(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Canvas_PointerWheelChanged(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
-        {
-            try
-            {
-                Input.CoreWindow_KeyDown(myCarousel, sender, args);
-            }
-            catch { }
-        }
-
 
         private async Task CreateTestItemsAlbums()
         {

@@ -35,7 +35,26 @@ namespace TiltedCarouselDemo
             DataContext = PageViewModel;
             this.Loaded += MainPage_Loaded;
             this.InitializeComponent();
-            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
+            this.KeyDown += MainPage_KeyDown;
+            this.PointerWheelChanged += MainPage_PointerWheelChanged;
+        }
+
+        private void MainPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
+        {
+            try
+            {
+                Input.WheelChanged(myCarousel, e.GetCurrentPoint(myCarousel));
+            }
+            catch { }
+        }
+
+        private void MainPage_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            try
+            {
+                Input.KeyDown(myCarousel, e.Key);
+            }
+            catch { }
         }
 
         private async void MainPage_Loaded(object sender, RoutedEventArgs e)
@@ -44,52 +63,6 @@ namespace TiltedCarouselDemo
             var focusableElement = myCarousel.FindDescendant<ContentControl>();
             focusableElement.Focus(FocusState.Programmatic);
         }
-
-        private void Grid_ManipulationStarted(object sender, ManipulationStartedRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationStarted(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Grid_ManipulationCompleted(object sender, ManipulationCompletedRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationCompleted(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Grid_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Grid_ManipulationDelta(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void Canvas_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
-        {
-            try
-            {
-                Input.Canvas_PointerWheelChanged(myCarousel, sender, e);
-            }
-            catch { }
-        }
-
-        private void CoreWindow_KeyDown(CoreWindow sender, KeyEventArgs args)
-        {
-            try
-            {
-                Input.CoreWindow_KeyDown(myCarousel, sender, args);
-            }
-            catch { }
-        }
-
 
         private void CreateTestItemsColors()
         {
@@ -101,7 +74,6 @@ namespace TiltedCarouselDemo
                 }
             }
         }
-
 
         private void PostersButton_Tapped(object sender, TappedRoutedEventArgs e)
         {
