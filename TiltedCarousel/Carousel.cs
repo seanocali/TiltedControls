@@ -14,14 +14,14 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using static Tilted.Common;
+using static TiltedCarousel.Common;
 using System.Diagnostics;
 using Windows.UI.Xaml.Media.Media3D;
 using Windows.UI.Core;
 using Windows.ApplicationModel.SocialInfo;
 using Windows.Devices.Bluetooth;
 
-namespace Tilted
+namespace TiltedCarousel
 {
     /// <summary>
     /// UI control to visually present a collection of data.
@@ -29,7 +29,7 @@ namespace Tilted
     /// <remarks>
     /// Inherits 'Grid' but works like an 'ItemsControl'. Visual tree contains an empty ContentControl for tab indexing and keyboard focus.
     /// </remarks>
-    public sealed partial class Carousel : Grid
+    public class Carousel : Grid
     {
         #region CONSTRUCTOR & INITIALIZATION METHODS
 
@@ -311,13 +311,13 @@ namespace Tilted
         DispatcherTimer _delayedRefreshTimer;
         DispatcherTimer _delayedZIndexUpdateTimer = new DispatcherTimer();
         CancellationTokenSource _cancelTokenSource;
-        int _maxItemWidth;
-        int _maxItemHeight;
+        protected int _maxItemWidth;
+        protected int _maxItemHeight;
         int _previousSelectedIndex;
         volatile float _scrollValue = 0;
         volatile float _scrollSnapshot = 0;
         volatile int _carouselInsertPosition;
-        Visual _dynamicGridVisual;
+        protected Visual _dynamicGridVisual;
         Grid _dynamicContainerGrid;
         Grid _itemsLayerGrid;
         Canvas _hitbox;
@@ -338,7 +338,7 @@ namespace Tilted
 
         #region PRIVATE PROPERTIES
 
-        bool isXaxisNavigation
+        protected bool isXaxisNavigation
         {
             get
             {
@@ -390,7 +390,7 @@ namespace Tilted
             }
         }
 
-        bool useFliptych
+        protected bool useFliptych
         {
             get
             {
@@ -596,15 +596,15 @@ namespace Tilted
         {
             get
             {
-                return (Brush)base.GetValue(ForegroundHighlightColorProperty);
+                return (Brush)base.GetValue(SelectedItemForegroundBrushProperty);
             }
             set
             {
-                base.SetValue(ForegroundHighlightColorProperty, value);
+                base.SetValue(SelectedItemForegroundBrushProperty, value);
             }
         }
 
-        public static readonly DependencyProperty ForegroundHighlightColorProperty = DependencyProperty.Register(nameof(SelectedItemForegroundBrush), typeof(Brush), typeof(Carousel),
+        public static readonly DependencyProperty SelectedItemForegroundBrushProperty = DependencyProperty.Register(nameof(SelectedItemForegroundBrush), typeof(Brush), typeof(Carousel),
             new PropertyMetadata(null, OnCaptionPropertyChanged));
 
 
@@ -1195,100 +1195,104 @@ namespace Tilted
                 StartExpressionItemAnimations(element);
             }
         }
-
-        void StartExpressionItemAnimations(FrameworkElement element)
+        protected void StartExpressionItemAnimations(FrameworkElement element)
         {
             // Scaling Expression Animation
-            Visual visual = ElementCompositionPreview.GetElementVisual(element);
+
+            var visual = ElementCompositionPreview.GetElementVisual(element);
             var compositor = Window.Current.Compositor;
-            var scaleRange = Convert.ToSingle(SelectedItemScale) - 1;
+            var scaleRange = (float)SelectedItemScale - 1;
             ScalarNode distanceAsPercentOfScaleThreshold = null;
             ScalarNode scaleThresholdDistanceRaw = null;
             BooleanNode distanceIsNegativeValue = null;
+            //bool distanceIsNegativeValueForDebug = false;
             BooleanNode isWithinScaleThreshold = null;
             float scaleItemsthreshold = 0;
-
             if (CarouselType == CarouselTypes.Wheel)
             {
-                int? slotNum = null;
-                if (element.Tag is int i)
+                scaleItemsthreshold = AdditionalItemsToScale == 0 ? (float)FliptychDegrees : (float)(FliptychDegrees * AdditionalItemsToScale);
+
+                var slotDegrees = ((Int32.Parse(element.Name) + (Density / 2)) % Density) * FliptychDegrees;
+
+                float wheelDegreesWhenItemIsSelected = Convert.ToSingle(slotDegrees);
+
+                ScalarNode wheelAngle = _dynamicGridVisual.GetReference().RotationAngleInDegrees;
+
+                float wheelAngleForDebug = _dynamicGridVisual.RotationAngleInDegrees;
+
+                // This is not a real Modulus, just remainder.
+                float distanceRawForDebug = 0;
+                switch (WheelAlignment)
                 {
-                    slotNum = i;
+                    case WheelAlignments.Right:
+                        scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
+                        distanceRawForDebug = wheelAngleForDebug - wheelDegreesWhenItemIsSelected;
+                        distanceRawForDebug = distanceRawForDebug % 360;
+                        break;
+                    case WheelAlignments.Top:
+                        scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
+                        distanceRawForDebug = wheelAngleForDebug - wheelDegreesWhenItemIsSelected;
+                        distanceRawForDebug = distanceRawForDebug % 360;
+                        break;
+                    case WheelAlignments.Left:
+                        scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
+                        distanceRawForDebug = wheelAngleForDebug + wheelDegreesWhenItemIsSelected;
+                        distanceRawForDebug = distanceRawForDebug % 360;
+                        break;
+                    case WheelAlignments.Bottom:
+                        scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
+                        distanceRawForDebug = wheelAngleForDebug + wheelDegreesWhenItemIsSelected;
+                        distanceRawForDebug = distanceRawForDebug % 360;
+                        break;
                 }
 
-                if (slotNum != null)
+
+
+                ScalarNode distanceToZero = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
+                //var distanceToZeroForDebug = Math.Abs(distanceRawForDebug);
+                ScalarNode distanceTo360 = 360 - distanceToZero;
+                //var distanceTo360ForDebug = 360 - distanceToZeroForDebug;
+                BooleanNode isClosestToZero = distanceToZero <= distanceTo360;
+                //bool isClosestToZeroForDebug = distanceToZeroForDebug <= distanceTo360ForDebug;
+                ScalarNode distanceInDegrees = ExpressionFunctions.Conditional(isClosestToZero, distanceToZero, distanceTo360);
+                //var distanceInDegreesForDebug = isClosestToZeroForDebug ? distanceToZeroForDebug : distanceTo360ForDebug;
+                distanceAsPercentOfScaleThreshold = distanceInDegrees / scaleItemsthreshold;
+
+                switch (WheelAlignment)
                 {
-                    scaleItemsthreshold = itemsToScale == 0 ? degrees : degrees * itemsToScale;
+                    case WheelAlignments.Top:
+                    case WheelAlignments.Bottom:
+                        distanceIsNegativeValue = ExpressionFunctions.Abs(scaleThresholdDistanceRaw) < 180;
+                        //distanceIsNegativeValueForDebug = Math.Abs(distanceRawForDebug) < 180;
+                        break;
+                    case WheelAlignments.Left:
+                        distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected - 90), 360)) < 180;
+                        break;
+                    case WheelAlignments.Right:
+                        distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected + 90), 360)) < 180;
+                        //distanceIsNegativeValueForDebug = Math.Abs(distanceRawForDebug) < 180;
+                        break;
+                }
 
-                    var slotDegrees = ((slotNum + (Density / 2)) % Density) * degrees;
 
-                    float wheelDegreesWhenItemIsSelected = Convert.ToSingle(slotDegrees);
 
-                    ScalarNode wheelAngle = _dynamicGridVisual.GetReference().RotationAngleInDegrees;
 
-                    float wheelAngleForDebug = _dynamicGridVisual.RotationAngleInDegrees;
+                ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
+                isWithinScaleThreshold = distanceInDegrees < scaleItemsthreshold;
 
-                    float distanceRawForDebug = 0;
-                    switch (WheelAlignment)
-                    {
-                        case WheelAlignments.Right:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
-                            distanceRawForDebug = wheelAngleForDebug - wheelDegreesWhenItemIsSelected;
-                            distanceRawForDebug = distanceRawForDebug % 360;
-                            break;
-                        case WheelAlignments.Top:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
-                            distanceRawForDebug = wheelAngleForDebug - wheelDegreesWhenItemIsSelected;
-                            distanceRawForDebug = distanceRawForDebug % 360;
-                            break;
-                        case WheelAlignments.Left:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
-                            distanceRawForDebug = wheelAngleForDebug + wheelDegreesWhenItemIsSelected;
-                            distanceRawForDebug = distanceRawForDebug % 360;
-                            break;
-                        case WheelAlignments.Bottom:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
-                            distanceRawForDebug = wheelAngleForDebug + wheelDegreesWhenItemIsSelected;
-                            distanceRawForDebug = distanceRawForDebug % 360;
-                            break;
-                    }
+                //BooleanNode willScale = scalePercent <= SelectedItemScale & scalePercent > 1;
+                ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
 
-                    ScalarNode distanceToZero = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
-                    ScalarNode distanceTo360 = 360 - distanceToZero;
-                    BooleanNode isClosestToZero = distanceToZero <= distanceTo360;
-                    ScalarNode distanceInDegrees = ExpressionFunctions.Conditional(isClosestToZero, distanceToZero, distanceTo360);
-                    distanceAsPercentOfScaleThreshold = distanceInDegrees / scaleItemsthreshold;
-
-                    switch (WheelAlignment)
-                    {
-                        case WheelAlignments.Top:
-                        case WheelAlignments.Bottom:
-                            distanceIsNegativeValue = ExpressionFunctions.Abs(scaleThresholdDistanceRaw) < 180;
-                            break;
-                        case WheelAlignments.Left:
-                            distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected - 90), 360)) < 180;
-                            break;
-                        case WheelAlignments.Right:
-                            distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected + 90), 360)) < 180;
-                            break;
-                    }
-
-                    ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
-                    isWithinScaleThreshold = distanceInDegrees < scaleItemsthreshold;
-                    ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
-
-                    // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
-                    if (SelectedItemScale > 1)
-                    {
-                        visual.StartAnimation("Scale.X", finalScaleValue);
-                        visual.StartAnimation("Scale.Y", finalScaleValue);
-                    }
+                // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
+                if (SelectedItemScale > 1)
+                {
+                    visual.StartAnimation("Scale.X", finalScaleValue);
+                    visual.StartAnimation("Scale.Y", finalScaleValue);
                 }
             }
-
             else if (CarouselType == CarouselTypes.Row || CarouselType == CarouselTypes.Column)
             {
-                scaleItemsthreshold = isXaxisNavigation ? itemsToScale * (_maxItemWidth + ItemGap) : itemsToScale * (_maxItemHeight + ItemGap);
+                scaleItemsthreshold = isXaxisNavigation ? AdditionalItemsToScale * (_maxItemWidth + ItemGap) : AdditionalItemsToScale * (_maxItemHeight + ItemGap);
                 if (scaleItemsthreshold == 0)
                 {
                     scaleItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
@@ -1304,6 +1308,7 @@ namespace Tilted
 
 
                 ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
+                //BooleanNode willScale = scalePercent <= SelectedItemScale & scalePercent > 1;
                 ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
 
                 // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
@@ -1315,7 +1320,7 @@ namespace Tilted
 
                 if (WarpIntensity != 0)
                 {
-                    var warpItemsthreshold = isXaxisNavigation ? itemsToWarp * (_maxItemWidth + ItemGap) : itemsToWarp * (_maxItemHeight + ItemGap);
+                    var warpItemsthreshold = isXaxisNavigation ? AdditionalItemsToWarp * (_maxItemWidth + ItemGap) : AdditionalItemsToWarp * (_maxItemHeight + ItemGap);
                     if (warpItemsthreshold == 0)
                     {
                         warpItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
@@ -1324,6 +1329,7 @@ namespace Tilted
                     var distanceAsPercentOfWarpThreshold = ExpressionFunctions.Abs(warpThresholdDistanceRaw);
                     var isWithinWarpThreshold = isXaxisNavigation ? offset.X > -warpItemsthreshold & offset.X < warpItemsthreshold : offset.Y > -warpItemsthreshold & offset.Y < warpItemsthreshold;
                     ScalarNode y = WarpIntensity - (distanceAsPercentOfWarpThreshold * WarpIntensity);
+                    ScalarNode WarpOffset = Convert.ToSingle(-WarpCurve) * warpThresholdDistanceRaw * warpThresholdDistanceRaw + WarpIntensity;
                     ScalarNode finalWarpValue = ExpressionFunctions.Conditional(isWithinWarpThreshold, y * ExpressionFunctions.Abs(y) * (float)WarpCurve, 0);
                     if (isXaxisNavigation)
                     {
@@ -1336,10 +1342,13 @@ namespace Tilted
                 }
             }
 
+            //var tiltedMedias = element.FindDescendants<Media>();
+
+            UIElement child = null;
+
             // Fliptych
             if (useFliptych && CarouselType != CarouselTypes.Wheel) // TODO: Implement Fliptych on Wheel
             {
-                UIElement child = null;
                 if (element.Transform3D == null)
                 {
                     element.Transform3D = new PerspectiveTransform3D { Depth = 1000 };
@@ -1377,58 +1386,78 @@ namespace Tilted
                     childVisual.StartAnimation("RotationAngleInDegrees", finalValue);
                 }
             }
+            SetColorAnimation(distanceAsPercentOfScaleThreshold, isWithinScaleThreshold, element);
+        }
 
-            if (SelectedItemForegroundBrush != null)
+        /// <summary>
+        /// For better performance it may be worth extending Carousel and overriding this method with one that targets the specific class and property you want.
+        /// </summary>
+        protected virtual void SetColorAnimation(ScalarNode distanceAsPercentOfScaleThreshold, BooleanNode isWithinScaleThreshold, FrameworkElement fe)
+        {
+            List<FrameworkElement> elements = fe.FindDescendants<FrameworkElement>().ToList();
+            elements.Add(fe);
+            foreach (var element in elements)
             {
-                foreach (var itemElement in _itemsLayerGrid.Children)
+                var t = element.GetType();
+                var props = t.GetProperties();
+                foreach (var prop in props)
                 {
-                    var children = itemElement.FindDescendants<FrameworkElement>().Where(x => x.Name.StartsWith("CarouselItemMedia"));
-                    foreach (var child in children)
+                    if (prop.PropertyType == typeof(CompositionColorBrush) || prop.PropertyType == typeof(CompositionLinearGradientBrush))
                     {
-                        var t = child.GetType();
-                        var props = t.GetProperties();
-                        foreach (var prop in props)
+                        if (SelectedItemForegroundBrush is SolidColorBrush solidColorBrush)
                         {
-                            if (prop.PropertyType == typeof(CompositionBrush))
+                            if (prop.GetValue(element) is CompositionColorBrush compositionSolid)
                             {
-                                if (SelectedItemForegroundBrush is SolidColorBrush solidColorBrush && prop.GetValue(child) is CompositionColorBrush compositionSolid)
-                                {
+                                ColorNode deselectedColor = ExpressionFunctions.ColorRgb(compositionSolid.Color.A,
+    compositionSolid.Color.R, compositionSolid.Color.G, compositionSolid.Color.B);
 
-                                    ColorNode deselectedColor = ExpressionFunctions.ColorRgb(compositionSolid.Color.A,
-                                        compositionSolid.Color.R, compositionSolid.Color.G, compositionSolid.Color.B);
+                                ColorNode selectedColor = ExpressionFunctions.ColorRgb(solidColorBrush.Color.A,
+                                    solidColorBrush.Color.R, solidColorBrush.Color.G, solidColorBrush.Color.B);
+
+                                ColorNode colorLerp = ExpressionFunctions.ColorLerp(selectedColor, deselectedColor, distanceAsPercentOfScaleThreshold);
+                                var finalColorExp = ExpressionFunctions.Conditional(isWithinScaleThreshold, colorLerp, deselectedColor);
+                                compositionSolid.StartAnimation("Color", finalColorExp);
+                            }
+                            else if (prop.GetValue(element) is CompositionLinearGradientBrush compositionGradient)
+                            {
+                                for (int i = 0; i < compositionGradient.ColorStops.Count; i++)
+                                {
+                                    var targetStop = compositionGradient.ColorStops[i];
+                                    ColorNode deselectedColor = ExpressionFunctions.ColorRgb(targetStop.Color.A, targetStop.Color.R,
+                                        targetStop.Color.G, targetStop.Color.B);
 
                                     ColorNode selectedColor = ExpressionFunctions.ColorRgb(solidColorBrush.Color.A,
                                         solidColorBrush.Color.R, solidColorBrush.Color.G, solidColorBrush.Color.B);
 
                                     ColorNode colorLerp = ExpressionFunctions.ColorLerp(selectedColor, deselectedColor, distanceAsPercentOfScaleThreshold);
                                     var finalColorExp = ExpressionFunctions.Conditional(isWithinScaleThreshold, colorLerp, deselectedColor);
-                                    compositionSolid.StartAnimation("Color", finalColorExp);
+                                    targetStop.StartAnimation("Color", finalColorExp);
                                 }
-                                else if (SelectedItemForegroundBrush is LinearGradientBrush linearGradientBrush && prop.GetValue(child) is CompositionLinearGradientBrush compositionGradient)
+                            }
+                        }
+                        else if (SelectedItemForegroundBrush is LinearGradientBrush linearGradientBrush && prop.GetValue(element) is CompositionLinearGradientBrush compositionGradient)
+                        {
+                            if (linearGradientBrush.GradientStops.Count == compositionGradient.ColorStops.Count)
+                            {
+                                for (int i = 0; i < compositionGradient.ColorStops.Count; i++)
                                 {
-                                    if (linearGradientBrush.GradientStops.Count == compositionGradient.ColorStops.Count)
-                                    {
-                                        for (int i = 0; i < compositionGradient.ColorStops.Count; i++)
-                                        {
-                                            var targetStop = compositionGradient.ColorStops[i];
-                                            ColorNode deselectedColor = ExpressionFunctions.ColorRgb(targetStop.Color.A, targetStop.Color.R,
-                                                targetStop.Color.G, targetStop.Color.B);
+                                    var targetStop = compositionGradient.ColorStops[i];
+                                    ColorNode deselectedColor = ExpressionFunctions.ColorRgb(targetStop.Color.A, targetStop.Color.R,
+                                        targetStop.Color.G, targetStop.Color.B);
 
-                                            var sourceStop = linearGradientBrush.GradientStops[i];
-                                            ColorNode selectedColor = ExpressionFunctions.ColorRgb(sourceStop.Color.A,
-                                                sourceStop.Color.R, sourceStop.Color.G, sourceStop.Color.B);
+                                    var sourceStop = linearGradientBrush.GradientStops[i];
+                                    ColorNode selectedColor = ExpressionFunctions.ColorRgb(sourceStop.Color.A,
+                                        sourceStop.Color.R, sourceStop.Color.G, sourceStop.Color.B);
 
-                                            ColorNode colorLerp = ExpressionFunctions.ColorLerp(selectedColor, deselectedColor, distanceAsPercentOfScaleThreshold);
-                                            var finalColorExp = ExpressionFunctions.Conditional(isWithinScaleThreshold, colorLerp, deselectedColor);
-                                            targetStop.StartAnimation("Color", finalColorExp);
-                                        }
-                                    }
+                                    ColorNode colorLerp = ExpressionFunctions.ColorLerp(selectedColor, deselectedColor, distanceAsPercentOfScaleThreshold);
+                                    var finalColorExp = ExpressionFunctions.Conditional(isWithinScaleThreshold, colorLerp, deselectedColor);
+                                    targetStop.StartAnimation("Color", finalColorExp);
                                 }
                             }
                         }
                     }
                 }
-            }
+            }        
         }
 
         private void AddStandardImplicitItemAnimation(Visual visual)
@@ -1764,6 +1793,7 @@ namespace Tilted
                     {
                         Convert.ChangeType(child, ItemContentStyle.TargetType);
                         child.Style = ItemContentStyle;
+                        child.Tag = true;
                     }
                 }
                 element.DataContext = Items[playlistIdx];
