@@ -7,8 +7,8 @@
     <ProjectGuid>{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TiltedCarouselDemo</RootNamespace>
-    <AssemblyName>TiltedCarouselDemo</AssemblyName>
+    <RootNamespace>CarouselDemo</RootNamespace>
+    <AssemblyName>CarouselDemo</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.19041.0</TargetPlatformVersion>
@@ -220,7 +220,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TiltedControls\TiltedControls.csproj">
       <Project>{5a2d2f03-acd9-4613-a3da-38c0fa4daf9d}</Project>
-      <Name>TiltedCarousel</Name>
+      <Name>Carousel</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

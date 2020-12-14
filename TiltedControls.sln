@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltedControls", "TiltedControls\TiltedControls.csproj", "{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltedCarouselDemo", "TiltedCarouselDemo\TiltedCarouselDemo.csproj", "{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarouselDemo", "CarouselDemo\CarouselDemo.csproj", "{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
