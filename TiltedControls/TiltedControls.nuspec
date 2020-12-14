@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>Tilted.Controls</id>
+    <version>1.0</version>
+    <title>Tilted Controls</title>
+    <authors>Sean K. O'Neil</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/seanocali/TiltedControls</projectUrl>
+    <description>A set of UWP UI controls that use CompositionAPI and Win2D. Includes a true carousel that loops content. It has unique features not found in other carousels such as wheel mode, warping, and brush animation support for custom controls that use CompositionBrush elements.</description>
+    <copyright>Copyright 2020</copyright>
+    <releaseNotes>Initial release.</releaseNotes>
+    <tags>carousel control uwp</tags>
+  </metadata>
+</package>
