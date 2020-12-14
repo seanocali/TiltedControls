@@ -20,6 +20,7 @@ using Windows.UI.Xaml.Media.Media3D;
 using Windows.UI.Core;
 using Windows.ApplicationModel.SocialInfo;
 using Windows.Devices.Bluetooth;
+using Windows.UI.Xaml.Data;
 
 namespace TiltedCarousel
 {
@@ -38,44 +39,33 @@ namespace TiltedCarousel
         /// </summary>
         public Carousel()
         {
-            this.Loaded += Carousel_Loaded;
-            _delayedRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(250) };
+            _delayedRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             _delayedRefreshTimer.Tick += _delayedRefreshTimer_Tick;
             _delayedZIndexUpdateTimer = new DispatcherTimer();
             _delayedZIndexUpdateTimer.Tick += _delayedZIndexUpdateTimer_Tick;
             this.Background = new SolidColorBrush(Colors.Transparent);
         }
 
-        private void Carousel_Loaded(object sender, RoutedEventArgs e)
-        {
-            Refresh();
-        }
-
         void Refresh()
         {
-            _inputAllowed = false;
-            if (IsLoaded || (!Double.IsNaN(Width) && !Double.IsNaN(Height)))
+            if (this.DataContext != null && (IsLoaded || (!Double.IsNaN(Width) && !Double.IsNaN(Height))))
             {
+                _inputAllowed = false;
                 AreItemsLoaded = false;
                 _delayedRefreshTimer.Start();
             }
         }
 
-        async Task LoadNewCarousel()
+        void LoadNewCarousel()
         {
             _uIItemsCreated = false;
-            if (_itemsLoadedTCS != null && !_itemsLoadedTCS.Task.IsCompleted)
-            {
-                _itemsLoadedTCS.SetResult(false);
-            }
-            _itemsLoadedTCS = new TaskCompletionSource<bool>();
             _width = Double.IsNaN(Width) ? ActualWidth : Width;
             _height = Double.IsNaN(Height) ? ActualHeight : Height;
             _cancelTokenSource = new CancellationTokenSource();
             var cancellationToken = _cancelTokenSource.Token;
             CreateContainers();
-            _elementsToResizeCount = 0;
             _elementsToLoadCount = Density;
+            var items = new FrameworkElement[Density];
             if (Items != null && Items.Count() > 0)
             {
                 try
@@ -93,33 +83,26 @@ namespace TiltedCarousel
                         var idx1 = (i + (Density / 2)) % Density;
                         var idx2 = Density - 1 - idx1;
                         var fe1 = AddCarouselItemToUI(idx1);
+                        items[idx1] = fe1;
                         if (cancellationToken.IsCancellationRequested) { break; }
-                        if (fe1 != null) { StartExpressionItemAnimations(fe1, idx1); }
                         var fe2 = AddCarouselItemToUI(idx2);
                         if (cancellationToken.IsCancellationRequested) { break; }
-                        if (fe2 != null) { StartExpressionItemAnimations(fe2, idx2); }
+                        items[idx2] = fe2;
                     }
 
                     _uIItemsCreated = true;
-                    await Task.WhenAny(_itemsLoadedTCS.Task, Task.Delay(5000), cancellationToken.AsTask());
-                    if (_itemsLoadedTCS.Task.IsCompletedSuccessfully)
+                    if (cancellationToken.IsCancellationRequested) { return; }
+                    for (int i = 0; i < Density / 2; i++)
                     {
-                        if (cancellationToken.IsCancellationRequested) { return; }
-
-                        //foreach (var element in _itemsLayerGrid.Children)
-                        //{
-                        //    StartExpressionItemAnimations(element as FrameworkElement);
-                        //}
-                        UpdateZIndices();
-                        SetHitboxSize();
-                        OnItemsLoaded();
-                    }
-                    else
-                    {
-                        OnItemsLoadFailed();
-                        Debug.WriteLine("Tilted Carousel: Carousel Items Failed to Load!");
+                        var idx1 = (i + (Density / 2)) % Density;
+                        var idx2 = Density - 1 - idx1;
+                        StartExpressionItemAnimations(items[idx1], idx1);
+                        StartExpressionItemAnimations(items[idx2], idx2);
                     }
 
+                    UpdateZIndices();
+                    SetHitboxSize();
+                    OnItemsCreated();
                 }
                 catch (Exception ex)
                 {
@@ -139,6 +122,10 @@ namespace TiltedCarousel
                 itemElement.Loaded += ItemElement_Loaded;
                 _itemsLayerGrid.Children[Density - 1 - idx] = itemElement;
             }
+            else
+            {
+                throw new Exception("Failed to create Carousel Item");
+            }
             return itemElement;
         }
 
@@ -150,7 +137,7 @@ namespace TiltedCarousel
                 _elementsToLoadCount--;
                 if (_elementsToLoadCount < 1)
                 {
-                    _itemsLoadedTCS.SetResult(true);
+                    OnItemsLoaded();
                 }
             }
         }
@@ -320,9 +307,7 @@ namespace TiltedCarousel
         bool _selectedIndexSetInternally;
         bool _deltaDirectionIsReverse;
         bool _uIItemsCreated;
-        volatile int _elementsToResizeCount;
         volatile int _elementsToLoadCount;
-        TaskCompletionSource<bool> _itemsLoadedTCS;
 
         #endregion
 
@@ -469,9 +454,6 @@ namespace TiltedCarousel
 
         //public static readonly DependencyProperty HitboxProperty = DependencyProperty.Register(nameof(Hitbox), typeof(Canvas), typeof(Carousel),
         //    new PropertyMetadata(null));
-
-
-
 
         public bool UseGestures
         {
@@ -1087,10 +1069,10 @@ namespace TiltedCarousel
 
         #region TIMER METHODS
 
-        private async void _delayedRefreshTimer_Tick(object sender, object e)
+        private void _delayedRefreshTimer_Tick(object sender, object e)
         {
             _delayedRefreshTimer.Stop();
-            await LoadNewCarousel();
+            LoadNewCarousel();
         }
 
         private void _delayedZIndexUpdateTimer_Tick(object sender, object e)
@@ -1146,18 +1128,17 @@ namespace TiltedCarousel
         protected void StartExpressionItemAnimations(FrameworkElement element, int? slotNum)
         {
             // Scaling Expression Animation
-
+            if (element == null) { return; }
             var visual = ElementCompositionPreview.GetElementVisual(element);
             var compositor = Window.Current.Compositor;
-            var scaleRange = (float)SelectedItemScale - 1;
-            ScalarNode distanceAsPercentOfScaleThreshold = null;
+            ScalarNode distanceAsPercentOfSelectionAreaThreshold = null;
             ScalarNode scaleThresholdDistanceRaw = null;
             BooleanNode distanceIsNegativeValue = null;
             BooleanNode isWithinScaleThreshold = null;
-            float scaleItemsthreshold = 0;
+            float selectionAreaThreshold = 0;
             if (CarouselType == CarouselTypes.Wheel && slotNum != null)
             {
-                scaleItemsthreshold = itemsToScale == 0 ? degrees : degrees * itemsToScale;
+                selectionAreaThreshold = itemsToScale == 0 ? degrees : degrees * itemsToScale;
 
                 var slotDegrees = ((slotNum + (Density / 2)) % Density) * degrees;
 
@@ -1185,7 +1166,7 @@ namespace TiltedCarousel
                 ScalarNode distanceTo360 = 360 - distanceToZero;
                 BooleanNode isClosestToZero = distanceToZero <= distanceTo360;
                 ScalarNode distanceInDegrees = ExpressionFunctions.Conditional(isClosestToZero, distanceToZero, distanceTo360);
-                distanceAsPercentOfScaleThreshold = distanceInDegrees / scaleItemsthreshold;
+                distanceAsPercentOfSelectionAreaThreshold = distanceInDegrees / selectionAreaThreshold;
 
                 switch (WheelAlignment)
                 {
@@ -1201,44 +1182,26 @@ namespace TiltedCarousel
                         break;
                 }
 
-                ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
-                isWithinScaleThreshold = distanceInDegrees < scaleItemsthreshold;
-                ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
-
-                // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
-                if (SelectedItemScale > 1)
-                {
-                    visual.StartAnimation("Scale.X", finalScaleValue);
-                    visual.StartAnimation("Scale.Y", finalScaleValue);
-                }
+                StartScaleAnimation(element, distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold);
 
             }
             else if (CarouselType == CarouselTypes.Row || CarouselType == CarouselTypes.Column)
             {
-                scaleItemsthreshold = isXaxisNavigation ? AdditionalItemsToScale * (_maxItemWidth + ItemGap) : AdditionalItemsToScale * (_maxItemHeight + ItemGap);
-                if (scaleItemsthreshold == 0)
+                selectionAreaThreshold = isXaxisNavigation ? AdditionalItemsToScale * (_maxItemWidth + ItemGap) : AdditionalItemsToScale * (_maxItemHeight + ItemGap);
+                if (selectionAreaThreshold == 0)
                 {
-                    scaleItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
+                    selectionAreaThreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
                 }
 
                 Vector3Node offset = visual.GetReference().Offset;
-                scaleThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / scaleItemsthreshold : offset.Y / scaleItemsthreshold;
+                scaleThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / selectionAreaThreshold : offset.Y / selectionAreaThreshold;
 
-                distanceAsPercentOfScaleThreshold = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
+                distanceAsPercentOfSelectionAreaThreshold = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
 
                 distanceIsNegativeValue = scaleThresholdDistanceRaw < 0;
-                isWithinScaleThreshold = isXaxisNavigation ? offset.X > -scaleItemsthreshold & offset.X < scaleItemsthreshold : offset.Y > -scaleItemsthreshold & offset.Y < scaleItemsthreshold;
+                isWithinScaleThreshold = isXaxisNavigation ? offset.X > -selectionAreaThreshold & offset.X < selectionAreaThreshold : offset.Y > -selectionAreaThreshold & offset.Y < selectionAreaThreshold;
 
-
-                ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
-                ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
-
-                // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
-                if (SelectedItemScale > 1)
-                {
-                    visual.StartAnimation("Scale.X", finalScaleValue);
-                    visual.StartAnimation("Scale.Y", finalScaleValue);
-                }
+                StartScaleAnimation(element, distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold);
 
                 if (WarpIntensity != 0)
                 {
@@ -1302,11 +1265,30 @@ namespace TiltedCarousel
                     childVisual.RotationAxis = isXaxisNavigation ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
                     childVisual.CenterPoint = new Vector3(_maxItemWidth / 2, _maxItemHeight / 2, 0);
                     ScalarNode rotatedValue = ExpressionFunctions.Conditional(distanceIsNegativeValue, fliptychDegrees, -fliptychDegrees);
-                    ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfScaleThreshold * rotatedValue, rotatedValue);
+                    ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfSelectionAreaThreshold * rotatedValue, rotatedValue);
                     childVisual.StartAnimation("RotationAngleInDegrees", finalValue);
                 }
             }
-            SetColorAnimation(distanceAsPercentOfScaleThreshold, isWithinScaleThreshold, element);
+            SetColorAnimation(distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold, element);
+        }
+
+        /// <summary>
+        /// Override this to access your items' SpriteVisual so you can animate Size instead of Scale, maintaining quality of 
+        /// vector or higher resolution graphics.
+        /// </summary>
+        protected virtual void StartScaleAnimation(UIElement element, ScalarNode distanceAsPercentOfScaleThreshold, BooleanNode isWithinScaleThreshold)
+        {
+            if (SelectedItemScale != 1)
+            {
+                var visual = ElementCompositionPreview.GetElementVisual(element);
+                var scaleRange = (float)SelectedItemScale - 1;
+                ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1;
+                ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1);
+
+                // Two animations required, a single Vector3 animation on Scale results in a string-too-long exception.
+                visual.StartAnimation("Scale.X", finalScaleValue);
+                visual.StartAnimation("Scale.Y", finalScaleValue);
+            }
         }
 
         /// <summary>
@@ -1742,12 +1724,6 @@ namespace TiltedCarousel
                             h = Convert.ToInt32(childElement.Height + childElement.Margin.Top + childElement.Margin.Bottom);
                         }
                     }
-                    else
-                    {
-                        // NOT IMPLEMENTED
-                        //_elementsToResizeCount++;
-                        //element.SizeChanged += Element_SizeChanged;
-                    }
                 }
                 else
                 {
@@ -1755,17 +1731,16 @@ namespace TiltedCarousel
                     h = Convert.ToInt32(element.Height + element.Margin.Top + element.Margin.Bottom);
                 }
 
-                if (w > 0 && h > 0)
-                {
-                    if (_maxItemWidth < element.MaxWidth) { _maxItemWidth = w; }
-                    if (_maxItemHeight < element.MaxHeight) { _maxItemHeight = h; }
-                    PositionElement(element, i, (float)w, (float)h);
-                    return element;
-                }
-                else
+                if (w == 0 || h == 0)
                 {
                     Debug.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
+                    return null;
                 }
+
+                if (_maxItemWidth < element.MaxWidth) { _maxItemWidth = w; }
+                if (_maxItemHeight < element.MaxHeight) { _maxItemHeight = h; }
+                PositionElement(element, i, (float)w, (float)h);
+                return element;
             }
             return null;
         }
@@ -1775,10 +1750,9 @@ namespace TiltedCarousel
             if (e.NewSize.Width > 0 && e.NewSize.Height > 0 && sender is FrameworkElement element)
             {
                 element.SizeChanged -= Element_SizeChanged;
-                _elementsToResizeCount--;
                 if (_maxItemHeight < element.ActualHeight) { _maxItemHeight = Convert.ToInt32(element.ActualHeight); }
                 if (_maxItemWidth < element.ActualWidth) { _maxItemWidth = Convert.ToInt32(element.ActualWidth); }
-                if (_uIItemsCreated && _elementsToResizeCount < 1)
+                if (_uIItemsCreated)
                 {
                     bool result = true;
                     for (int i = (Density - 1); i > -1; i--)
@@ -1800,7 +1774,7 @@ namespace TiltedCarousel
                         }
                         else { result = false; }
                     }
-                    _itemsLoadedTCS.SetResult(result);
+                    OnItemsLoaded();
                 }
             }
         }
@@ -1952,34 +1926,38 @@ namespace TiltedCarousel
         public void AnimateToSelectedIndex()
         {
             var count = Items != null && Items.Count >= 0 ? Items.Count() : 0;
-            var distance = ModularDistance(_previousSelectedIndex, SelectedIndex, count);
-            bool goForward = false;
-
-            if (Common.Mod(_previousSelectedIndex + distance, count) == SelectedIndex)
+            if (count > 0)
             {
-                goForward = true;
-            }
+                var distance = ModularDistance(_previousSelectedIndex, SelectedIndex, count);
+                bool goForward = false;
 
-            var steps = distance > Density ? Density : distance;
-
-            if (goForward)
-            {
-                var startIdx = Modulus((SelectedIndex + 1 - steps - (Density / 2)), count);
-                for (int i = 0; i < steps; i++)
+                if (Common.Mod(_previousSelectedIndex + distance, count) == SelectedIndex)
                 {
-                    ChangeSelection((startIdx + i + (Density - 1)) % Items.Count(), false);
+                    goForward = true;
                 }
-            }
-            else
-            {
-                var startIdx = Modulus(SelectedIndex - 1 + steps - (Density / 2), count);
-                for (int i = 0; i < steps; i++)
+
+                var steps = distance > Density ? Density : distance;
+
+                if (goForward)
                 {
-                    ChangeSelection(Common.Mod(startIdx - i, count), true);
+                    var startIdx = Modulus((SelectedIndex + 1 - steps - (Density / 2)), count);
+                    for (int i = 0; i < steps; i++)
+                    {
+                        ChangeSelection((startIdx + i + (Density - 1)) % Items.Count(), false);
+                    }
                 }
+                else
+                {
+                    var startIdx = Modulus(SelectedIndex - 1 + steps - (Density / 2), count);
+                    for (int i = 0; i < steps; i++)
+                    {
+                        ChangeSelection(Common.Mod(startIdx - i, count), true);
+                    }
+                }
+
+                UpdateZIndices();
             }
 
-            UpdateZIndices();
         }
 
         /// <summary>
@@ -2137,6 +2115,16 @@ namespace TiltedCarousel
 
         #region EVENT HANDLERS
 
+        public event EventHandler ItemsCreated;
+
+        void OnItemsCreated()
+        {
+            AreItemsLoaded = true;
+            EventHandler handler = ItemsCreated;
+            if (handler != null)
+                handler(this, null);
+        }
+
         /// <summary>
         /// Raises when the carousel items are loaded into the visual tree.
         /// </summary>
@@ -2157,19 +2145,6 @@ namespace TiltedCarousel
         void OnCarouselMovingStateChanged()
         {
             EventHandler handler = CarouselMovingStateChanged;
-            if (handler != null)
-                handler(this, null);
-        }
-
-        /// <summary>
-        /// Raises when the carousel items fail to load into the visual tree.
-        /// </summary>
-        public event EventHandler ItemsLoadFailed;
-
-        void OnItemsLoadFailed()
-        {
-            AreItemsLoaded = true;
-            EventHandler handler = ItemsLoadFailed;
             if (handler != null)
                 handler(this, null);
         }
@@ -2201,7 +2176,7 @@ namespace TiltedCarousel
                     {
                         control.AnimateToSelectedIndex();
                     }
-                    if (control.Items != null)
+                    if (control.Items != null && newVal >= 0 && newVal < control.Items.Count)
                     {
                         control.SelectedItem = control.Items[newVal];
                     }

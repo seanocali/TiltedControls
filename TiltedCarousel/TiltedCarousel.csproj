@@ -136,6 +136,9 @@
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Animations">
       <Version>6.1.1</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Media">
+      <Version>7.0.0-preview4</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Page Include="CarouselItem.xaml">
