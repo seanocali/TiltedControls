@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace TiltedCarousel
+namespace TiltedControls
 {
     public static partial class Common
     {

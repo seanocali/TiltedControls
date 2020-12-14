@@ -14,7 +14,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
-using static TiltedCarousel.Common;
+using static TiltedControls.Common;
 using System.Diagnostics;
 using Windows.UI.Xaml.Media.Media3D;
 using Windows.UI.Core;
@@ -22,7 +22,7 @@ using Windows.ApplicationModel.SocialInfo;
 using Windows.Devices.Bluetooth;
 using Windows.UI.Xaml.Data;
 
-namespace TiltedCarousel
+namespace TiltedControls
 {
     /// <summary>
     /// UI control to visually present a collection of data.

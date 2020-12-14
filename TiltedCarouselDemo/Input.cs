@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TiltedCarousel;
+using TiltedControls;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Input;
 using Windows.UI.Xaml.Input;
-using static TiltedCarousel.Common;
+using static TiltedControls.Common;
 
 namespace TiltedCarouselDemo
 {
