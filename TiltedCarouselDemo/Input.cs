@@ -19,6 +19,7 @@ namespace TiltedCarouselDemo
         {
             if (carousel != null && carousel.AreItemsLoaded)
             {
+                //GitTest
                 carousel.StartManipulationMode();
             }
         }
