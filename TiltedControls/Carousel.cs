@@ -1182,6 +1182,7 @@ namespace TiltedControls
                         break;
                 }
 
+                isWithinScaleThreshold = distanceInDegrees < selectionAreaThreshold;
                 StartScaleAnimation(element, distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold);
 
             }

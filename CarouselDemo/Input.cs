@@ -10,7 +10,7 @@ using Windows.UI.Input;
 using Windows.UI.Xaml.Input;
 using static TiltedControls.Common;
 
-namespace TiltedCarouselDemo
+namespace CarouselDemo
 {
     public static class Input
     {

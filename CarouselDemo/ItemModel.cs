@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 
-namespace TiltedCarouselDemo
+namespace CarouselDemo
 {
     public class ItemModel
     {

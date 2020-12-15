@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-namespace TiltedCarouselDemo
+namespace CarouselDemo
 {
     public sealed partial class MoviePostersView : Page
     {

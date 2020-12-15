@@ -11,7 +11,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using static TiltedControls.Common;
 
-namespace TiltedCarouselDemo
+namespace CarouselDemo
 {
     public class MainPageViewModel : INotifyPropertyChanged
     {

@@ -6,11 +6,26 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 namespace TiltedControls
 {
     public static partial class Common
     {
+        public static async Task<byte[]> AsByteArray(this StorageFile file)
+        {
+            IRandomAccessStream fileStream = await file.OpenAsync(FileAccessMode.Read);
+            var reader = new Windows.Storage.Streams.DataReader(fileStream.GetInputStreamAt(0));
+            await reader.LoadAsync((uint)fileStream.Size);
+
+            byte[] pixels = new byte[fileStream.Size];
+
+            reader.ReadBytes(pixels);
+
+            return pixels;
+        }
+
         public enum CarouselTypes
         {
             Wheel, Column, Row
