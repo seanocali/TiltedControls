@@ -56,7 +56,7 @@ namespace TiltedControls
             }
         }
 
-        async Task LoadNewCarousel()
+        void LoadNewCarousel()
         {
             _uIItemsCreated = false;
             _width = Double.IsNaN(Width) ? ActualWidth : Width;
@@ -91,32 +91,12 @@ namespace TiltedControls
                     }
 
                     _uIItemsCreated = true;
-                    bool connectedAnimationMode = false;
                     if (cancellationToken.IsCancellationRequested) { return; }
-                    for (int i = 0; i < Density / 2; i++)
-                    {
-                        var idx1 = (i + (Density / 2)) % Density;
-                        var idx2 = Density - 1 - idx1;
-
-                        if (i == 0 && SelectedItemExpressionDelay > 0 && (SelectedItemScale != 1 || WarpIntensity != 0))
-                        {
-                            connectedAnimationMode = true;
-                        }
-                        else
-                        {
-                            StartExpressionItemAnimations(items[idx1], idx1);
-                        }
-
-                        StartExpressionItemAnimations(items[idx2], idx2);
-                    }
 
                     UpdateZIndices();
                     SetHitboxSize();
+                    InitializeAnimations(items);
                     OnItemsCreated();
-                    if (connectedAnimationMode)
-                    {
-                        await PrepareSelectedItemForConnectedAnimation(cancellationToken);
-                    }
                 }
                 catch (Exception ex)
                 {
@@ -127,34 +107,16 @@ namespace TiltedControls
             _inputAllowed = true;
         }
 
-        async Task PrepareSelectedItemForConnectedAnimation(CancellationToken cancellationToken)
+        protected virtual void InitializeAnimations(FrameworkElement[] items)
         {
-            var durationMs = SelectedItemExpressionDelay + 300;
-            var duration = TimeSpan.FromMilliseconds(durationMs);
-            var delay = TimeSpan.FromMilliseconds(SelectedItemExpressionDelay);
-
-            var visual = ElementCompositionPreview.GetElementVisual(SelectedItemElement);
-            var scaleAnimation = visual.Compositor.CreateVector3KeyFrameAnimation();
-            scaleAnimation.Duration = duration;
-            scaleAnimation.DelayTime = delay;
-            scaleAnimation.Target = "Scale";
-            scaleAnimation.InsertKeyFrame(1f, new Vector3((float)SelectedItemScale, (float)SelectedItemScale, 1));
-            visual.StartAnimation("Scale", scaleAnimation);
-
-            if (this.CarouselType == CarouselTypes.Column || this.CarouselType == CarouselTypes.Row)
+            for (int i = 0; i < Density / 2; i++)
             {
-                var translateAnimation = visual.Compositor.CreateScalarKeyFrameAnimation();
-                translateAnimation.Duration = duration;
-                translateAnimation.DelayTime = delay;
-                var target = CarouselType == CarouselTypes.Column ? "Translation.X" : "Translation.Y";
-                translateAnimation.Target = target;
-                translateAnimation.InsertKeyFrame(1f, (float)(WarpIntensity * WarpCurve));
-                visual.StartAnimation(target, translateAnimation);
-            }
+                var idx1 = (i + (Density / 2)) % Density;
+                var idx2 = Density - 1 - idx1;
 
-            await Task.WhenAny(cancellationToken.AsTask(), Task.Delay(durationMs));
-            var idx1 = (Density / 2) % Density;
-            StartExpressionItemAnimations(SelectedItemElement, idx1);
+                StartExpressionItemAnimations(items[idx1], idx1);
+                StartExpressionItemAnimations(items[idx2], idx2);
+            }
         }
 
         FrameworkElement AddCarouselItemToUI(int idx)
@@ -350,7 +312,7 @@ namespace TiltedControls
         bool _manipulationStarted;
         bool _selectedIndexSetInternally;
         bool _deltaDirectionIsReverse;
-        bool _uIItemsCreated;
+        protected bool _uIItemsCreated;
         volatile int _elementsToLoadCount;
 
         #endregion
@@ -517,21 +479,6 @@ namespace TiltedControls
             var control = s as Carousel;
             control.Refresh();
         })));
-
-        public int SelectedItemExpressionDelay
-        {
-            get
-            {
-                return (int)base.GetValue(SelectedItemExpressionDelayProperty);
-            }
-            set
-            {
-                base.SetValue(SelectedItemExpressionDelayProperty, value);
-            }
-        }
-
-        public static readonly DependencyProperty SelectedItemExpressionDelayProperty = DependencyProperty.Register(nameof(SelectedItemExpressionDelay), typeof(int), typeof(Carousel),
-        new PropertyMetadata(500, null));
 
 
         /// <summary>
@@ -1128,10 +1075,10 @@ namespace TiltedControls
 
         #region TIMER METHODS
 
-        private async void _delayedRefreshTimer_Tick(object sender, object e)
+        private void _delayedRefreshTimer_Tick(object sender, object e)
         {
             _delayedRefreshTimer.Stop();
-            await LoadNewCarousel();
+            LoadNewCarousel();
         }
 
         private void _delayedZIndexUpdateTimer_Tick(object sender, object e)
@@ -1186,7 +1133,6 @@ namespace TiltedControls
 
         protected void StartExpressionItemAnimations(FrameworkElement element, int? slotNum)
         {
-            // Scaling Expression Animation
             if (element == null) { return; }
             var visual = ElementCompositionPreview.GetElementVisual(element);
             var compositor = Window.Current.Compositor;
