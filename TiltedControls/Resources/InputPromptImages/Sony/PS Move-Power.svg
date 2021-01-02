@@ -1,0 +1,47 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100">
+<defs>
+<g id="Layer1_0_FILL">
+<path fill="#A2A2A2" stroke="none" d="
+M 68.35 31.6
+Q 60.75 24 50 24 39.25 24 31.6 31.6 24 39.25 24 50 24 60.75 31.6 68.35 39.25 76 50 76 60.75 76 68.35 68.35 76 60.75 76 50 76 39.25 68.35 31.6
+M 50 31.95
+Q 57.45 31.95 62.75 37.2 68.05 42.55 68.05 50 68.05 57.45 62.75 62.75 57.45 68.05 50 68.05 42.55 68.05 37.2 62.75 31.95 57.45 31.95 50 31.95 42.55 37.2 37.2 42.55 31.95 50 31.95 Z"/>
+
+<path fill="#C8C8C8" stroke="none" d="
+M 62.75 37.2
+Q 57.45 31.95 50 31.95 42.55 31.95 37.2 37.2 31.95 42.55 31.95 50 31.95 57.45 37.2 62.75 42.55 68.05 50 68.05 57.45 68.05 62.75 62.75 68.05 57.45 68.05 50 68.05 42.55 62.75 37.2
+M 50 38.6
+L 50 48.55 50 38.6
+M 50 60.85
+Q 45.5 60.85 42.35 57.65 39.2 54.5 39.2 50 39.2 45.8 42 42.75 39.2 45.8 39.2 50 39.2 54.5 42.35 57.65 45.5 60.85 50 60.85 54.45 60.85 57.65 57.65 60.8 54.5 60.8 50 60.8 45.8 58.05 42.75 60.8 45.8 60.8 50 60.8 54.5 57.65 57.65 54.45 60.85 50 60.85 Z"/>
+</g>
+
+<path id="Layer1_0_1_STROKES" stroke="#757575" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 50 24
+Q 60.75 24 68.35 31.6 76 39.25 76 50 76 60.75 68.35 68.35 60.75 76 50 76 39.25 76 31.6 68.35 24 60.75 24 50 24 39.25 31.6 31.6 39.25 24 50 24 Z"/>
+
+<path id="Layer1_0_2_STROKES" stroke="#FFFFFF" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 50 38.6
+L 50 48.55
+M 58.05 42.75
+Q 60.8 45.8 60.8 50 60.8 54.5 57.65 57.65 54.45 60.85 50 60.85 45.5 60.85 42.35 57.65 39.2 54.5 39.2 50 39.2 45.8 42 42.75"/>
+
+</defs>
+
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#Layer1_0_FILL"/>
+
+<use xlink:href="#Layer1_0_1_STROKES"/>
+
+<use xlink:href="#Layer1_0_2_STROKES"/>
+</g>
+
+<g transform="matrix( 1, 0, 0, 1, -3.4,-28) ">
+<clipPath id="Mask_Mask_1">
+<rect x="20.9" y="-2" width="65" height="20.8" fill="#FFFFFF" stroke="none"/>
+</clipPath>
+
+<text clip-path="url(#Mask_Mask_1)" writing-mode="lr"><tspan x="22.95" y="13.6" baseline-shift="0%" kerning="auto" font-family="Arial_Regular" font-size="15" fill="#999999" xml:space="preserve">PS Move</tspan></text>
+</g>
+</svg>

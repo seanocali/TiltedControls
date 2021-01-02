@@ -70,5 +70,60 @@ namespace TiltedControls
         {
             return (degrees * (Math.PI / 180));
         }
+
+
+        public enum GamepadInputTypes
+        {
+            A = 0,
+            B = 1,
+            X = 2,
+            Y = 3,
+            View = 4,
+            Menu = 5,
+            LeftShoulder = 6,
+            RightShoulder = 7,
+            LeftRightShoulder = 8,
+            LeftTrigger = 9,
+            RightTrigger = 10,
+            LeftRightTrigger = 11,
+            DPad = 12,
+            DPadUp = 13,
+            DPadDown = 14,
+            DPadLeft = 15,
+            DPadRight = 16,
+            DPadUpLeft = 17,
+            DPadDownRight = 18,
+            DPadDownLeft = 19,
+            DPadUpRight = 20,
+            LeftThumbstick = 21,
+            LeftThumbstickClockwise = 22,
+            LeftThumbstickCounterclockwise = 23,
+            LeftThumbstickUp = 24,
+            LeftThumbstickDown = 25,
+            LeftThumbstickLeft = 26,
+            LeftThumbstickRight = 27,
+            LeftThumbstickUpLeft = 28,
+            LeftThumbstickDownRight = 29,
+            LeftThumbstickDownLeft = 30,
+            LeftThumbstickUpRight = 31,
+            LeftThumbstickLeftRight = 32,
+            LeftThumbstickUpDown = 33,
+            LeftThumbstickButton = 34,
+            RightThumbstick = 35,
+            RightThumbstickClockwise = 36,
+            RightThumbstickCounterclockwise = 37,
+            RightThumbstickUp = 38,
+            RightThumbstickDown = 39,
+            RightThumbstickLeft = 40,
+            RightThumbstickRight = 41,
+            RightThumbstickUpLeft = 42,
+            RightThumbstickDownRight = 43,
+            RightThumbstickDownLeft = 44,
+            RightThumbstickUpRight = 45,
+            RightThumbstickLeftRight = 46,
+            RightThumbstickUpDown = 47,
+            RightThumbstickButton = 48,
+            HomeButton = 49
+        }
     }
 }

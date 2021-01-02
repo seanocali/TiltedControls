@@ -1,0 +1,61 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100">
+<defs>
+<g id="Layer1_0_FILL">
+<path fill="#313131" stroke="none" d="
+M 87.5 76.25
+L 84.75 27
+Q 82.5 4.15 54.75 7.5 34.8 10.85 23.5 35 13.1 60.6 15.25 89.5
+L 87.5 76.25
+M 65.5 16.1
+Q 67.85 16.7 69.65 18.2 73.15 21 74 25.4 74.15 26.1 74.3 26.8 74.4 27.5 74.5 28.25
+L 77 71.25 41.25 77.75 41.25 33.75
+Q 41.35 32.6 41.45 31.45 41.9 26.35 44.7 22.3 45.7 20.9 46.95 19.8 50.45 16.65 55 15.95 60.25 14.95 65.5 16.1 Z"/>
+
+<path fill="#4F4F4F" stroke="none" d="
+M 69.65 18.2
+Q 67.85 16.7 65.5 16.1 60.25 14.95 55 15.95 50.45 16.65 46.95 19.8 45.7 20.9 44.7 22.3 41.9 26.35 41.45 31.45 41.35 32.6 41.25 33.75
+L 41.25 77.75 77 71.25 74.5 28.25
+Q 74.4 27.5 74.3 26.8 74.15 26.1 74 25.4 73.15 21 69.65 18.2
+M 70.75 52.8
+L 70.8 55.7 66.5 56.35 66.55 68.15 63.25 68.7 63.2 56.9 58.9 57.55 58.9 54.65 70.75 52.8
+M 48.9 56.25
+L 52.2 55.7 52.25 67.4 58.5 66.45 58.45 69.45 48.95 70.95 48.9 56.25 Z"/>
+
+<path fill="#999999" stroke="none" d="
+M 52.2 55.7
+L 48.9 56.25 48.95 70.95 58.45 69.45 58.5 66.45 52.25 67.4 52.2 55.7
+M 70.8 55.7
+L 70.75 52.8 58.9 54.65 58.9 57.55 63.2 56.9 63.25 68.7 66.55 68.15 66.5 56.35 70.8 55.7 Z"/>
+</g>
+
+<path id="Layer1_0_1_STROKES" stroke="#626262" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 69.65 18.2
+Q 67.85 16.7 65.5 16.1 60.25 14.95 55 15.95 50.45 16.65 46.95 19.8 45.7 20.9 44.7 22.3 41.9 26.35 41.45 31.45 41.35 32.6 41.25 33.75
+L 41.25 77.75 77 71.25 74.5 28.25
+Q 74.4 27.5 74.3 26.8 74.15 26.1 74 25.4 73.15 21 69.65 18.2 Z"/>
+
+<path id="Layer1_0_2_STROKES" stroke="#1B1B1B" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 87.5 76.25
+L 84.75 27
+Q 82.5 4.15 54.75 7.5 34.8 10.85 23.5 35 13.1 60.6 15.25 89.5
+L 87.5 76.25 Z"/>
+
+</defs>
+
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#Layer1_0_FILL"/>
+
+<use xlink:href="#Layer1_0_1_STROKES"/>
+
+<use xlink:href="#Layer1_0_2_STROKES"/>
+</g>
+
+<g transform="matrix( 1, 0, 0, 1, -3.4,-28) ">
+<clipPath id="Mask_Mask_1">
+<rect x="3.8" y="-2" width="99.2" height="20.8" fill="#FFFFFF" stroke="none"/>
+</clipPath>
+
+<text clip-path="url(#Mask_Mask_1)" writing-mode="lr"><tspan x="5.85" y="13.6" baseline-shift="0%" kerning="auto" font-family="Arial_Regular" font-size="15" fill="#999999" xml:space="preserve">Xbox Series X</tspan></text>
+</g>
+</svg>

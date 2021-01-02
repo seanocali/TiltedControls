@@ -1306,9 +1306,9 @@ namespace TiltedControls
                 var scaleRange = (float)SelectedItemScale - 1;
                 using (ScalarNode scalePercent = scaleRange * (1 - distanceAsPercentOfScaleThreshold) + 1)
                 using (ScalarNode finalScaleValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, scalePercent, 1))
-                using (Vector3Node finalScaleValueVector3 = ExpressionFunctions.Vector3(finalScaleValue, finalScaleValue, 1))
                 {
-                    visual.StartAnimation(nameof(Visual.Scale), finalScaleValueVector3);
+                    visual.StartAnimation("Scale.X", finalScaleValue);
+                    visual.StartAnimation("Scale.Y", finalScaleValue);
                 }
 
             }
@@ -1807,9 +1807,9 @@ namespace TiltedControls
             var elementVisual = ElementCompositionPreview.GetElementVisual(element);
             if (elementVisual.ImplicitAnimations != null) { elementVisual.ImplicitAnimations.Clear(); }
             elementVisual.CenterPoint = new Vector3((elementWidth / 2), (elementHeight / 2), 0);
-            var translateX = GetTranslateX(index);
-            var translateY = GetTranslateY(index);
-            elementVisual.Offset = new Vector3(Convert.ToSingle(translateX), Convert.ToSingle(translateY), 0);
+            var offsetX = GetOffsetX(index);
+            var offsetY = GetOffsetY(index);
+            elementVisual.Offset = new Vector3(Convert.ToSingle(offsetX), Convert.ToSingle(offsetY), 0);
             if (CarouselType == CarouselTypes.Wheel)
             {
                 elementVisual.RotationAngleInDegrees = GetRotation(index);
@@ -2068,7 +2068,7 @@ namespace TiltedControls
 
         #region VALUE CONVERTERS
 
-        private double GetTranslateY(int i)
+        protected double GetOffsetY(int i)
         {
             switch (CarouselType)
             {
@@ -2090,7 +2090,7 @@ namespace TiltedControls
                     return 0;
             }
         }
-        private double GetTranslateX(int i)
+        protected double GetOffsetX(int i)
         {
             switch (CarouselType)
             {

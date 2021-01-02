@@ -1,0 +1,67 @@
+
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100">
+<defs>
+<g id="Layer1_0_FILL">
+<path fill="#D7D7D7" stroke="none" d="
+M 92.95 27.1
+Q 92.95 22.1 87.95 22.1
+L 13.05 22.1
+Q 8.05 22.1 8.05 27.1 9.1 50.5 8.05 73.8 8.05 78.8 13.05 78.8
+L 87.95 78.8
+Q 92.95 78.8 92.95 73.8 91.85 50.5 92.95 27.1
+M 81.5 29.95
+Q 85.1 29.95 85.1 33.55 84.15 50.5 85.1 67.35 85.1 70.95 81.5 70.95
+L 67.7 70.95 66.6 70.95 19.5 70.95
+Q 15.85 70.95 15.85 67.35 16.85 50.5 15.85 33.55 15.85 29.95 19.5 29.95
+L 66.6 29.95 67.7 29.95 81.5 29.95 Z"/>
+
+<path fill="#F5F5F5" stroke="none" d="
+M 85.1 33.55
+Q 85.1 29.95 81.5 29.95
+L 67.7 29.95 66.6 29.95 19.5 29.95
+Q 15.85 29.95 15.85 33.55 16.85 50.5 15.85 67.35 15.85 70.95 19.5 70.95
+L 66.6 70.95 67.7 70.95 81.5 70.95
+Q 85.1 70.95 85.1 67.35 84.15 50.5 85.1 33.55
+M 48.6 43.3
+L 60.65 34.2 60.65 39.1 78.05 39.1 78.05 47.5 60.65 47.5 60.65 52.4 48.6 43.3 Z"/>
+
+<path fill="#404040" stroke="none" d="
+M 60.65 34.2
+L 48.6 43.3 60.65 52.4 60.65 47.5 78.05 47.5 78.05 39.1 60.65 39.1 60.65 34.2 Z"/>
+</g>
+
+<path id="Layer1_0_1_STROKES" stroke="#FFFFFF" stroke-width="4" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 67.7 70.95
+L 81.5 70.95
+Q 85.1 70.95 85.1 67.35 84.15 50.5 85.1 33.55 85.1 29.95 81.5 29.95
+L 67.7 29.95
+M 66.6 29.95
+L 19.5 29.95
+Q 15.85 29.95 15.85 33.55 16.85 50.5 15.85 67.35 15.85 70.95 19.5 70.95
+L 66.6 70.95"/>
+
+<path id="Layer1_0_2_STROKES" stroke="#404040" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" fill="none" d="
+M 87.95 22.1
+Q 92.95 22.1 92.95 27.1 91.85 50.5 92.95 73.8 92.95 78.8 87.95 78.8
+L 13.05 78.8
+Q 8.05 78.8 8.05 73.8 9.1 50.5 8.05 27.1 8.05 22.1 13.05 22.1
+L 87.95 22.1 Z"/>
+
+</defs>
+
+<g transform="matrix( 1, 0, 0, 1, 0,0) ">
+<use xlink:href="#Layer1_0_FILL"/>
+
+<use xlink:href="#Layer1_0_1_STROKES"/>
+
+<use xlink:href="#Layer1_0_2_STROKES"/>
+</g>
+
+<g transform="matrix( 1, 0, 0, 1, -3.4,-28) ">
+<clipPath id="Mask_Mask_1">
+<rect x="0.85" y="-2" width="105.1" height="20.8" fill="#FFFFFF" stroke="none"/>
+</clipPath>
+
+<text clip-path="url(#Mask_Mask_1)" writing-mode="lr"><tspan x="2.9" y="13.6" baseline-shift="0%" kerning="auto" font-family="Arial_Regular" font-size="15" fill="#999999" xml:space="preserve">Light Keyboard</tspan></text>
+</g>
+</svg>
