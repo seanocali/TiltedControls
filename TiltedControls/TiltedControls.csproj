@@ -127,8 +127,8 @@
     <Compile Include="Common.cs" />
     <Compile Include="InputPollingService.cs" />
     <Compile Include="InputPrompt.cs" />
-    <Compile Include="OrderedDictionary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RawGameControllerModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
@@ -151,7 +151,7 @@
     <PRIResource Include="Resources.resw" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Fonts\ps4.ttf" />
+    <Content Include="Resources\Fonts\ps4.ttf" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\Fonts\xboxone.ttf" />
@@ -457,7 +457,7 @@
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox 360-Start %28Clean%29.svg" />
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox 360-Start.svg" />
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox 360-X.svg" />
-    <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox 360-Y.svg.svg" />
+    <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox 360-Y.svg" />
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox One-A.svg" />
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox One-B.svg" />
     <EmbeddedResource Include="Resources\InputPromptImages\Microsoft\Xbox One-DPad.svg" />

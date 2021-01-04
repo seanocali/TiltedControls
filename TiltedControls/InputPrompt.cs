@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -20,6 +21,7 @@ namespace TiltedControls
         Image _image;
         SvgImageSource _source;
         Assembly _assembly;
+        CancellationTokenSource _cts;
 
         public InputPrompt()
         {
@@ -37,7 +39,7 @@ namespace TiltedControls
             InputPollingService.LastInputTypeChanged -= InputPollingService_LastInputTypeChanged;
         }
 
-        private void InputPrompt_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void InputPrompt_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             ushort? vendorId = null;
             ushort? productId = null;
@@ -50,82 +52,131 @@ namespace TiltedControls
 
             InputPollingService.LastInputTypeChanged += InputPollingService_LastInputTypeChanged;
             InputPollingService.Start(vendorId, productId);
-            Refresh();
+            await Refresh();
         }
 
-        private void InputPollingService_LastInputTypeChanged(object sender, EventArgs e)
+        private async void InputPollingService_LastInputTypeChanged(object sender, EventArgs e)
         {
-            Refresh();
+            await Refresh();
         }
 
-        async void Refresh()
+        public async void SimulateInput(ushort vendorId, ushort? productId)
         {
-            bool success = false;
+            InputPollingService.ProductId = productId;
+            InputPollingService.VendorId = vendorId;
+            await Refresh(vendorId, productId);
+        }
+
+        async Task Refresh(ushort? simulatedVendorId = null, ushort? simulatedProductId = null)
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+            }
+            _cts = new CancellationTokenSource();
+            var cancellationToken = _cts.Token;
             string rootFolderName = null;
             string themeName = null;
             string productName = null;
             string keyName = null;
             var key = GamepadKey;
-            rootFolderName = InputPollingService.VendorId != null ? GetVendorName((ushort)InputPollingService.VendorId) : null;
-            if (MonochromePreferred && HasMonochromeFont(rootFolderName))
+            if (simulatedVendorId != null)
             {
-                string resourceName = $"TiltedControls.Resources.Fonts.ps4.ttf";
-                var font = new FontFamily(resourceName + "#ps4");
+                rootFolderName = GetVendorName((ushort)simulatedVendorId);
+            }
+            else
+            {
+                rootFolderName = InputPollingService.VendorId != null ? GetVendorName((ushort)InputPollingService.VendorId) : null;
+            }
+
+            if (MonochromePreferred && GetMonochromeFontName(rootFolderName) != null)
+            {
+                var fontName = GetMonochromeFontName(rootFolderName);
+                var font = new FontFamily($"TiltedControls/Resources/Fonts/{fontName}.ttf#{fontName}");
                 var vb = new Viewbox();
                 var tb = new TextBlock();
                 tb.Foreground = this.Foreground;
                 tb.FontFamily = font;
-                tb.Text = "\uE803";
+
+                var hexStr = "E8" + ((int)key).ToString("X2");
+                int decValue = int.Parse(hexStr, System.Globalization.NumberStyles.HexNumber);
+                var c = (char)decValue;
+                tb.Text = c.ToString();
                 vb.Child = tb;
                 this.Content = vb;
             }
             else
             {
-                //if (this.Content != _image) { this.Content = _image; }
-                if (!InputPollingService.IsKeyboard)
+                if (this.Content != _image) { this.Content = _image; }
+                if (simulatedVendorId != null)
                 {
-                    productName = GetProductName((ushort)InputPollingService.VendorId, InputPollingService.ProductId);
+                    productName = GetProductName((ushort)simulatedVendorId, simulatedProductId);
                     if (productName != null) { productName += '-'; }
-                    keyName = GetGamepadKeyName(key, (ushort)InputPollingService.VendorId, InputPollingService.ProductId).Replace("Gamepad", "");
+                    keyName = GetGamepadKeyName(key, (ushort)simulatedVendorId, simulatedProductId).Replace("Gamepad", "");
                 }
-                if (rootFolderName == null)
+                else
                 {
-                    rootFolderName = "Keyboard";
-                    themeName = Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
-                    keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
+                    if (!InputPollingService.IsKeyboard)
+                    {
+                        productName = GetProductName((ushort)InputPollingService.VendorId, InputPollingService.ProductId);
+                        if (productName != null) { productName += '-'; }
+                        keyName = GetGamepadKeyName(key, (ushort)InputPollingService.VendorId, InputPollingService.ProductId).Replace("Gamepad", "");
+                    }
+                    if (rootFolderName == null)
+                    {
+                        rootFolderName = "Keyboard";
+                        themeName = Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
+                        keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
+                    }
                 }
+
                 string resourceName = $"TiltedControls.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
 
-                try
+                await UpdateImage(resourceName, cancellationToken);
+            }
+        }
+
+        private async Task UpdateImage(string resourceName, CancellationToken cancellationToken)
+        {
+            bool success = false;
+            try
+            {
+                using (var resourceStream = _assembly.GetManifestResourceStream(resourceName))
                 {
-                    using (var resourceStream = _assembly.GetManifestResourceStream(resourceName))
+                    if (resourceStream != null && resourceStream.Length > 0)
                     {
-                        if (resourceStream != null && resourceStream.Length > 0)
+                        using (var memStream = new MemoryStream())
                         {
-                            using (var memStream = new MemoryStream())
+                            await Task.WhenAny(resourceStream.CopyToAsync(memStream), cancellationToken.AsTask());
+                            if (!cancellationToken.IsCancellationRequested)
                             {
-                                await resourceStream.CopyToAsync(memStream);
                                 memStream.Position = 0;
                                 using (var raStream = memStream.AsRandomAccessStream())
                                 {
-                                    SvgImageSourceLoadStatus status = await _source.SetSourceAsync(raStream);
-                                    success = status == 0;
+                                    var setSourceTask = _source.SetSourceAsync(raStream).AsTask();
+                                    await Task.WhenAny(setSourceTask, cancellationToken.AsTask());
+                                    if (!cancellationToken.IsCancellationRequested)
+                                    {
+                                        SvgImageSourceLoadStatus status = await setSourceTask;
+                                        success = status == 0;
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             if (success) { OnImageLoaded(); }
             else { OnImageLoadFailed(); }
         }
 
-        private bool HasMonochromeFont(string vendorName)
+        private string GetMonochromeFontName(string vendorName)
         {
             if (vendorName != null)
             {
@@ -133,18 +184,19 @@ namespace TiltedControls
                 switch (vendorName)
                 {
                     case "microsoft":
+                        return "xboxone";
                     case "sony":
-                        return true;
+                        return "ps4";
                 }
             }
-            return false;
+            return null;
         }
 
         public event EventHandler ImageLoaded = delegate { };
         void OnImageLoaded()
         {
             EventHandler handler = ImageLoaded;
-            handler(null, new EventArgs());
+            handler(this, new EventArgs());
         }
 
         public event EventHandler ImageLoadFailed = delegate { };
@@ -152,7 +204,7 @@ namespace TiltedControls
         {
             _source.UriSource = null;
             EventHandler handler = ImageLoadFailed;
-            handler(null, new EventArgs());
+            handler(this, new EventArgs());
         }
 
         private static string GetVendorName(ushort vendorId)
@@ -171,15 +223,48 @@ namespace TiltedControls
             return null;
         }
 
+        /// <summary>
+        /// https://devicehunt.com/
+        /// </summary>
         private static string GetProductName(ushort vendorId, ushort? productId = null)
         {
             switch (vendorId)
             {
                 case 1118:
+                    if (productId != null)
+                    {
+                        switch ((ushort)productId)
+                        {
+                            case 721:
+                            case 746:
+                            case 733:
+                                return "Xbox One";
+                            case 702:
+                                return "Xbox 360";
+                        }
+                    }
                     return "Xbox One";
                 case 1356:
+                    if (productId != null)
+                    {
+                        switch ((ushort)productId)
+                        {
+                            case 6604:
+                            case 2976:
+                            case 1476:
+                                return "PS4";
+                        }
+                    }
                     return "PS4";
                 case 1406:
+                    if (productId != null)
+                    {
+                        switch ((ushort)productId)
+                        {
+                            case 774:
+                                return "Wii";
+                        }
+                    }
                     return "Switch";
                 case 10462:
                     return "Steam";
@@ -237,6 +322,10 @@ namespace TiltedControls
                     return "L3";
                 case GamepadInputTypes.RightThumbstickButton:
                     return "R3";
+                case GamepadInputTypes.LeftRightShoulder:
+                    return "L1R1";
+                case GamepadInputTypes.LeftRightTrigger:
+                    return "L2R2";
                 case GamepadInputTypes.View:
                     return "Select";
                 case GamepadInputTypes.Menu:
@@ -278,6 +367,14 @@ namespace TiltedControls
                     return "L";
                 case GamepadInputTypes.RightShoulder:
                     return "R";
+                case GamepadInputTypes.LeftRightShoulder:
+                    return "LR";
+                case GamepadInputTypes.LeftTrigger:
+                    return "ZL";
+                case GamepadInputTypes.RightTrigger:
+                    return "ZR";
+                case GamepadInputTypes.LeftRightTrigger:
+                    return "ZLZR";
                 default:
                     return key.ToString();
             }
@@ -329,6 +426,10 @@ namespace TiltedControls
                     return "DownLeft";
                 case GamepadInputTypes.DPadUpRight:
                     return "UpRight";
+                case GamepadInputTypes.DPadUpDown:
+                    return "UpDown";
+                case GamepadInputTypes.DPadLeftRight:
+                    return "LeftRight";
                 case GamepadInputTypes.LeftThumbstick:
                     return "WSAD";
                 case GamepadInputTypes.LeftThumbstickClockwise:
@@ -351,6 +452,10 @@ namespace TiltedControls
                     return "SA";
                 case GamepadInputTypes.LeftThumbstickUpRight:
                     return "WD";
+                case GamepadInputTypes.LeftThumbstickUpDown:
+                    return "WS";
+                case GamepadInputTypes.LeftThumbstickLeftRight:
+                    return "AD";
                 case GamepadInputTypes.LeftThumbstickButton:
                     return "ChevronLeft";
                 case GamepadInputTypes.RightThumbstick:
@@ -375,6 +480,10 @@ namespace TiltedControls
                     return "24";
                 case GamepadInputTypes.RightThumbstickUpRight:
                     return "86";
+                case GamepadInputTypes.RightThumbstickUpDown:
+                    return "82";
+                case GamepadInputTypes.RightThumbstickLeftRight:
+                    return "46";
                 case GamepadInputTypes.RightThumbstickButton:
                     return "ChevronRight";
                 case GamepadInputTypes.HomeButton:
@@ -383,13 +492,23 @@ namespace TiltedControls
             return null;
         }
 
-        private static void OnMapPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        private async static void OnMapPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var control = d as InputPrompt;
             if (control.IsLoaded)
             {
-                control.Refresh();
+                await control.Refresh();
             }
+        }
+
+        public string VendorId
+        {
+            get => InputPollingService.VendorId != null ? ((ushort)InputPollingService.VendorId).ToString("X4") : null;
+        }
+
+        public string ProductId
+        {
+            get => InputPollingService.ProductId != null ? ((ushort)InputPollingService.ProductId).ToString("X4") : null;
         }
 
         #region DEPENDENCY PROPERTIES

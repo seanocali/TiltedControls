@@ -15,9 +15,10 @@ namespace TiltedControls
     {
         static bool _hasStarted;
         public static bool HasInitialized;
+        static bool _isRawPolling;
         static DispatcherTimer _initializationCooldownTimer;
         static HashSet<IGameController> _gamepads;
-        static HashSet<RawGameController> _rawControllers;
+        static Dictionary<RawGameController, RawGameControllerModel> _rawControllers;
         static Dictionary<RawGameController, IGameController> _controllers = new Dictionary<RawGameController, IGameController>();
 
         static InputPollingService()
@@ -46,8 +47,11 @@ namespace TiltedControls
                 controllers.Concat(RacingWheel.RacingWheels.AsEnumerable());
 
                 _gamepads = controllers.ToHashSet();
-                _rawControllers = RawGameController.RawGameControllers.ToHashSet();
-
+                _rawControllers = new Dictionary<RawGameController, RawGameControllerModel>();
+                foreach (var raw in RawGameController.RawGameControllers)
+                {
+                    _rawControllers.Add(raw, new RawGameControllerModel(raw));
+                }
                 Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
                 Gamepad.GamepadAdded += Controller_Added;
                 Gamepad.GamepadRemoved += Controller_Removed;
@@ -62,50 +66,6 @@ namespace TiltedControls
             }
         }
 
-        private static void _initializationCooldownTimer_Tick(object sender, object e)
-        {
-            _initializationCooldownTimer.Stop();
-            HasInitialized = true;
-        }
-
-        static void UpdateControllerLists()
-        {
-            _controllers = new Dictionary<RawGameController, IGameController>();
-            foreach (var raw in _rawControllers)
-            {
-                _controllers[raw] = null;
-            }
-            foreach (var gamepad in _gamepads)
-            {
-                var raw = RawGameController.FromGameController(gamepad);
-                _controllers[raw] = gamepad;
-            }
-        }
-
-        private static void RawGameController_RawGameControllerRemoved(object sender, RawGameController e)
-        {
-            _rawControllers.Remove(e);
-            UpdateControllerLists();
-        }
-
-        private static async void RawGameController_RawGameControllerAdded(object sender, RawGameController e)
-        {
-            _rawControllers.Add(e);
-            UpdateControllerLists();
-            if (HasInitialized || VendorId == null)
-            {
-                VendorId = e.HardwareVendorId;
-                ProductId = e.HardwareProductId;
-#if NETFX_CORE
-                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-#else
-                await CoreDispatcher.Main.RunAsync(CoreDispatcherPriority.Normal, () =>
-#endif
-                {
-                    OnLastInputTypeChanged();
-                });
-            }
-        }
 
         internal static void Stop()
         {
@@ -121,17 +81,121 @@ namespace TiltedControls
             _hasStarted = false;
         }
 
-        internal static ushort? VendorId { get; private set; }
-        internal static ushort? ProductId { get; private set; }
+        static async void StartRawPolling()
+        {
+            if (_isRawPolling)
+            {
+                await StopRawPollingAndWait();
+            }
+            _isRawPolling = true;
+            while (_isRawPolling)
+            {
+                foreach (var pair in _controllers)
+                {
+                    if (pair.Value == null)
+                    {
+                        var rawOnlyController = pair.Key;
+                        var model = _rawControllers[pair.Key];
+                        rawOnlyController.GetCurrentReading(model.Buttons, model.Switches, model.Axes);
+                        await ParseRawReading(model);
+                    }
+                }
+                await Task.Delay(50);
+            }
+        }
+
+        static async Task ParseRawReading(RawGameControllerModel model)
+        {
+            for (int i = 0; i < model.Buttons.Length; i++)
+            {
+                if (model.Buttons[i])
+                {
+                    var label = model.Controller.GetButtonLabel(i);
+                    Debug.WriteLine(label);
+                }
+            }
+
+
+            if (model.Buttons.Any(x => x) 
+                || model.Switches.Any(y => y != GameControllerSwitchPosition.Center))
+            {
+                await HandleRawInput(model.Controller);
+            }
+        }
+
+        static void StopRawPolling()
+        {
+            _isRawPolling = false;
+        }
+
+        static async Task StopRawPollingAndWait()
+        {
+            _isRawPolling = false;
+            await Task.Delay(50);
+        }
+
+        private static void _initializationCooldownTimer_Tick(object sender, object e)
+        {
+            _initializationCooldownTimer.Stop();
+            HasInitialized = true;
+        }
+
+        static void UpdateControllerLists()
+        {
+            _controllers = new Dictionary<RawGameController, IGameController>();
+            foreach (var raw in _rawControllers)
+            {
+                _controllers[raw.Key] = null;
+            }
+            foreach (var gamepad in _gamepads)
+            {
+                var raw = RawGameController.FromGameController(gamepad);
+                _controllers[raw] = gamepad;
+            }
+
+            if (_controllers.Values.Any(x => x == null))
+            {
+                StartRawPolling();
+            }
+            else
+            {
+                StopRawPolling();
+            }
+        }
+
+        private static void RawGameController_RawGameControllerRemoved(object sender, RawGameController e)
+        {
+            if (_rawControllers.ContainsKey(e))
+            {
+                _rawControllers.Remove(e);
+                UpdateControllerLists();
+            }
+        }
+
+        private static async void RawGameController_RawGameControllerAdded(object sender, RawGameController e)
+        {
+            if (e.AxisCount > 0 || e.ButtonCount > 0 || e.SwitchCount > 0)
+            {
+                _rawControllers.Add(e, new RawGameControllerModel(e));
+                UpdateControllerLists();
+                if (HasInitialized || VendorId == null)
+                {
+                    await HandleRawInput(e);
+                }
+            }
+        }
+
+        internal static ushort? VendorId { get; set; }
+        internal static ushort? ProductId { get; set; }
         internal static bool IsKeyboard
         {
             get => VendorId == null;
         }
 
-        private static void CoreWindow_KeyDown(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.KeyEventArgs args)
+        private static async void CoreWindow_KeyDown(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.KeyEventArgs args)
         {
-            SetLastUsedHardwareDevice(args.VirtualKey);
             args.Handled = false;
+            await SetLastUsedHardwareDevice(args.VirtualKey);
         }
 
         private static void Controller_Added(object sender, IGameController e)
@@ -146,10 +210,10 @@ namespace TiltedControls
             UpdateControllerLists();
         }
 
-        private static void SetLastUsedHardwareDevice(VirtualKey key)
+        private static async Task SetLastUsedHardwareDevice(VirtualKey key)
         {
             int keyCode = (int)key;
-            if (keyCode >= 195 && (IsKeyboard))
+            if (keyCode >= 195)
             {
                 foreach (var controller in _controllers.Values)
                 {
@@ -163,10 +227,7 @@ namespace TiltedControls
                             || reading.RightThumbstickX > 0.1 || reading.RightThumbstickX < -0.1
                             || reading.RightThumbstickY > 0.1 || reading.RightThumbstickY < -0.1)
                         {
-                            var raw = RawGameController.FromGameController(gamepad);
-                            VendorId = raw.HardwareVendorId;
-                            ProductId = raw.HardwareProductId;
-                            OnLastInputTypeChanged();
+                            await HandleRawInput(gamepad);
                             break;
                         }
                     }
@@ -175,10 +236,7 @@ namespace TiltedControls
                         ArcadeStickReading reading = arcadeStick.GetCurrentReading();
                         if (reading.Buttons != ArcadeStickButtons.None)
                         {
-                            var raw = RawGameController.FromGameController(arcadeStick);
-                            VendorId = raw.HardwareVendorId;
-                            ProductId = raw.HardwareProductId;
-                            OnLastInputTypeChanged();
+                            await HandleRawInput(arcadeStick);
                             break;
                         }
                     }
@@ -188,20 +246,40 @@ namespace TiltedControls
                         if (reading.Buttons != RacingWheelButtons.None 
                             || reading.Wheel > 0.1)
                         {
-                            var raw = RawGameController.FromGameController(racingWheel);
-                            VendorId = raw.HardwareVendorId;
-                            ProductId = raw.HardwareProductId;
-                            OnLastInputTypeChanged();
+                            await HandleRawInput(racingWheel);
                             break;
                         }
                     }
                 }
             }
-            else if (keyCode < 195 && !IsKeyboard)
+            else if (keyCode < 195)
             {
                 VendorId = null;
                 ProductId = null;
                 OnLastInputTypeChanged();
+            }
+        }
+
+        static async Task HandleRawInput(IGameController controller)
+        {
+            var raw = RawGameController.FromGameController(controller);
+            await HandleRawInput(raw);
+        }
+
+        static async Task HandleRawInput(RawGameController raw)
+        {
+            if (VendorId != raw.HardwareProductId || ProductId != raw.HardwareProductId)
+            {
+                VendorId = raw.HardwareVendorId;
+                ProductId = raw.HardwareProductId;
+#if NETFX_CORE
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+#else
+                await CoreDispatcher.Main.RunAsync(CoreDispatcherPriority.Normal, () =>
+#endif
+                {
+                    OnLastInputTypeChanged();
+                });
             }
         }
 
