@@ -16,7 +16,7 @@ using static TiltedControls.InputPollingService;
 
 namespace TiltedControls
 {
-    public class InputPrompt : ContentPresenter
+    public sealed class InputPrompt : ContentPresenter
     {
         Image _image;
         SvgImageSource _source;
@@ -380,7 +380,7 @@ namespace TiltedControls
             }
         }
 
-        public virtual string GetDefaultKeyboardKeyName(GamepadInputTypes key)
+        public static string GetDefaultKeyboardKeyName(GamepadInputTypes key)
         {
             switch (key)
             {
