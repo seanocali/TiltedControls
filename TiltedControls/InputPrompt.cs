@@ -380,7 +380,7 @@ namespace TiltedControls
             }
         }
 
-        public static string GetDefaultKeyboardKeyName(GamepadInputTypes key)
+        public virtual string GetDefaultKeyboardKeyName(GamepadInputTypes key)
         {
             switch (key)
             {
@@ -525,7 +525,7 @@ namespace TiltedControls
             }
         }
         public static readonly DependencyProperty GamepadKeyProperty = DependencyProperty.Register(nameof(GamepadKey), typeof(GamepadInputTypes), typeof(InputPrompt),
-            new PropertyMetadata(null, OnMapPropertyChanged));
+            new PropertyMetadata(GamepadInputTypes.None, OnMapPropertyChanged));
 
         public bool MonochromePreferred
         {

@@ -254,9 +254,12 @@ namespace TiltedControls
             }
             else if (keyCode < 195)
             {
-                VendorId = null;
-                ProductId = null;
-                OnLastInputTypeChanged();
+                if (VendorId != null || ProductId != null)
+                {
+                    VendorId = null;
+                    ProductId = null;
+                    OnLastInputTypeChanged();
+                }
             }
         }
 

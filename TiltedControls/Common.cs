@@ -125,7 +125,8 @@ namespace TiltedControls
             RightThumbstickButton = 48,
             HomeButton = 49,
             DPadUpDown = 50,
-            DPadLeftRight = 51
+            DPadLeftRight = 51,
+            None
         }
     }
 }
