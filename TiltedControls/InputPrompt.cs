@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -93,7 +94,7 @@ namespace TiltedControls
             if (MonochromePreferred && GetMonochromeFontName(rootFolderName) != null)
             {
                 var fontName = GetMonochromeFontName(rootFolderName);
-                var font = new FontFamily($"TiltedControls/Resources/Fonts/{fontName}.ttf#{fontName}");
+                var font = new FontFamily($"/TiltedControls/Resources/Fonts/{fontName}.ttf#{fontName}");
                 var vb = new Viewbox();
                 var tb = new TextBlock();
                 tb.Foreground = this.Foreground;
