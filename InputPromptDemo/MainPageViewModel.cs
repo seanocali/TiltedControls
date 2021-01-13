@@ -4,14 +4,24 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static TiltedControls.Common;
 
 namespace InputPromptDemo
 {
     public class MainPageViewModel : INotifyPropertyChanged
     {
-        private bool _monochrome;
 
-        public bool Monochrome
+        public bool MonochromeSelected
+        {
+            get => Monochrome != MonochromeModes.None;
+            set
+            {
+                Monochrome = value ? MonochromeModes.Force : MonochromeModes.None;
+            }
+        }
+
+        private MonochromeModes _monochrome;
+        public MonochromeModes Monochrome
         {
             get { return _monochrome; }
             set 

@@ -48,9 +48,14 @@ namespace TiltedControls
 
                 _gamepads = controllers.ToHashSet();
                 _rawControllers = new Dictionary<RawGameController, RawGameControllerModel>();
-                foreach (var raw in RawGameController.RawGameControllers)
+                for (int i = 0; i < RawGameController.RawGameControllers.Count(); i++)
                 {
-                    _rawControllers.Add(raw, new RawGameControllerModel(raw));
+                    var raw = RawGameController.RawGameControllers[i];
+                    if (i == 0) { RawGameController_RawGameControllerAdded(null, RawGameController.RawGameControllers.First()); }
+                    else
+                    {
+                        _rawControllers.Add(raw, new RawGameControllerModel(raw));
+                    }
                 }
                 Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
                 Gamepad.GamepadAdded += Controller_Added;
@@ -176,11 +181,14 @@ namespace TiltedControls
         {
             if (e.AxisCount > 0 || e.ButtonCount > 0 || e.SwitchCount > 0)
             {
-                _rawControllers.Add(e, new RawGameControllerModel(e));
-                UpdateControllerLists();
-                if (HasInitialized || VendorId == null)
+                if (!_rawControllers.ContainsKey(e))
                 {
-                    await HandleRawInput(e);
+                    _rawControllers.Add(e, new RawGameControllerModel(e));
+                    UpdateControllerLists();
+                    if (HasInitialized || VendorId == null)
+                    {
+                        await HandleRawInput(e);
+                    }
                 }
             }
         }

@@ -82,54 +82,49 @@ namespace TiltedControls
             string productName = null;
             string keyName = null;
             var key = GamepadKey;
-            if (simulatedVendorId != null)
-            {
-                rootFolderName = GetVendorName((ushort)simulatedVendorId);
-            }
-            else
-            {
-                rootFolderName = InputPollingService.VendorId != null ? GetVendorName((ushort)InputPollingService.VendorId) : null;
-            }
+            ushort? vendorId = simulatedVendorId != null ? simulatedVendorId : InputPollingService.VendorId;
+            ushort? productId = simulatedProductId != null ? simulatedProductId : InputPollingService.ProductId;
 
-            if (MonochromePreferred && GetMonochromeFontName(rootFolderName) != null)
+            rootFolderName = vendorId != null ? GetVendorName((ushort)vendorId) : null;
+            productName = vendorId != null && productId != null ? GetProductName((ushort)vendorId, productId) : null;
+
+            string monochromeFontName = Monochrome != MonochromeModes.None ? GetMonochromeFontName(rootFolderName, productName, Monochrome == MonochromeModes.Force) : null;
+            if (monochromeFontName != null)
             {
-                var fontName = GetMonochromeFontName(rootFolderName);
-                var font = new FontFamily($"/TiltedControls/Resources/Fonts/{fontName}.ttf#{fontName}");
+                var font = new FontFamily($"/TiltedControls/Resources/Fonts/{monochromeFontName}.ttf#{monochromeFontName}");
                 var vb = new Viewbox();
                 var tb = new TextBlock();
                 tb.Foreground = this.Foreground;
                 tb.FontFamily = font;
 
-                var hexStr = "E8" + ((int)key).ToString("X2");
-                int decValue = int.Parse(hexStr, System.Globalization.NumberStyles.HexNumber);
-                var c = (char)decValue;
-                tb.Text = c.ToString();
+                if (monochromeFontName == "keyboard")
+                {
+                    tb.Text = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
+                }
+                else
+                {
+                    var hexStr = "E8" + ((int)key).ToString("X2");
+                    int decValue = int.Parse(hexStr, System.Globalization.NumberStyles.HexNumber);
+                    var c = (char)decValue;
+                    tb.Text = c.ToString();
+                }
                 vb.Child = tb;
                 this.Content = vb;
             }
             else
             {
                 if (this.Content != _image) { this.Content = _image; }
-                if (simulatedVendorId != null)
+                if (!InputPollingService.IsKeyboard)
                 {
-                    productName = GetProductName((ushort)simulatedVendorId, simulatedProductId);
                     if (productName != null) { productName += '-'; }
-                    keyName = GetGamepadKeyName(key, (ushort)simulatedVendorId, simulatedProductId).Replace("Gamepad", "");
+                    keyName = GetGamepadKeyName(key, (ushort)vendorId, productId).Replace("Gamepad", "");
                 }
-                else
+                if (rootFolderName == null)
                 {
-                    if (!InputPollingService.IsKeyboard)
-                    {
-                        productName = GetProductName((ushort)InputPollingService.VendorId, InputPollingService.ProductId);
-                        if (productName != null) { productName += '-'; }
-                        keyName = GetGamepadKeyName(key, (ushort)InputPollingService.VendorId, InputPollingService.ProductId).Replace("Gamepad", "");
-                    }
-                    if (rootFolderName == null)
-                    {
-                        rootFolderName = "Keyboard";
-                        themeName = Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
-                        keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
-                    }
+                    rootFolderName = "Keyboard";
+                    themeName = Monochrome != MonochromeModes.None ? "Monochrome" : "";
+                    themeName += Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
+                    keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
                 }
 
                 string resourceName = $"TiltedControls.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
@@ -177,20 +172,44 @@ namespace TiltedControls
             else { OnImageLoadFailed(); }
         }
 
-        private string GetMonochromeFontName(string vendorName)
+        private string GetMonochromeFontName(string vendorName, string productName, bool force = false)
         {
             if (vendorName != null)
             {
                 vendorName = vendorName.ToLower();
-                switch (vendorName)
+                if (force)
                 {
-                    case "microsoft":
-                        return "xboxone";
-                    case "sony":
-                        return "ps4";
+                    switch (vendorName)
+                    {
+                        default:
+                        case "microsoft":
+                            return "xboxone";
+                        case "sony":
+                            return "ps4";
+                    }
+                }
+                else
+                {
+                    return GetExactMonochromeGamepadName(productName);
                 }
             }
-            return null;
+            else
+            {
+                return "keyboard";
+            }
+        }
+
+        string GetExactMonochromeGamepadName(string productName)
+        {
+            switch (productName)
+            {
+                default:
+                    return null;
+                case "Xbox One":
+                    return "xboxone";
+                case "PS4":
+                    return "ps4";
+            }
         }
 
         public event EventHandler ImageLoaded = delegate { };
@@ -528,18 +547,32 @@ namespace TiltedControls
         public static readonly DependencyProperty GamepadKeyProperty = DependencyProperty.Register(nameof(GamepadKey), typeof(GamepadInputTypes), typeof(InputPrompt),
             new PropertyMetadata(GamepadInputTypes.None, OnMapPropertyChanged));
 
-        public bool MonochromePreferred
+        public MonochromeModes Monochrome
         {
             get
             {
-                return (bool)base.GetValue(MonochromePreferredProperty);
+                return (MonochromeModes)base.GetValue(MonochromeProperty);
             }
             set
             {
-                base.SetValue(MonochromePreferredProperty, value);
+                base.SetValue(MonochromeProperty, value);
             }
         }
-        public static readonly DependencyProperty MonochromePreferredProperty = DependencyProperty.Register(nameof(MonochromePreferred), typeof(bool), typeof(InputPrompt),
+        public static readonly DependencyProperty MonochromeProperty = DependencyProperty.Register(nameof(Monochrome), typeof(MonochromeModes), typeof(InputPrompt),
+            new PropertyMetadata(MonochromeModes.None, OnMapPropertyChanged));
+
+        public bool ReverseAxes
+        {
+            get
+            {
+                return (bool)base.GetValue(ReverseAxesProperty);
+            }
+            set
+            {
+                base.SetValue(ReverseAxesProperty, value);
+            }
+        }
+        public static readonly DependencyProperty ReverseAxesProperty = DependencyProperty.Register(nameof(ReverseAxes), typeof(bool), typeof(InputPrompt),
             new PropertyMetadata(false, OnMapPropertyChanged));
 
         public int InitialVendorId

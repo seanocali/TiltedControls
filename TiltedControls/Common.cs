@@ -71,6 +71,12 @@ namespace TiltedControls
             return (degrees * (Math.PI / 180));
         }
 
+        public enum MonochromeModes
+        {
+            None = 0,
+            WhenAvailable = 1,
+            Force = 2
+        }
 
         public enum GamepadInputTypes
         {
