@@ -24,6 +24,10 @@ namespace TiltedControls
         Assembly _assembly;
         CancellationTokenSource _cts;
 
+        static FontFamily _keyboardMonochromeFont;
+        static FontFamily _xboxOneMonochromeFont;
+        static FontFamily _ps4MonochromeFont;
+
         public InputPrompt()
         {
             _image = new Image();
@@ -81,7 +85,7 @@ namespace TiltedControls
             string themeName = null;
             string productName = null;
             string keyName = null;
-            var key = GamepadKey;
+            var key = ReverseAxes ? GetReverseAxis(GamepadKey) : GamepadKey;
             ushort? vendorId = simulatedVendorId != null ? simulatedVendorId : InputPollingService.VendorId;
             ushort? productId = simulatedProductId != null ? simulatedProductId : InputPollingService.ProductId;
 
@@ -91,12 +95,10 @@ namespace TiltedControls
             string monochromeFontName = Monochrome != MonochromeModes.None ? GetMonochromeFontName(rootFolderName, productName, Monochrome == MonochromeModes.Force) : null;
             if (monochromeFontName != null)
             {
-                var font = new FontFamily($"/TiltedControls/Resources/Fonts/{monochromeFontName}.ttf#{monochromeFontName}");
                 var vb = new Viewbox();
                 var tb = new TextBlock();
                 tb.Foreground = this.Foreground;
-                tb.FontFamily = font;
-
+                tb.FontFamily = LoadAndGetFont(monochromeFontName);
                 if (monochromeFontName == "keyboard")
                 {
                     tb.Text = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
@@ -131,6 +133,23 @@ namespace TiltedControls
 
                 await UpdateImage(resourceName, cancellationToken);
             }
+        }
+
+        private FontFamily LoadAndGetFont(string requestedFont)
+        {
+            switch (requestedFont)
+            {
+                case "keyboard":
+                    if (_keyboardMonochromeFont == null) { _keyboardMonochromeFont = new FontFamily("/TiltedControls/Resources/Fonts/keyboard.ttf#keyboard"); }
+                    return _keyboardMonochromeFont;
+                case "xboxone":
+                    if (_xboxOneMonochromeFont == null) { _xboxOneMonochromeFont = new FontFamily("/TiltedControls/Resources/Fonts/xboxone.ttf#xboxone"); }
+                    return _xboxOneMonochromeFont;
+                case "ps4":
+                    if (_ps4MonochromeFont == null) { _ps4MonochromeFont = new FontFamily("/TiltedControls/Resources/Fonts/ps4.ttf#ps4"); }
+                    return _ps4MonochromeFont;
+            }
+            return null;
         }
 
         private async Task UpdateImage(string resourceName, CancellationToken cancellationToken)
@@ -510,6 +529,27 @@ namespace TiltedControls
                     return "End";
             }
             return null;
+        }
+
+        private GamepadInputTypes GetReverseAxis(GamepadInputTypes gamepadKey)
+        {
+            switch (gamepadKey)
+            {
+                default:
+                    return gamepadKey;
+                case GamepadInputTypes.DPadUpDown:
+                    return GamepadInputTypes.DPadLeftRight;
+                case GamepadInputTypes.DPadLeftRight:
+                    return GamepadInputTypes.DPadUpDown;
+                case GamepadInputTypes.LeftThumbstickLeftRight:
+                    return GamepadInputTypes.LeftThumbstickUpDown;
+                case GamepadInputTypes.LeftThumbstickUpDown:
+                    return GamepadInputTypes.LeftThumbstickLeftRight;
+                case GamepadInputTypes.RightThumbstickLeftRight:
+                    return GamepadInputTypes.RightThumbstickUpDown;
+                case GamepadInputTypes.RightThumbstickUpDown:
+                    return GamepadInputTypes.RightThumbstickLeftRight;
+            }
         }
 
         private async static void OnMapPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
