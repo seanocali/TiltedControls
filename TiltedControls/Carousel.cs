@@ -1,5 +1,4 @@
 ﻿using Microsoft.Toolkit.Uwp.UI.Animations.Expressions;
-using Microsoft.Toolkit.Uwp.UI.Extensions;
 using Windows.UI;
 using Windows.UI.Composition;
 using Windows.UI.Xaml;
@@ -21,6 +20,7 @@ using Windows.UI.Core;
 using Windows.ApplicationModel.SocialInfo;
 using Windows.Devices.Bluetooth;
 using Windows.UI.Xaml.Data;
+using Microsoft.Toolkit.Uwp.UI;
 
 namespace TiltedControls
 {
@@ -1319,7 +1319,15 @@ namespace TiltedControls
         /// </summary>
         protected virtual void SetColorAnimation(ScalarNode distanceAsPercentOfScaleThreshold, BooleanNode isWithinScaleThreshold, FrameworkElement fe)
         {
-            List<FrameworkElement> elements = fe.FindDescendants<FrameworkElement>().ToList();
+            var descendants = fe.FindDescendants();
+            List<FrameworkElement> elements = new List<FrameworkElement>();
+            foreach (var descendant in descendants)
+            {
+                if (descendant is FrameworkElement cfe)
+                {
+                    elements.Add(cfe);
+                }
+            }
             elements.Add(fe);
             foreach (var element in elements)
             {
@@ -1712,7 +1720,8 @@ namespace TiltedControls
                 FrameworkElement element = ItemTemplate.LoadContent() as FrameworkElement;
                 if (ItemContentStyle != null)
                 {
-                    var child = element.FindDescendants<FrameworkElement>().Where(x => x.GetType() == ItemContentStyle.TargetType).FirstOrDefault();
+                    var descendants = element.FindDescendants();
+                    var child = descendants.Where(x => x.GetType() == ItemContentStyle.TargetType).FirstOrDefault() as FrameworkElement;
                     if (child != null)
                     {
                         Convert.ChangeType(child, ItemContentStyle.TargetType);
