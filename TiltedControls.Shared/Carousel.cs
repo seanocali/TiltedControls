@@ -1,4 +1,7 @@
-﻿using Microsoft.Toolkit.Uwp.UI.Animations.Expressions;
+﻿
+#if NETFX_CORE
+using Microsoft.Toolkit.Uwp.UI;
+using Microsoft.Toolkit.Uwp.UI.Animations.Expressions;
 using Windows.UI;
 using Windows.UI.Composition;
 using Windows.UI.Xaml;
@@ -7,20 +10,28 @@ using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Media.Media3D;
+#else
+using CommunityToolkit.WinUI.UI;
+using CommunityToolkit.WinUI.UI.Animations.Expressions;
+using Microsoft.UI;
+using Microsoft.UI.Composition;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Animation;
+using Microsoft.UI.Xaml.Media.Media3D;
+#endif
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using static TiltedControls.Common;
-using System.Diagnostics;
-using Windows.UI.Xaml.Media.Media3D;
-using Windows.UI.Core;
-using Windows.ApplicationModel.SocialInfo;
-using Windows.Devices.Bluetooth;
-using Windows.UI.Xaml.Data;
-using Microsoft.Toolkit.Uwp.UI;
 
 namespace TiltedControls
 {

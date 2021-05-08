@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Gaming.Input;
 using Windows.System;
 using Windows.UI.Core;
+
+#if NETFX_CORE
 using Windows.UI.Xaml;
+#else
+using Microsoft.UI.Xaml;
+#endif
 
 namespace TiltedControls
 {
@@ -283,11 +287,7 @@ namespace TiltedControls
             {
                 VendorId = raw.HardwareVendorId;
                 ProductId = raw.HardwareProductId;
-#if NETFX_CORE
                 await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-#else
-                await CoreDispatcher.Main.RunAsync(CoreDispatcherPriority.Normal, () =>
-#endif
                 {
                     OnLastInputTypeChanged();
                 });

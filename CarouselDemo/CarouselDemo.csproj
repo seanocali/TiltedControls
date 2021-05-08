@@ -220,7 +220,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TiltedControls\TiltedControls.csproj">
       <Project>{5a2d2f03-acd9-4613-a3da-38c0fa4daf9d}</Project>
-      <Name>Carousel</Name>
+      <Name>TiltedControls</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

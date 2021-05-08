@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Windows.Storage;
-using Windows.System;
+﻿#if NETFX_CORE
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
+#else
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
+#endif
+using System;
+using System.IO;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using static TiltedControls.Common;
-using static TiltedControls.InputPollingService;
 
 namespace TiltedControls
 {
@@ -39,12 +39,12 @@ namespace TiltedControls
             this.Unloaded += InputPrompt_Unloaded;
         }
 
-        private void InputPrompt_Unloaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private void InputPrompt_Unloaded(object sender, RoutedEventArgs e)
         {
             InputPollingService.LastInputTypeChanged -= InputPollingService_LastInputTypeChanged;
         }
 
-        private async void InputPrompt_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        private async void InputPrompt_Loaded(object sender, RoutedEventArgs e)
         {
             ushort? vendorId = null;
             ushort? productId = null;
