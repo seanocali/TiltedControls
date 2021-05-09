@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>5cc3f511-a800-4236-a0e7-8800113d6a20</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>CarouselDemo.Shared</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LargeTile.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SmallTile.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SmallTile.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SmallTile.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SmallTile.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SmallTile.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SplashScreen.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SplashScreen.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SplashScreen.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SplashScreen.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\SplashScreen.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square150x150Logo.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square150x150Logo.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square150x150Logo.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square150x150Logo.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-lightunplated_targetsize-16.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-lightunplated_targetsize-24.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-lightunplated_targetsize-256.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-lightunplated_targetsize-32.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-lightunplated_targetsize-48.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-unplated_targetsize-16.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-unplated_targetsize-256.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-unplated_targetsize-32.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.altform-unplated_targetsize-48.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-16.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-24.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-256.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-32.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Square44x44Logo.targetsize-48.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\StoreLogo.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\StoreLogo.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\StoreLogo.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\StoreLogo.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\StoreLogo.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Wide310x150Logo.scale-100.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Wide310x150Logo.scale-125.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Wide310x150Logo.scale-150.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="$(MSBuildThisFileDirectory)Assets\Wide310x150Logo.scale-400.png" />
+    <Content Include="$(MSBuildThisFileDirectory)TestData\AlbumCoverLinks.txt" />
+    <Content Include="$(MSBuildThisFileDirectory)TestData\MoviePosterLinks.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)AlbumCoversView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)MoviePostersView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AlbumCoversView.xaml.cs">
+      <DependentUpon>AlbumCoversView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Input.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ItemModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MainPage.xaml.cs">
+      <DependentUpon>MainPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MainPageViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MoviePostersView.xaml.cs">
+      <DependentUpon>MoviePostersView.xaml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+</Project>

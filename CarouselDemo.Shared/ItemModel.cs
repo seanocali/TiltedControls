@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.UI;
+﻿#if NETFX_CORE
 using Windows.UI.Xaml.Media;
+#else
+using Microsoft.UI.Xaml.Media;
+#endif
 
 namespace CarouselDemo
 {

@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TiltedControls;
 using Windows.System;
-using Windows.UI.Core;
-using Windows.UI.Input;
+#if NETFX_CORE
 using Windows.UI.Xaml.Input;
+using Windows.UI.Input;
+#else
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Input;
+#endif
 using static TiltedControls.Common;
 
 namespace CarouselDemo
@@ -70,7 +70,11 @@ namespace CarouselDemo
 
         }
 
+#if NETFX_CORE
         public static void WheelChanged(Carousel carousel, PointerPoint point)
+#else
+        public static void WheelChanged(Carousel carousel, Microsoft.UI.Input.Experimental.ExpPointerPoint point)
+#endif
         {
             if (carousel != null && carousel.AreItemsLoaded)
             {

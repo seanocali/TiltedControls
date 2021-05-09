@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Core;
-using Windows.UI.Xaml;
+#if NETFX_CORE
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+#else
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
+#endif
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -54,14 +48,29 @@ namespace CarouselDemo
         private async Task CreateTestItemsAlbums()
         {
             PageViewModel.Items = new List<ItemModel>();
-            var posterLinks = await File.ReadAllLinesAsync("TestData/AlbumCoverLinks.txt");
-            foreach (var link in posterLinks)
+            FileInfo postersFile;
+#if NETFX_CORE
+            postersFile = new FileInfo("TestData/AlbumCoverLinks.txt");
+#else
+            var dir = new DirectoryInfo(System.AppDomain.CurrentDomain.BaseDirectory);
+            var parent = dir.Parent.FullName;
+            postersFile = new FileInfo(Path.Combine(parent, "TestData/AlbumCoverLinks.txt"));
+#endif
+            if (postersFile.Exists)
             {
-                var item = new ItemModel
+                var posterLinks = await File.ReadAllLinesAsync(postersFile.FullName);
+                foreach (var link in posterLinks)
                 {
-                    ImageSourcePath = link
-                };
-                PageViewModel.Items.Add(item);
+                    var item = new ItemModel
+                    {
+                        ImageSourcePath = link
+                    };
+                    PageViewModel.Items.Add(item);
+                }
+            }
+            else
+            {
+                throw new FileNotFoundException("File not found", postersFile.FullName);
             }
         }
 

@@ -11,6 +11,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Media3D;
+using EF = Microsoft.Toolkit.Uwp.UI.Animations.Expressions.ExpressionFunctions;
 #else
 using CommunityToolkit.WinUI.UI;
 using CommunityToolkit.WinUI.UI.Animations.Expressions;
@@ -23,6 +24,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Animation;
 using Microsoft.UI.Xaml.Media.Media3D;
+using EF = CommunityToolkit.WinUI.UI.Animations.Expressions.ExpressionFunctions;
 #endif
 using System;
 using System.Collections.Generic;
@@ -1146,11 +1148,12 @@ namespace TiltedControls
         {
             if (element == null) { return; }
             var visual = ElementCompositionPreview.GetElementVisual(element);
-            var compositor = Window.Current.Compositor;
+            var compositor = visual.Compositor;
             ScalarNode distanceAsPercentOfSelectionAreaThreshold = null;
             ScalarNode scaleThresholdDistanceRaw = null;
             BooleanNode distanceIsNegativeValue = null;
             BooleanNode isWithinScaleThreshold = null;
+            Vector3Node offset = null;
             float selectionAreaThreshold = 0;
 
             if (CarouselType == CarouselTypes.Wheel && slotNum != null)
@@ -1166,36 +1169,36 @@ namespace TiltedControls
                     switch (WheelAlignment)
                     {
                         case WheelAlignments.Right:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
+                            scaleThresholdDistanceRaw = EF.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
                             break;
                         case WheelAlignments.Top:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
+                            scaleThresholdDistanceRaw = EF.Mod((wheelAngle - wheelDegreesWhenItemIsSelected), 360);
                             break;
                         case WheelAlignments.Left:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
+                            scaleThresholdDistanceRaw = EF.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
                             break;
                         case WheelAlignments.Bottom:
-                            scaleThresholdDistanceRaw = ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
+                            scaleThresholdDistanceRaw = EF.Mod((wheelAngle + wheelDegreesWhenItemIsSelected), 360);
                             break;
                     }
 
-                    using (ScalarNode distanceToZero = ExpressionFunctions.Abs(scaleThresholdDistanceRaw))
+                    using (ScalarNode distanceToZero = EF.Abs(scaleThresholdDistanceRaw))
                     using (ScalarNode distanceTo360 = 360 - distanceToZero)
                     using (BooleanNode isClosestToZero = distanceToZero <= distanceTo360)
-                    using (ScalarNode distanceInDegrees = ExpressionFunctions.Conditional(isClosestToZero, distanceToZero, distanceTo360))
+                    using (ScalarNode distanceInDegrees = EF.Conditional(isClosestToZero, distanceToZero, distanceTo360))
                     {
                         distanceAsPercentOfSelectionAreaThreshold = distanceInDegrees / selectionAreaThreshold;
                         switch (WheelAlignment)
                         {
                             case WheelAlignments.Top:
                             case WheelAlignments.Bottom:
-                                distanceIsNegativeValue = ExpressionFunctions.Abs(scaleThresholdDistanceRaw) < 180;
+                                distanceIsNegativeValue = EF.Abs(scaleThresholdDistanceRaw) < 180;
                                 break;
                             case WheelAlignments.Left:
-                                distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle + wheelDegreesWhenItemIsSelected - 90), 360)) < 180;
+                                distanceIsNegativeValue = EF.Abs(EF.Mod((wheelAngle + wheelDegreesWhenItemIsSelected - 90), 360)) < 180;
                                 break;
                             case WheelAlignments.Right:
-                                distanceIsNegativeValue = ExpressionFunctions.Abs(ExpressionFunctions.Mod((wheelAngle - wheelDegreesWhenItemIsSelected + 90), 360)) < 180;
+                                distanceIsNegativeValue = EF.Abs(EF.Mod((wheelAngle - wheelDegreesWhenItemIsSelected + 90), 360)) < 180;
                                 break;
                         }
 
@@ -1212,11 +1215,10 @@ namespace TiltedControls
                     selectionAreaThreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
                 }
 
-                using (Vector3Node offset = visual.GetReference().Offset)
-                {
+                    offset = visual.GetReference().Offset;
                     scaleThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / selectionAreaThreshold : offset.Y / selectionAreaThreshold;
 
-                    distanceAsPercentOfSelectionAreaThreshold = ExpressionFunctions.Abs(scaleThresholdDistanceRaw);
+                    distanceAsPercentOfSelectionAreaThreshold = EF.Abs(scaleThresholdDistanceRaw);
 
                     distanceIsNegativeValue = scaleThresholdDistanceRaw < 0;
                     isWithinScaleThreshold = isXaxisNavigation ? offset.X > -selectionAreaThreshold & offset.X < selectionAreaThreshold : offset.Y > -selectionAreaThreshold & offset.Y < selectionAreaThreshold;
@@ -1231,11 +1233,11 @@ namespace TiltedControls
                             warpItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
                         }
                         using (ScalarNode warpThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / warpItemsthreshold : offset.Y / warpItemsthreshold)
-                        using (ScalarNode distanceAsPercentOfWarpThreshold = ExpressionFunctions.Abs(warpThresholdDistanceRaw))
+                        using (ScalarNode distanceAsPercentOfWarpThreshold = EF.Abs(warpThresholdDistanceRaw))
                         using (BooleanNode isWithinWarpThreshold = isXaxisNavigation ? offset.X > -warpItemsthreshold & offset.X < warpItemsthreshold : offset.Y > -warpItemsthreshold & offset.Y < warpItemsthreshold)
                         using (ScalarNode y = WarpIntensity - (distanceAsPercentOfWarpThreshold * WarpIntensity))
                         using (ScalarNode WarpOffset = Convert.ToSingle(-WarpCurve) * warpThresholdDistanceRaw * warpThresholdDistanceRaw + WarpIntensity)
-                        using (ScalarNode finalWarpValue = ExpressionFunctions.Conditional(isWithinWarpThreshold, y * ExpressionFunctions.Abs(y) * (float)WarpCurve, 0))
+                        using (ScalarNode finalWarpValue = EF.Conditional(isWithinWarpThreshold, y * EF.Abs(y) * (float)WarpCurve, 0))
                         {
                             if (isXaxisNavigation)
                             {
@@ -1247,14 +1249,14 @@ namespace TiltedControls
                             }
                         }
                     }
-                }
+                
             }
-
-            UIElement child = null;
 
             // Fliptych
             if (useFliptych && CarouselType != CarouselTypes.Wheel) // TODO: Implement Fliptych on Wheel
             {
+                UIElement child = null;
+
                 if (element.Transform3D == null)
                 {
                     element.Transform3D = new PerspectiveTransform3D { Depth = 1000 };
@@ -1287,22 +1289,20 @@ namespace TiltedControls
                     if (CarouselType == CarouselTypes.Wheel) { fliptychDegrees *= -1; }
                     childVisual.RotationAxis = isXaxisNavigation ? new Vector3(0, 1, 0) : new Vector3(1, 0, 0);
                     childVisual.CenterPoint = new Vector3(_maxItemWidth / 2, _maxItemHeight / 2, 0);
-                    using (ScalarNode rotatedValue = ExpressionFunctions.Conditional(distanceIsNegativeValue, fliptychDegrees, -fliptychDegrees))
-                    using (ScalarNode finalValue = ExpressionFunctions.Conditional(isWithinScaleThreshold, distanceAsPercentOfSelectionAreaThreshold * rotatedValue, rotatedValue))
+                    using (ScalarNode rotatedValue = EF.Conditional(distanceIsNegativeValue, fliptychDegrees, -fliptychDegrees))
+                    using (ScalarNode finalValue = EF.Conditional(isWithinScaleThreshold, distanceAsPercentOfSelectionAreaThreshold * rotatedValue, rotatedValue))
                     {
-                        childVisual.StartAnimation("RotationAngleInDegrees", finalValue);
+                        childVisual.StartAnimation(nameof(childVisual.RotationAngleInDegrees), finalValue);
                     }
                 }
             }
             SetColorAnimation(distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold, element);
 
-            distanceAsPercentOfSelectionAreaThreshold.Dispose();
-            scaleThresholdDistanceRaw.Dispose();
-            distanceIsNegativeValue.Dispose();
-            isWithinScaleThreshold.Dispose();
-            scaleThresholdDistanceRaw = null;
-            distanceIsNegativeValue = null;
-            isWithinScaleThreshold = null;
+            offset?.Dispose();
+            distanceAsPercentOfSelectionAreaThreshold?.Dispose();
+            scaleThresholdDistanceRaw?.Dispose();
+            distanceIsNegativeValue?.Dispose();
+            isWithinScaleThreshold?.Dispose();
         }
 
         /// <summary>
