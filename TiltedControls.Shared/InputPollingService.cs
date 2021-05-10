@@ -11,12 +11,15 @@ using Windows.UI.Core;
 using Windows.UI.Xaml;
 #else
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
+using System.Windows.Input;
 #endif
 
 namespace TiltedControls
 {
     internal static class InputPollingService
     {
+        static UIElement _rootUIElement;
         static bool _hasStarted;
         public static bool HasInitialized;
         static bool _isRawPolling;
@@ -32,8 +35,14 @@ namespace TiltedControls
             _initializationCooldownTimer.Interval = TimeSpan.FromSeconds(1);
         }
 
-        internal static void Start(ushort? initialVendorId = null, ushort? initialProductId = null)
+        internal static void Start(UIElement rootUIElement, ushort? initialVendorId = null, ushort? initialProductId = null)
         {
+            if (rootUIElement != _rootUIElement)
+            {
+                // Window Changed
+                Stop();
+                _rootUIElement = rootUIElement;
+            }
             if (!_hasStarted)
             {
                 _hasStarted = true;
@@ -45,12 +54,26 @@ namespace TiltedControls
                         ProductId = (ushort)initialProductId;
                     }
                 }
+                _gamepads = new HashSet<IGameController>();
 
-                IEnumerable<IGameController> controllers = Gamepad.Gamepads.AsEnumerable();
-                controllers.Concat(ArcadeStick.ArcadeSticks.AsEnumerable());
-                controllers.Concat(RacingWheel.RacingWheels.AsEnumerable());
+                // Do not replace these loops with LINQ statements
+                // This syntax is required for WinRT-Win32 interop
 
-                _gamepads = controllers.ToHashSet();
+                foreach (var gp in Gamepad.Gamepads)
+                {
+                    _gamepads.Add(gp);
+                }
+                
+                foreach (var gp in ArcadeStick.ArcadeSticks)
+                {
+                    _gamepads.Add(gp);
+                }
+
+                foreach (var gp in RacingWheel.RacingWheels)
+                {
+                    _gamepads.Add(gp);
+                }
+
                 _rawControllers = new Dictionary<RawGameController, RawGameControllerModel>();
                 for (int i = 0; i < RawGameController.RawGameControllers.Count(); i++)
                 {
@@ -61,7 +84,12 @@ namespace TiltedControls
                         _rawControllers.Add(raw, new RawGameControllerModel(raw));
                     }
                 }
+
+#if NETFX_CORE
                 Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
+#else
+                rootUIElement.KeyDown += RootUIElement_KeyDown;
+#endif
                 Gamepad.GamepadAdded += Controller_Added;
                 Gamepad.GamepadRemoved += Controller_Removed;
                 ArcadeStick.ArcadeStickAdded += Controller_Added;
@@ -75,10 +103,17 @@ namespace TiltedControls
             }
         }
 
-
         internal static void Stop()
         {
+#if NETFX_CORE
             Window.Current.CoreWindow.KeyDown -= CoreWindow_KeyDown;
+#else
+            if (_rootUIElement != null)
+            {
+                _rootUIElement.KeyDown -= RootUIElement_KeyDown;
+                _rootUIElement = null;
+            }
+#endif
             Gamepad.GamepadAdded -= Controller_Added;
             Gamepad.GamepadRemoved -= Controller_Removed;
             ArcadeStick.ArcadeStickAdded -= Controller_Added;
@@ -164,7 +199,7 @@ namespace TiltedControls
 
             if (_controllers.Values.Any(x => x == null))
             {
-                StartRawPolling();
+                //StartRawPolling();
             }
             else
             {
@@ -204,12 +239,20 @@ namespace TiltedControls
             get => VendorId == null;
         }
 
+#if NETFX_CORE
         private static async void CoreWindow_KeyDown(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.KeyEventArgs args)
         {
             args.Handled = false;
             await SetLastUsedHardwareDevice(args.VirtualKey);
         }
+#else
 
+        private static async void RootUIElement_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            e.Handled = false;
+            await SetLastUsedHardwareDevice(e.Key);
+        }
+#endif
         private static void Controller_Added(object sender, IGameController e)
         {
             _gamepads.Add(e);

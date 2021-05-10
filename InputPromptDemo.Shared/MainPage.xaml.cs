@@ -1,8 +1,15 @@
-﻿using Microsoft.Toolkit.Uwp.UI;
-using System;
+﻿using System;
 using TiltedControls;
+
+#if NETFX_CORE
+using Microsoft.Toolkit.Uwp.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+#else
+using CommunityToolkit.WinUI.UI;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+#endif
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 

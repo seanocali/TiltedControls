@@ -4,6 +4,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 #else
+using CommunityToolkit.WinUI.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -30,6 +31,9 @@ namespace TiltedControls
 
         public InputPrompt()
         {
+#if !NETFX_CORE
+            throw new NotImplementedException("Input Prompt only works on UWP apps at this time.")
+#endif
             _image = new Image();
             _source = new SvgImageSource();
             _image.Source = _source;
@@ -54,9 +58,19 @@ namespace TiltedControls
                 if (InitialProductId > 0 && GetProductName((ushort)InitialProductId) != null) { productId = (ushort)InitialProductId; }
             }
             catch (Exception ex) { Console.WriteLine(ex.Message); }
-
+            
+            UIElement rootUIElement = null;
+#if !NETFX_CORE
+            rootUIElement = this;
+            while (true)
+            {
+                var ascendant = rootUIElement.FindAscendant<UIElement>();
+                if (ascendant != null) { rootUIElement = ascendant; }
+                else { break; }
+            }
+#endif
             InputPollingService.LastInputTypeChanged += InputPollingService_LastInputTypeChanged;
-            InputPollingService.Start(vendorId, productId);
+            InputPollingService.Start(rootUIElement, vendorId, productId);
             await Refresh();
         }
 
@@ -109,7 +123,7 @@ namespace TiltedControls
             }
             else
             {
-                if (this.Content != _image) { this.Content = _image; }
+                if (this.Content is Image image && image == _image) { this.Content = _image; }
                 if (!InputPollingService.IsKeyboard)
                 {
                     if (productName != null) { productName += '-'; }
@@ -122,8 +136,8 @@ namespace TiltedControls
                     themeName += Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
                     keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
                 }
-
-                string resourceName = $"TiltedControls.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
+                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                string resourceName = $"{assemblyName}.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
 
                 await UpdateImageFromEmbeddedResource(resourceName, cancellationToken);
             }
@@ -592,7 +606,7 @@ namespace TiltedControls
             get => InputPollingService.ProductId != null ? ((ushort)InputPollingService.ProductId).ToString("X4") : null;
         }
 
-        #region DEPENDENCY PROPERTIES
+#region DEPENDENCY PROPERTIES
 
         public GamepadInputTypes GamepadKey
         {
@@ -692,7 +706,7 @@ namespace TiltedControls
         public static readonly DependencyProperty MappedKeyboardKeyProperty = DependencyProperty.Register(nameof(MappedKeyboardKey), typeof(string), typeof(InputPrompt),
             new PropertyMetadata(null, OnMapPropertyChanged));
 
-        #endregion
+#endregion
 
         static string Test
         {
