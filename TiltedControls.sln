@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30413.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltedControls", "TiltedControls\TiltedControls.csproj", "{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TiltedControls.UWP", "TiltedControls.UWP\TiltedControls.UWP.csproj", "{092D08C3-F311-472B-A2A4-0397DAF5BBC2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarouselDemo", "CarouselDemo\CarouselDemo.csproj", "{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}"
 EndProject
@@ -23,14 +23,14 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "InputPromptDemo.Shared", "I
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "InputPromptDemo.WinUI.Desktop (Package)", "InputPromptDemo.WinUI.Desktop\InputPromptDemo.WinUI.Desktop (Package)\InputPromptDemo.WinUI.Desktop (Package).wapproj", "{BC6DE779-6D6E-449C-862E-F3EBBF8B3705}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputPromptDemo.WinUI.Desktop", "InputPromptDemo.WinUI.Desktop\InputPromptDemo.WinUI.Desktop\InputPromptDemo.WinUI.Desktop.csproj", "{42A21496-41C8-4C6A-AD20-CFB130B68C55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InputPromptDemo.WinUI.Desktop", "InputPromptDemo.WinUI.Desktop\InputPromptDemo.WinUI.Desktop\InputPromptDemo.WinUI.Desktop.csproj", "{42A21496-41C8-4C6A-AD20-CFB130B68C55}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		TiltedControls.Shared\TiltedControls.Shared.projitems*{092d08c3-f311-472b-a2a4-0397daf5bbc2}*SharedItemsImports = 4
 		InputPromptDemo.Shared\InputPromptDemo.Shared.projitems*{15fc46e7-0c28-4163-9fac-1542280c7b5b}*SharedItemsImports = 4
 		InputPromptDemo.Shared\InputPromptDemo.Shared.projitems*{42a21496-41c8-4c6a-ad20-cfb130b68c55}*SharedItemsImports = 5
 		CarouselDemo.Shared\CarouselDemo.Shared.projitems*{42d133e3-0d87-4b47-ab6d-dd4a5b2e539b}*SharedItemsImports = 5
-		TiltedControls.Shared\TiltedControls.Shared.projitems*{5a2d2f03-acd9-4613-a3da-38c0fa4daf9d}*SharedItemsImports = 4
 		TiltedControls.Shared\TiltedControls.Shared.projitems*{5bb3e4aa-429a-4ba0-8418-8d252686b458}*SharedItemsImports = 13
 		CarouselDemo.Shared\CarouselDemo.Shared.projitems*{5cc3f511-a800-4236-a0e7-8800113d6a20}*SharedItemsImports = 13
 		InputPromptDemo.Shared\InputPromptDemo.Shared.projitems*{b74281c3-3fca-463d-bcc0-e616e056ed11}*SharedItemsImports = 13
@@ -50,26 +50,26 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|ARM.ActiveCfg = Debug|ARM
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|ARM.Build.0 = Debug|ARM
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|ARM64.Build.0 = Debug|ARM64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|x64.ActiveCfg = Debug|x64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|x64.Build.0 = Debug|x64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|x86.ActiveCfg = Debug|x86
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Debug|x86.Build.0 = Debug|x86
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|ARM.ActiveCfg = Release|ARM
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|ARM.Build.0 = Release|ARM
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|ARM64.ActiveCfg = Release|ARM64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|ARM64.Build.0 = Release|ARM64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|x64.ActiveCfg = Release|x64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|x64.Build.0 = Release|x64
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|x86.ActiveCfg = Release|x86
-		{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}.Release|x86.Build.0 = Release|x86
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|ARM.ActiveCfg = Debug|ARM
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|ARM.Build.0 = Debug|ARM
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|ARM64.Build.0 = Debug|ARM64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|x64.ActiveCfg = Debug|x64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|x64.Build.0 = Debug|x64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|x86.ActiveCfg = Debug|x86
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Debug|x86.Build.0 = Debug|x86
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|ARM.ActiveCfg = Release|ARM
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|ARM.Build.0 = Release|ARM
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|ARM64.ActiveCfg = Release|ARM64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|ARM64.Build.0 = Release|ARM64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|x64.ActiveCfg = Release|x64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|x64.Build.0 = Release|x64
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|x86.ActiveCfg = Release|x86
+		{092D08C3-F311-472B-A2A4-0397DAF5BBC2}.Release|x86.Build.0 = Release|x86
 		{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}.Debug|ARM.ActiveCfg = Debug|ARM
 		{E8FAEE59-FCA4-4643-AE17-86E8B35EA13E}.Debug|ARM.Build.0 = Debug|ARM

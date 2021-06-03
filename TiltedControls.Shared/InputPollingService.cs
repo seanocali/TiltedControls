@@ -199,7 +199,7 @@ namespace TiltedControls
 
             if (_controllers.Values.Any(x => x == null))
             {
-                //StartRawPolling();
+                StartRawPolling();
             }
             else
             {

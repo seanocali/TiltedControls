@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{5A2D2F03-ACD9-4613-A3DA-38C0FA4DAF9D}</ProjectGuid>
+    <ProjectGuid>{092D08C3-F311-472B-A2A4-0397DAF5BBC2}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TiltedControls</RootNamespace>
@@ -127,10 +127,10 @@
       <Version>6.2.12</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Animations">
-      <Version>7.0.1</Version>
+      <Version>7.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Media">
-      <Version>7.0.1</Version>
+      <Version>7.0.2</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
