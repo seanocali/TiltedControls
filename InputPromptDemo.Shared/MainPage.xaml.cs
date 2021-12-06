@@ -43,7 +43,7 @@ namespace InputPromptDemo
 
         private void PS5Button_Click(object sender, RoutedEventArgs e)
         {
-
+            SimulateGamepadInput(1356, 3302);
         }
 
         void SimulateGamepadInput(ushort vendorId, ushort? productId)

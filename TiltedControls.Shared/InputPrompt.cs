@@ -37,7 +37,6 @@ namespace TiltedControls
             _image = new Image();
             _source = new SvgImageSource();
             _image.Source = _source;
-            this.Content = _image;
             _assembly = this.GetType().GetTypeInfo().Assembly;
             this.Loaded += InputPrompt_Loaded;
             this.Unloaded += InputPrompt_Unloaded;
@@ -123,7 +122,8 @@ namespace TiltedControls
             }
             else
             {
-                if (this.Content is Image image && image == _image) { this.Content = _image; }
+                if (this.Content is Image image && image == _image) { }
+                else { this.Content = _image; }
                 if (!InputPollingService.IsKeyboard)
                 {
                     if (productName != null) { productName += '-'; }
@@ -327,6 +327,8 @@ namespace TiltedControls
                             case 2976:
                             case 1476:
                                 return "PS4";
+                            case 3302:
+                                return "PS5";
                         }
                     }
                     return "PS4";
