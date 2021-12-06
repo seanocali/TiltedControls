@@ -339,6 +339,8 @@ namespace TiltedControls
                         {
                             case 774:
                                 return "Wii";
+                            case 8201: // Switch Pro Controller
+                                return "Switch";
                         }
                     }
                     return "Switch";
