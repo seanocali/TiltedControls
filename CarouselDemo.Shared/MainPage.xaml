@@ -14,14 +14,16 @@
                   HorizontalAlignment="Left">
                 <StackPanel VerticalAlignment="Top">
                     <StackPanel Orientation="Horizontal">
-                        <ComboBox Header="Carousel Type"
+                        <ComboBox IsTabStop="False"
+                                  Header="Carousel Type"
                                   ToolTipService.ToolTip="Change the layout style of the carosel."
                                   Margin="0 8"
                                   Width="120"
                                   ItemsSource="{x:Bind PageViewModel.CarouselTypeNames}"
                                   SelectedItem="{x:Bind PageViewModel.SelectedCarouselTypeName, Mode=TwoWay}">
                         </ComboBox>
-                        <ComboBox Header="Wheel Alignment"
+                        <ComboBox IsTabStop="False"
+                                  Header="Wheel Alignment"
                                   ToolTipService.ToolTip="Choose which container edge to align the wheel."
                                   Margin="16 8"
                                   Width="120"
@@ -30,23 +32,27 @@
                                   Visibility="{x:Bind PageViewModel.IsWheel, Mode=OneWay}">
                         </ComboBox>
                     </StackPanel>
-                    <Slider Header="Navigation Speed" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Navigation Speed" Margin="0 8"
                             ToolTipService.ToolTip="Speed (in ms) the carousel changes selection."
                             Value="{x:Bind PageViewModel.NavigationSpeed, Mode=TwoWay}"
                             Minimum="0" Maximum="2000"
                             StepFrequency="50"/>
-                    <Slider Header="Fliptych Amount" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Fliptych Amount" Margin="0 8"
                             ToolTipService.ToolTip="Create a Coverflow-like effect."
                             Value="{x:Bind PageViewModel.FliptychDegrees, Mode=TwoWay}"
                             Minimum="0" Maximum="90"
                             StepFrequency="0.1"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
-                    <Slider Header="Selected Item Scale" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Selected Item Scale" Margin="0 8"
                             ToolTipService.ToolTip="Animated grow and shrink effect for selected item."
                             Value="{x:Bind PageViewModel.SelectedItemScale, Mode=TwoWay}"
                             Minimum="1" Maximum="3.0"
                             StepFrequency="0.1"/>
-                    <Slider Header="Additional Items to Scale" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Additional Items to Scale" Margin="0 8"
                             ToolTipService.ToolTip="Number of items closest to selected to have an animated falloff effect."
                             Value="{x:Bind PageViewModel.AdditionalItemsToScale, Mode=TwoWay}"
                             Minimum="0" Maximum="12" 
@@ -56,38 +62,44 @@
                             Value="{x:Bind PageViewModel.Density, Mode=TwoWay}"
                             Minimum="12" Maximum="72"
                             StepFrequency="4"/>
-                    <Slider Header="Item Gap" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Item Gap" Margin="0 8"
                             ToolTipService.ToolTip="Space between items. Negative values allowed."
                             Value="{x:Bind PageViewModel.ItemGap, Mode=TwoWay}"
                             Minimum="-30" Maximum="100"
                             StepFrequency="1"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
-                    <Slider Header="Additional Items to Warp" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Additional Items to Warp" Margin="0 8"
                             ToolTipService.ToolTip="Number of items closest to selected to have an animated falloff effect."
                             Value="{x:Bind PageViewModel.AdditionalItemsToWarp, Mode=TwoWay}"
                             Minimum="0" Maximum="12" 
                             StepFrequency="2" 
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
-                    <Slider Header="Warp Intensity" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Warp Intensity" Margin="0 8"
                             ToolTipService.ToolTip="Amount to protrude the selected item. Use this and Warp Curve."
                             Value="{x:Bind PageViewModel.WarpIntensity, Mode=TwoWay}"
                             Minimum="-1280" Maximum="1280"
                             StepFrequency="1"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
-                    <Slider Header="Warp Curve" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Warp Curve" Margin="0 8"
                             ToolTipService.ToolTip="Curve of all protruding items. Use this and Warp Intensity"
                             Value="{x:Bind PageViewModel.WarpCurve, Mode=TwoWay}"
                             Minimum="0.0001" Maximum="0.01" 
                             StepFrequency="0.0001"
                             Visibility="{x:Bind PageViewModel.IsNotWheel, Mode=OneWay}"/>
-                    <ToggleSwitch Header="ZIndex Update Waits for Animation"
+                    <ToggleSwitch IsTabStop="False"
+                                  Header="ZIndex Update Waits for Animation"
                                   ToolTipService.ToolTip="Delay when the selected item becomes topmost"
                                   Margin="0 8"
                                   IsOn="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=TwoWay}" />
                     <StackPanel Orientation="Horizontal" Margin="0 8">
                         <TextBlock Text="Enter Desired Index and Press Tab: "/>
-                        <TextBox Margin="6 0" 
-                             Text="{x:Bind PageViewModel.IndexChooserInput, Mode=TwoWay}" />
+                        <TextBox IsTabStop="False"
+                                 Margin="6 0" 
+                                 Text="{x:Bind PageViewModel.IndexChooserInput, Mode=TwoWay}" />
                     </StackPanel>
                     <StackPanel Orientation="Horizontal"  Margin="0 8">
                         <TextBlock Text="Current Selected Index: "/>
@@ -98,10 +110,12 @@
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Center"
                                 Margin="16">
-                        <Button Content="Poster Gallery" 
+                        <Button IsTabStop="False"
+                                Content="Poster Gallery" 
                                 Margin="20 0"
                                 Tapped="PostersButton_Tapped"/>
-                        <Button Content="Album Gallery" 
+                        <Button IsTabStop="False"
+                                Content="Album Gallery" 
                                 Margin="20 0"
                                 Tapped="AlbumsButton_Tapped"/>
                     </StackPanel>
@@ -120,11 +134,11 @@
                     <RectangleGeometry Rect="0 0 1000 1000"/>
                 </Grid.Clip>
                 <Grid Width="300" Height="300"
-                  BorderBrush="Black"
-                  BorderThickness="1"
-                  Background="{x:Bind PageViewModel.SelectedItemBackground, Mode=OneWay}">
+                      BorderBrush="Black"
+                      BorderThickness="1"
+                      Background="{x:Bind PageViewModel.SelectedItemBackground, Mode=OneWay}">
                     <TextBlock FontSize="30" Margin="2"
-                           Text="{x:Bind PageViewModel.SelectedItemText, Mode=OneWay}"/>
+                               Text="{x:Bind PageViewModel.SelectedItemText, Mode=OneWay}"/>
                     <TextBlock FontSize="20"
                                TextWrapping="WrapWholeWords"
                                HorizontalAlignment="Center"

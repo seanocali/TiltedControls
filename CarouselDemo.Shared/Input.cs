@@ -73,7 +73,7 @@ namespace CarouselDemo
 #if NETFX_CORE
         public static void WheelChanged(Carousel carousel, PointerPoint point)
 #else
-        public static void WheelChanged(Carousel carousel, Microsoft.UI.Input.Experimental.ExpPointerPoint point)
+        public static void WheelChanged(Carousel carousel, PointerPoint point)
 #endif
         {
             if (carousel != null && carousel.AreItemsLoaded)

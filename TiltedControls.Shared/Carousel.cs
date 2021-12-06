@@ -43,7 +43,7 @@ namespace TiltedControls
     /// <remarks>
     /// Visual tree contains an empty ContentControl for tab indexing and keyboard focus.
     /// </remarks>
-    public class Carousel : Grid
+    public class Carousel : ContentControl
     {
         #region CONSTRUCTOR & INITIALIZATION METHODS
 
@@ -52,11 +52,13 @@ namespace TiltedControls
         /// </summary>
         public Carousel()
         {
+            _root = new Grid();
+            this.Content = _root;
             _delayedRefreshTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             _delayedRefreshTimer.Tick += _delayedRefreshTimer_Tick;
             _delayedZIndexUpdateTimer = new DispatcherTimer();
             _delayedZIndexUpdateTimer.Tick += _delayedZIndexUpdateTimer_Tick;
-            this.Background = new SolidColorBrush(Colors.Transparent);
+            _root.Background = new SolidColorBrush(Colors.Transparent);
         }
 
         void Refresh()
@@ -163,7 +165,7 @@ namespace TiltedControls
 
         void CreateContainers()
         {
-            this.Children.Clear();
+            _root.Children.Clear();
             _currentRowXPosTick = 0;
             _currentWheelTick = 0;
             _carouselInsertPosition = 0;
@@ -176,10 +178,8 @@ namespace TiltedControls
             ElementCompositionPreview.SetIsTranslationEnabled(_dynamicContainerGrid, true);
             AddImplicitWheelRotationAnimation(_dynamicGridVisual);
             _itemsLayerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-            _focusableDummyElement = new ContentControl { IsTabStop = true };
-            this.Children.Add(_focusableDummyElement);
             _dynamicContainerGrid.Children.Add(_itemsLayerGrid);
-            this.Children.Add(_dynamicContainerGrid);
+            _root.Children.Add(_dynamicContainerGrid);
             if (_hitbox != null)
             {
                 _hitbox.ManipulationStarted -= _hitbox_ManipulationStarted;
@@ -196,10 +196,10 @@ namespace TiltedControls
                 _hitbox.ManipulationStarted += _hitbox_ManipulationStarted;
                 _hitbox.ManipulationCompleted += _hitbox_ManipulationCompleted;
                 _hitbox.ManipulationDelta += _hitbox_ManipulationDelta;
-                this.Children.Add(_hitbox);
+                _root.Children.Add(_hitbox);
             }
 
-            ElementCompositionPreview.SetIsTranslationEnabled(this, true);
+            ElementCompositionPreview.SetIsTranslationEnabled(_root, true);
         }
 
         private void _hitbox_ManipulationDelta(object sender, ManipulationDeltaRoutedEventArgs e)
@@ -300,7 +300,7 @@ namespace TiltedControls
         #endregion
 
         #region FIELDS
-
+        Grid _root;
         volatile bool _inputAllowed;
         double _width;
         double _height;
@@ -317,7 +317,6 @@ namespace TiltedControls
         Grid _dynamicContainerGrid;
         Grid _itemsLayerGrid;
         Canvas _hitbox;
-        ContentControl _focusableDummyElement;
         volatile float _currentWheelTick;
         volatile float _currentWheelTickOffset;
         long _currentColumnYPosTick;
@@ -1392,6 +1391,7 @@ namespace TiltedControls
                                         using (ColorNode colorLerp = ExpressionFunctions.ColorLerp(selectedColor, deselectedColor, distanceAsPercentOfScaleThreshold))
                                         using (ColorNode finalColorExp = ExpressionFunctions.Conditional(isWithinScaleThreshold, colorLerp, deselectedColor))
                                         {
+                                            //CommunityToolkit.WinUI.UI.Animations.Expressions.CompositionExtensions.StartAnimation(targetStop, "Color", finalColorExp);
                                             targetStop.StartAnimation("Color", finalColorExp);
                                         }
                                     }
@@ -1796,7 +1796,6 @@ namespace TiltedControls
                 if (_maxItemWidth < element.ActualWidth) { _maxItemWidth = Convert.ToInt32(element.ActualWidth); }
                 if (_uIItemsCreated)
                 {
-                    bool result = true;
                     for (int i = (Density - 1); i > -1; i--)
                     {
                         int playlistIdx = (i + this.currentStartIndexBackwards) % Items.Count();
@@ -1814,7 +1813,6 @@ namespace TiltedControls
                         {
                             PositionElement(itemElement, i, (float)itemElement.ActualWidth, (float)itemElement.ActualHeight);
                         }
-                        else { result = false; }
                     }
                     OnItemsLoaded();
                 }
@@ -2022,10 +2020,20 @@ namespace TiltedControls
                 }
                 if (sb != null)
                 {
+                    sb.Completed += SelectionAnimation_Completed;
                     sb.Begin();
                 }
 
             }
+        }
+
+        private void SelectionAnimation_Completed(object sender, object e)
+        {
+            if (sender is Storyboard sb)
+            {
+                sb.Completed -= SelectionAnimation_Completed;
+            }
+            OnSelectionAnimationComplete();
         }
 
         private void RotateWheel(bool clockwise)
@@ -2186,6 +2194,17 @@ namespace TiltedControls
         void OnCarouselMovingStateChanged()
         {
             EventHandler handler = CarouselMovingStateChanged;
+            if (handler != null)
+                handler(this, null);
+        }
+
+        /// <summary>
+        /// Raises whenever an item selection storyboard animation completes.
+        /// </summary>
+        public event EventHandler SelectionAnimationComplete;
+        void OnSelectionAnimationComplete()
+        {
+            EventHandler handler = SelectionAnimationComplete;
             if (handler != null)
                 handler(this, null);
         }

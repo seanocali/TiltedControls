@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Windows.UI;
+using System.Diagnostics;
 
 #if NETFX_CORE
 using Microsoft.Toolkit.Uwp.UI;
@@ -35,8 +36,17 @@ namespace CarouselDemo
             DataContext = PageViewModel;
             this.Loaded += MainPage_Loaded;
             this.InitializeComponent();
-            this.KeyDown += MainPage_KeyDown;
             this.PointerWheelChanged += MainPage_PointerWheelChanged;
+#if NETFX_CORE
+            Window.Current.CoreWindow.KeyDown += CoreWindow_KeyDown;
+#else
+            this.KeyDown += MainPage_KeyDown;
+#endif
+        }
+
+        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            myCarousel.Focus(FocusState.Keyboard);
         }
 
         private void MainPage_PointerWheelChanged(object sender, PointerRoutedEventArgs e)
@@ -45,7 +55,21 @@ namespace CarouselDemo
             {
                 Input.WheelChanged(myCarousel, e.GetCurrentPoint(myCarousel));
             }
-            catch { }
+            catch { Debug.WriteLine("Mouse wheel input failed!"); }
+        }
+
+        private async void CoreWindow_KeyDown(Windows.UI.Core.CoreWindow sender, Windows.UI.Core.KeyEventArgs args)
+        {
+            try
+            {
+                args.Handled = true;
+                Debug.WriteLine("Key Pressed");
+                await FocusManager.TryFocusAsync(myCarousel, FocusState.Keyboard);
+                Input.KeyDown(myCarousel, args.VirtualKey);
+                var e = FocusManager.GetFocusedElement();
+                Debug.WriteLine(e.ToString());
+            }
+            catch { Console.Write($"Key input {args.VirtualKey} failed!"); }
         }
 
         private void MainPage_KeyDown(object sender, KeyRoutedEventArgs e)
@@ -54,14 +78,7 @@ namespace CarouselDemo
             {
                 Input.KeyDown(myCarousel, e.Key);
             }
-            catch { }
-        }
-
-        private async void MainPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            await Task.Delay(1500);
-            var focusableElement = myCarousel.FindDescendant<ContentControl>();
-            focusableElement.Focus(FocusState.Programmatic);
+            catch { Debug.WriteLine($"Key input {e.Key} failed!"); }
         }
 
         private void CreateTestItemsColors()

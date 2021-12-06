@@ -28,7 +28,8 @@
                     </DataTemplate>
                 </tilted:Carousel.ItemTemplate>
             </tilted:Carousel>
-            <Button Content="Close" 
+            <Button IsTabStop="False"
+                    Content="Close" 
                     Tapped="CloseButton_Tapped"
                     HorizontalAlignment="Right" VerticalAlignment="Top" 
                     Foreground="White" 

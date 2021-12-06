@@ -226,7 +226,14 @@ namespace TiltedControls
                     UpdateControllerLists();
                     if (HasInitialized || VendorId == null)
                     {
-                        await HandleRawInput(e);
+                        try
+                        {
+                            await HandleRawInput(e);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
                     }
                 }
             }
