@@ -256,7 +256,6 @@ namespace TiltedControls
 
         private static async void RootUIElement_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
         {
-            e.Handled = false;
             await SetLastUsedHardwareDevice(e.Key);
         }
 #endif

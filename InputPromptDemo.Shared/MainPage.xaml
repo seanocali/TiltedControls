@@ -18,12 +18,13 @@
                     HorizontalAlignment="Center">
                     <TextBlock VerticalAlignment="Top" 
                        Margin="40" 
+                               TextAlignment="Center"
                        HorizontalAlignment="Center"
                        FontSize="20" 
-                       FontStyle="Italic">Press a keyboard key,<LineBreak/>then press a gamepad button.</TextBlock>
+                       FontStyle="Italic">Alternate between keyboard input and gamepad input<LineBreak/>and observe the behavior in the box below</TextBlock>
                     <StackPanel HorizontalAlignment="Center"
                         Margin="0 20">
-                        <CheckBox Content="Monochrome Gamepad Icons" 
+                        <CheckBox Content="Use Monochrome Icons" 
                           Margin="10"
                           IsTabStop="False"
                           HorizontalAlignment="Center"

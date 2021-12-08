@@ -57,7 +57,8 @@
                             Value="{x:Bind PageViewModel.AdditionalItemsToScale, Mode=TwoWay}"
                             Minimum="0" Maximum="12" 
                             StepFrequency="2" />
-                    <Slider Header="Density" Margin="0 8"
+                    <Slider IsTabStop="False"
+                            Header="Density" Margin="0 8"
                             ToolTipService.ToolTip="Number of items active in the UI. Lower improves performance."
                             Value="{x:Bind PageViewModel.Density, Mode=TwoWay}"
                             Minimum="12" Maximum="72"

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CarouselDemo.WinUI (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "CarouselDemo.WinUI (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
