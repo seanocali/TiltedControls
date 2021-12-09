@@ -50,7 +50,12 @@ namespace InputPromptDemo
             SimulateGamepadInput(1406, 3302);
         }
 
-        void SimulateGamepadInput(ushort vendorId, ushort? productId)
+        private void KeyboardSim_Click(object sender, RoutedEventArgs e)
+        {
+            SimulateGamepadInput(null, null);
+        }
+
+        void SimulateGamepadInput(ushort? vendorId, ushort? productId)
         {
             var descendants = this.FindDescendants();
             foreach (var descendant in descendants)

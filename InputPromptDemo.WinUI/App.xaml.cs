@@ -42,7 +42,7 @@ namespace InputPromptDemo.WinUI
         /// <param name="args">Details about the launch request and process.</param>
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
         {
-            //throw new NotImplementedException("WinUI does not yet support gamepad input. Use UWP version.");
+            throw new NotImplementedException("WinUI does not yet support gamepad input. Use the UWP version of the InputPrompt Demo.");
             m_window = new Window();
             var frame = new Frame();
             m_window.Content = frame;

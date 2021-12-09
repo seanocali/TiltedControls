@@ -906,4 +906,44 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadLeftRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadUpDown.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadDownLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadDownRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadUpLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch Pro-DPadUpRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickClockwise.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickCounterclockwise.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickDown.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickDownLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickDownRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickLeftRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickUp.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickUpDown.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickUpLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LeftThumbstickUpRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickClockwise.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickCounterclockwise.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickDown.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickDownLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickDownRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickLeftRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickRight.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickUp.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickUpDown.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickUpLeft.svg" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-RightThumbstickUpRight.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-ZLZR.svg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Nintendo\Switch-LR.svg" />
+  </ItemGroup>
 </Project>

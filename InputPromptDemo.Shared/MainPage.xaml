@@ -15,61 +15,71 @@
         <Viewbox>
             <Grid>
                 <StackPanel VerticalAlignment="Center" 
-                    HorizontalAlignment="Center">
+                            HorizontalAlignment="Center">
                     <TextBlock VerticalAlignment="Top" 
-                       Margin="40" 
+                               Margin="40" 
                                TextAlignment="Center"
-                       HorizontalAlignment="Center"
-                       FontSize="20" 
-                       FontStyle="Italic">Alternate between keyboard input and gamepad input<LineBreak/>and observe the behavior in the box below</TextBlock>
+                               HorizontalAlignment="Center"
+                               FontSize="20" 
+                               FontStyle="Italic">Alternate between keyboard input and gamepad input<LineBreak/>and observe the behavior in the box below</TextBlock>
                     <StackPanel HorizontalAlignment="Center"
                         Margin="0 20">
                         <CheckBox Content="Use Monochrome Icons" 
-                          Margin="10"
-                          IsTabStop="False"
-                          HorizontalAlignment="Center"
-                          IsChecked="{x:Bind PageViewModel.MonochromeSelected, Mode=TwoWay}" />
+                                  Margin="10"
+                                  IsTabStop="False"
+                                  HorizontalAlignment="Center"
+                                  IsChecked="{x:Bind PageViewModel.MonochromeSelected, Mode=TwoWay}" />
                         <Button Content="Simulate Xbox 360 Gamepad Input"
-                        Margin="10"
-                        Width="300"
-                        IsTabStop="False"
-                        Click="Xbox360Button_Click"/>
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="Xbox360Button_Click"/>
                         <Button Content="Simulate Xbox One Gamepad Input"
-                        Margin="10"
-                        Width="300"
-                        IsTabStop="False"
-                        Click="XboxOneButton_Click"/>
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="XboxOneButton_Click"/>
                         <Button Content="Simulate PlayStation 4 DualShock Input" 
-                        Margin="10"
-                        Width="300"
-                        IsTabStop="False"
-                        Click="PS4Button_Click"/>
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="PS4Button_Click"/>
                         <Button Content="Simulate PlayStation 5 DualSense Input" 
-                        Margin="10"
-                        Width="300"
-                        IsTabStop="False"
-                        Click="PS5Button_Click"/>
-                        <!--<Button Content="Simulate Nintendo Switch Pro Input" 
-                        Margin="10"
-                        Width="300"
-                        IsTabStop="False"
-                        Click="SwitchPro_Click"/>-->
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="PS5Button_Click"/>
+                        <Button Content="Simulate Nintendo Switch Pro Input" 
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="SwitchPro_Click"/>
+                        <Button Content="Simulate Nintendo Switch Pro Input" 
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="SwitchPro_Click"/>
+                        <Button Content="Simulate Keyboard Input" 
+                                Margin="10"
+                                Width="300"
+                                IsTabStop="False"
+                                Click="KeyboardSim_Click"/>
                     </StackPanel>
 
                     <StackPanel HorizontalAlignment="Center"
-                            Margin="20"
-                            BorderBrush="Black"
-                            BorderThickness="4"
-                            Padding="20"
-                            CornerRadius="30">
+                                Margin="20"
+                                BorderBrush="Black"
+                                BorderThickness="4"
+                                Padding="20"
+                                CornerRadius="30">
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="LeftThumbstickUpDown"
                                         Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"  
                                         MaxHeight="50" 
                                         Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">Change Selection</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">Change Selection</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="LeftRightShoulder"  
@@ -77,51 +87,51 @@
                                         MaxHeight="50"
                                         Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">Change Mode</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">Change Mode</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="Y"
-                                        Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
-                                        MaxHeight="50" 
-                                        Margin="12 0"/>
+                                                Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
+                                                MaxHeight="50" 
+                                                Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">Help</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">Help</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="X"
-                                        Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
-                                        MaxHeight="50" 
-                                        Margin="12 0"/>
+                                                Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
+                                                MaxHeight="50" 
+                                                Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">More Info</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">More Info</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="B"
-                                        Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
-                                        MaxHeight="50" 
-                                        Margin="12 0"/>
+                                                Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
+                                                MaxHeight="50" 
+                                                Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">Go Back</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">Go Back</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <tilted:InputPrompt GamepadKey="A" 
-                                        ImageLoaded="InputPrompt_ImageLoaded"
-                                        Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
-                                        MaxHeight="50" 
-                                        Margin="12 0"/>
+                                                ImageLoaded="InputPrompt_ImageLoaded"
+                                                Monochrome="{x:Bind PageViewModel.Monochrome, Mode=OneWay}"
+                                                MaxHeight="50" 
+                                                Margin="12 0"/>
                             <TextBlock VerticalAlignment="Center" 
-                               FontSize="30" 
-                               FontWeight="Bold">Select Item</TextBlock>
+                                       FontSize="30" 
+                                       FontWeight="Bold">Select Item</TextBlock>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel VerticalAlignment="Bottom" 
-                    HorizontalAlignment="Right" 
-                    Margin="12">
+                            HorizontalAlignment="Right" 
+                            Margin="12">
                 </StackPanel>
             </Grid>
         </Viewbox>

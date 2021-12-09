@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Media.Imaging;
+using System.Drawing;
 #endif
 using System;
 using System.IO;
@@ -78,7 +79,7 @@ namespace TiltedControls
             await Refresh();
         }
 
-        public async void SimulateInput(ushort vendorId, ushort? productId)
+        public async void SimulateInput(ushort? vendorId, ushort? productId)
         {
             InputPollingService.ProductId = productId;
             InputPollingService.VendorId = vendorId;
