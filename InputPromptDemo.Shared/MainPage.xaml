@@ -17,13 +17,13 @@
                 <StackPanel VerticalAlignment="Center" 
                             HorizontalAlignment="Center">
                     <TextBlock VerticalAlignment="Top" 
-                               Margin="40" 
+                               Margin="40 20" 
                                TextAlignment="Center"
                                HorizontalAlignment="Center"
                                FontSize="20" 
                                FontStyle="Italic">Alternate between keyboard input and gamepad input<LineBreak/>and observe the behavior in the box below</TextBlock>
                     <StackPanel HorizontalAlignment="Center"
-                        Margin="0 20">
+                        Margin="0 10">
                         <CheckBox Content="Use Monochrome Icons" 
                                   Margin="10"
                                   IsTabStop="False"
@@ -49,11 +49,6 @@
                                 Width="300"
                                 IsTabStop="False"
                                 Click="PS5Button_Click"/>
-                        <Button Content="Simulate Nintendo Switch Pro Input" 
-                                Margin="10"
-                                Width="300"
-                                IsTabStop="False"
-                                Click="SwitchPro_Click"/>
                         <Button Content="Simulate Nintendo Switch Pro Input" 
                                 Margin="10"
                                 Width="300"
