@@ -116,7 +116,7 @@ namespace TiltedControls
                 catch (Exception ex)
                 {
                     _cancelTokenSource.Cancel();
-                    Debug.WriteLine(ex.Message);
+                    Trace.WriteLine(ex.Message);
                 }
             }
             _inputAllowed = true;
@@ -1775,7 +1775,7 @@ namespace TiltedControls
 
                 if (w == 0 || h == 0)
                 {
-                    Debug.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
+                    Trace.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
                     return null;
                 }
 

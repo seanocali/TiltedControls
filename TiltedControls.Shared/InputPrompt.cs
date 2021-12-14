@@ -32,9 +32,6 @@ namespace TiltedControls
 
         public InputPrompt()
         {
-//#if !NETFX_CORE
-//            throw new NotImplementedException("Input Prompt only works on UWP apps at this time.");
-//#endif
             _image = new Image();
             _source = new SvgImageSource();
             _image.Source = _source;

@@ -155,7 +155,7 @@ namespace TiltedControls
                 if (model.Buttons[i])
                 {
                     var label = model.Controller.GetButtonLabel(i);
-                    Debug.WriteLine(label);
+                    Trace.WriteLine(label);
                 }
             }
 
