@@ -332,7 +332,7 @@ namespace TiltedControls
 
         static async Task HandleRawInput(RawGameController raw)
         {
-            if (VendorId != raw.HardwareProductId || ProductId != raw.HardwareProductId)
+            if (VendorId != raw.HardwareVendorId || ProductId != raw.HardwareProductId)
             {
                 VendorId = raw.HardwareVendorId;
                 ProductId = raw.HardwareProductId;

@@ -43,7 +43,7 @@ namespace TiltedControls
 
         internal static Task AsTask(this CancellationToken cancellationToken)
         {
-            var tcs = new TaskCompletionSource<object>();
+            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
             cancellationToken.Register(() => tcs.TrySetCanceled(),
                 useSynchronizationContext: false);
             return tcs.Task;
