@@ -1,0 +1,69 @@
+﻿<UserControl
+    x:Class="TiltedControls.Shared.OnScreenKeyboard"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:TiltedControls.Shared"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Viewbox>
+        <Grid>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="1" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="2" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="3" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="4" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="5" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="6" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="7" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="8" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="9" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="0" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="48" BorderThickness="1" Click="B_Clicked" Content="Back" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="Q" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="W" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="28" BorderThickness="1" Click="B_Clicked" Content="E" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="R" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="28" BorderThickness="1" Click="B_Clicked" Content="T" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="28" BorderThickness="1" Click="B_Clicked" Content="Y" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="U" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="28" BorderThickness="1" Click="B_Clicked" Content="I" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="O" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="P" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="26" BorderThickness="1" Click="B_Clicked" Content="-" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="A" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="S" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="D" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="F" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="G" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="H" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="J" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="K" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="L" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="'" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="Enter" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="Z" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="X" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="C" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="V" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="B" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="M" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="N" />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="22" BorderThickness="1" Click="B_Clicked" Content="," />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="." />
+                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" Width="72" BorderThickness="1" Click="B_Clicked" Content="Space" />
+                </StackPanel>
+            </StackPanel>
+
+
+        </Grid>
+
+    </Viewbox>
+</UserControl>

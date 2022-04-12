@@ -897,11 +897,18 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InputPollingService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)InputPrompt.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)OnScreenKeyboard.xaml.cs">
+      <DependentUpon>OnScreenKeyboard.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)RawGameControllerModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Page Include="$(MSBuildThisFileDirectory)CarouselItem.xaml">
       <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)OnScreenKeyboard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

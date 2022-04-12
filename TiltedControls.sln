@@ -17,9 +17,11 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "InputPromptDemo.Shared", "I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TiltedControls.WinUI.Desktop", "TiltedControls.WinUI.Desktop\TiltedControls.WinUI.Desktop.csproj", "{8F64EBDA-2F68-4CC2-B336-396E1F159469}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarouselDemo.WinUI", "CarouselDemo.WinUI\CarouselDemo.WinUI.csproj", "{ADC00ECA-8A82-426D-B183-BA996B92835C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarouselDemo.WinUI", "CarouselDemo.WinUI\CarouselDemo.WinUI.csproj", "{ADC00ECA-8A82-426D-B183-BA996B92835C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputPromptDemo.WinUI", "InputPromptDemo.WinUI\InputPromptDemo.WinUI.csproj", "{61713786-8D2B-45F7-8869-402FE3E7E9E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InputPromptDemo.WinUI", "InputPromptDemo.WinUI\InputPromptDemo.WinUI.csproj", "{61713786-8D2B-45F7-8869-402FE3E7E9E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnScreenKeyboardDemo", "OnScreenKeyboardDemo\OnScreenKeyboardDemo.csproj", "{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -200,6 +202,36 @@ Global
 		{61713786-8D2B-45F7-8869-402FE3E7E9E1}.Release|x86.ActiveCfg = Release|x86
 		{61713786-8D2B-45F7-8869-402FE3E7E9E1}.Release|x86.Build.0 = Release|x86
 		{61713786-8D2B-45F7-8869-402FE3E7E9E1}.Release|x86.Deploy.0 = Release|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|Any CPU.Build.0 = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM.ActiveCfg = Debug|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM.Build.0 = Debug|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM.Deploy.0 = Debug|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM64.Build.0 = Debug|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|ARM64.Deploy.0 = Debug|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x64.ActiveCfg = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x64.Build.0 = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x64.Deploy.0 = Debug|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x86.ActiveCfg = Debug|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x86.Build.0 = Debug|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Debug|x86.Deploy.0 = Debug|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|Any CPU.ActiveCfg = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|Any CPU.Build.0 = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|Any CPU.Deploy.0 = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM.ActiveCfg = Release|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM.Build.0 = Release|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM.Deploy.0 = Release|ARM
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM64.ActiveCfg = Release|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM64.Build.0 = Release|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|ARM64.Deploy.0 = Release|ARM64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x64.ActiveCfg = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x64.Build.0 = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x64.Deploy.0 = Release|x64
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x86.ActiveCfg = Release|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x86.Build.0 = Release|x86
+		{7B47ADF8-1783-405A-A4BC-D5F0E35F0CBB}.Release|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
