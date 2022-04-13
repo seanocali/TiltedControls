@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using static TiltedControls.Common;
+using System.Diagnostics;
 
 namespace TiltedControls
 {
@@ -25,7 +26,6 @@ namespace TiltedControls
         Image _image;
         SvgImageSource _source;
         Assembly _assembly;
-        CancellationTokenSource _cts;
 
         static FontFamily _xboxOneMonochromeFont;
         static FontFamily _ps4MonochromeFont;
@@ -83,61 +83,67 @@ namespace TiltedControls
             await Refresh(vendorId, productId);
         }
 
+        volatile bool _refreshQueued;
+        volatile bool _refreshBusy;
+
         async Task Refresh(ushort? simulatedVendorId = null, ushort? simulatedProductId = null)
         {
-            if (_cts != null)
+            _refreshQueued = true;
+            if (!_refreshBusy)
             {
-                _cts.Cancel();
-                _cts.Dispose();
-            }
-            _cts = new CancellationTokenSource();
-            var cancellationToken = _cts.Token;
-            string rootFolderName = null;
-            string themeName = null;
-            string productName = null;
-            string keyName = null;
-            var key = ReverseAxes ? GetReverseAxis(GamepadKey) : GamepadKey;
-            ushort? vendorId = simulatedVendorId != null ? simulatedVendorId : InputPollingService.VendorId;
-            ushort? productId = simulatedProductId != null ? simulatedProductId : InputPollingService.ProductId;
-
-            rootFolderName = vendorId != null ? GetVendorName((ushort)vendorId) : null;
-            productName = vendorId != null && productId != null ? GetProductName((ushort)vendorId, productId) : null;
-
-            string monochromeFontName = Monochrome != MonochromeModes.None ? GetMonochromeFontName(rootFolderName, productName, Monochrome == MonochromeModes.Force) : null;
-            if (monochromeFontName != null)
-            {
-
-                var vb = new Viewbox();
-                var tb = new TextBlock();
-                tb.Foreground = this.Foreground;
-                tb.FontFamily = LoadAndGetFont(monochromeFontName);
-                var hexStr = "E8" + ((int)key).ToString("X2");
-                int decValue = int.Parse(hexStr, System.Globalization.NumberStyles.HexNumber);
-                var c = (char)decValue;
-                tb.Text = c.ToString();
-                vb.Child = tb;
-                this.Content = vb;
-            }
-            else
-            {
-                if (this.Content is Image image && image == _image) { }
-                else { this.Content = _image; }
-                if (!InputPollingService.IsKeyboard)
+                _refreshBusy = true;
+                while (_refreshQueued)
                 {
-                    if (productName != null) { productName += '-'; }
-                    keyName = GetGamepadKeyName(key, (ushort)vendorId, productId).Replace("Gamepad", "");
-                }
-                if (rootFolderName == null)
-                {
-                    rootFolderName = "Keyboard";
-                    themeName = Monochrome != MonochromeModes.None ? "Monochrome" : "";
-                    themeName += Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
-                    keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
-                }
-                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
-                string resourceName = $"{assemblyName}.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
+                    _refreshQueued = false;
+                    string rootFolderName = null;
+                    string themeName = null;
+                    string productName = null;
+                    string keyName = null;
+                    var key = ReverseAxes ? GetReverseAxis(GamepadKey) : GamepadKey;
+                    ushort? vendorId = simulatedVendorId != null ? simulatedVendorId : InputPollingService.VendorId;
+                    ushort? productId = simulatedProductId != null ? simulatedProductId : InputPollingService.ProductId;
 
-                await UpdateImageFromEmbeddedResource(resourceName, cancellationToken);
+                    rootFolderName = vendorId != null ? GetVendorName((ushort)vendorId) : null;
+                    productName = vendorId != null && productId != null ? GetProductName((ushort)vendorId, productId) : null;
+
+                    string monochromeFontName = Monochrome != MonochromeModes.None ? GetMonochromeFontName(rootFolderName, productName, Monochrome == MonochromeModes.Force) : null;
+                    if (monochromeFontName != null)
+                    {
+
+                        var vb = new Viewbox();
+                        var tb = new TextBlock();
+                        tb.Foreground = this.Foreground;
+                        tb.FontFamily = LoadAndGetFont(monochromeFontName);
+                        var hexStr = "E8" + ((int)key).ToString("X2");
+                        int decValue = int.Parse(hexStr, System.Globalization.NumberStyles.HexNumber);
+                        var c = (char)decValue;
+                        tb.Text = c.ToString();
+                        vb.Child = tb;
+                        this.Content = vb;
+                    }
+                    else
+                    {
+                        if (this.Content is Image image && image == _image) { }
+                        else { this.Content = _image; }
+                        if (!InputPollingService.IsKeyboard)
+                        {
+                            if (productName != null) { productName += '-'; }
+                            keyName = GetGamepadKeyName(key, (ushort)vendorId, productId).Replace("Gamepad", "");
+                        }
+                        if (rootFolderName == null)
+                        {
+                            rootFolderName = "Keyboard";
+                            themeName = Monochrome != MonochromeModes.None ? "Monochrome" : "";
+                            themeName += Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
+                            keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
+                        }
+                        var assemblyName = Assembly.GetExecutingAssembly().GetName().Name;
+                        string resourceName = $"{assemblyName}.Resources.InputPromptImages.{rootFolderName}.{themeName}{productName}{keyName}.svg";
+
+                        await UpdateImageFromEmbeddedResource(resourceName);
+                    }
+                }
+                _refreshBusy = false;
             }
         }
 
@@ -154,8 +160,9 @@ namespace TiltedControls
             }
             return null;
         }
+        
 
-        private async Task UpdateImageFromEmbeddedResource(string resourceName, CancellationToken cancellationToken)
+        private async Task UpdateImageFromEmbeddedResource(string resourceName)
         {
             bool success = false;
             try
@@ -166,20 +173,12 @@ namespace TiltedControls
                     {
                         using (var memStream = new MemoryStream())
                         {
-                            await Task.WhenAny(resourceStream.CopyToAsync(memStream), cancellationToken.AsTask());
-                            if (!cancellationToken.IsCancellationRequested)
+                            await resourceStream.CopyToAsync(memStream);
+                            memStream.Position = 0;
+                            using (var raStream = memStream.AsRandomAccessStream())
                             {
-                                memStream.Position = 0;
-                                using (var raStream = memStream.AsRandomAccessStream())
-                                {
-                                    var setSourceTask = _source.SetSourceAsync(raStream).AsTask();
-                                    await Task.WhenAny(setSourceTask, cancellationToken.AsTask());
-                                    if (!cancellationToken.IsCancellationRequested)
-                                    {
-                                        SvgImageSourceLoadStatus status = await setSourceTask;
-                                        success = status == 0;
-                                    }
-                                }
+                                var status = await _source.SetSourceAsync(raStream).AsTask();
+                                success = status == 0;
                             }
                         }
                     }
