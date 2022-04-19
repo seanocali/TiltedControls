@@ -704,15 +704,15 @@ namespace TiltedControls
         {
             get
             {
-                return (int)base.GetValue(AditionalItemsToScaleProperty);
+                return (int)base.GetValue(AdditionalItemsToScaleProperty);
             }
             set
             {
-                base.SetValue(AditionalItemsToScaleProperty, value);
+                base.SetValue(AdditionalItemsToScaleProperty, value);
             }
         }
 
-        public static readonly DependencyProperty AditionalItemsToScaleProperty = DependencyProperty.Register(nameof(AdditionalItemsToScale), typeof(int), typeof(Carousel),
+        public static readonly DependencyProperty AdditionalItemsToScaleProperty = DependencyProperty.Register(nameof(AdditionalItemsToScale), typeof(int), typeof(Carousel),
          new PropertyMetadata(0, OnCaptionPropertyChanged));
 
         /// <summary>
@@ -757,15 +757,15 @@ namespace TiltedControls
         {
             get
             {
-                return (WheelAlignments)base.GetValue(WheelOrientationProperty);
+                return (WheelAlignments)base.GetValue(WheelAlignmentProperty);
             }
             set
             {
-                base.SetValue(WheelOrientationProperty, value);
+                base.SetValue(WheelAlignmentProperty, value);
             }
         }
 
-        public static readonly DependencyProperty WheelOrientationProperty = DependencyProperty.Register(nameof(WheelAlignment), typeof(WheelAlignments), typeof(Carousel),
+        public static readonly DependencyProperty WheelAlignmentProperty = DependencyProperty.Register(nameof(WheelAlignment), typeof(WheelAlignments), typeof(Carousel),
             new PropertyMetadata(WheelAlignments.Right, OnCaptionPropertyChanged));
 
         /// <summary>
