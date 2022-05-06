@@ -4,61 +4,147 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:TiltedControls"
     mc:Ignorable="d" >
+    <UserControl.Resources>
+        <local:StringCaseConverter x:Key="StringCaseConverter" />
+        <Style x:Key="ButtonStyleRegularKey" TargetType="Button">
+            <Setter Property="Background" Value="{ThemeResource ButtonBackground}"/>
+            <Setter Property="BackgroundSizing" Value="OuterBorderEdge"/>
+            <Setter Property="Foreground" Value="{ThemeResource ButtonForeground}"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Width" Value="34" />
+            <Setter Property="Height" Value="30" />
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+            <Setter Property="UseSystemFocusVisuals" Value="{StaticResource UseSystemFocusVisuals}"/>
+            <Setter Property="FocusVisualMargin" Value="-3"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter x:Name="ContentPresenter" AutomationProperties.AccessibilityView="Raw" 
+                                          Background="{TemplateBinding Background}" 
+                                          BackgroundSizing="{TemplateBinding BackgroundSizing}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}" CornerRadius="3" Content="{TemplateBinding Content}"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                                          Padding="10 6">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal">
+                                        <Storyboard>
+                                            <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="PointerOver">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundPointerOver}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPointerOver}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundPointerOver}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <PointerUpThemeAnimation Storyboard.TargetName="ContentPresenter"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundPressed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushPressed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundPressed}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <PointerDownThemeAnimation Storyboard.TargetName="ContentPresenter"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Background">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBackgroundDisabled}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="BorderBrush">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonBorderBrushDisabled}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetName="ContentPresenter" Storyboard.TargetProperty="Foreground">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonForegroundDisabled}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                        </ContentPresenter>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     <Viewbox>
         <Grid>
             <StackPanel Margin="40 0 40 2">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="1" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="2" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="3" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="4" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="5" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="6" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="7" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="8" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="9" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="0" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="62" BorderThickness="1" Click="B_Clicked" Content="Back" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="1" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="2" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="3" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="4" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="5" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="6" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="7" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="8" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="9" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="0" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="Back" Width="70" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="Q" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="W" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="28" BorderThickness="1" Click="B_Clicked" Content="E" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="R" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="28" BorderThickness="1" Click="B_Clicked" Content="T" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="28" BorderThickness="1" Click="B_Clicked" Content="Y" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="U" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="28" BorderThickness="1" Click="B_Clicked" Content="I" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="O" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="P" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="26" BorderThickness="1" Click="B_Clicked" Content="-" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="/" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=q}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=w}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=e}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=r}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=t}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=y}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=u}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=i}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=o}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=p}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="-" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="/" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="A" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="S" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="D" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="F" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="G" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="H" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="J" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="K" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="L" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="'" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="66" BorderThickness="1" Click="B_Clicked" Content="Enter" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=a}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=s}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=d}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=f}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=g}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=h}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=j}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=k}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=l}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="'" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="Enter" Width="70"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="Z" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="X" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="C" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="V" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="B" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="M" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="N" />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="22" BorderThickness="1" Click="B_Clicked" Content="," />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" BorderThickness="1" Click="B_Clicked" Content="." />
-                    <Button BorderBrush="{ThemeResource SystemBaseLowColor}" MinWidth="98" BorderThickness="1" Click="B_Clicked" Content="Space" />
+                    <ToggleButton x:Name="ShiftKey" FontFamily="/Resources/Fonts/MaterialIcons-Regular.ttf#Material Icons" 
+                                  Padding="10 6" Height="30" Width="34" BorderThickness="0" Margin="1"
+                            FontWeight="Bold"
+                            Content="&#xE318;" />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=z}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=x}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=c}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=v}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=b}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=n}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="{Binding ElementName=ShiftKey, Path=IsChecked, Converter={StaticResource StringCaseConverter}, ConverterParameter=m}"/>
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="," />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="." />
+                    <Button Style="{StaticResource ButtonStyleRegularKey}" Click="B_Clicked" Content="Space" Width="70"/>
                 </StackPanel>
             </StackPanel>
 

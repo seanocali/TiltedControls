@@ -9,6 +9,7 @@
     <Import_RootNamespace>TiltedControls.Shared</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Resources\Fonts\MaterialIcons-Regular.ttf" />
     <Content Include="$(MSBuildThisFileDirectory)Resources\Fonts\ps4.ttf" />
     <Content Include="$(MSBuildThisFileDirectory)Resources\Fonts\xboxone.ttf" />
   </ItemGroup>
@@ -890,6 +891,7 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Valve\Vive-TrackpadUp.svg" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)StringCaseConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Carousel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CarouselItem.xaml.cs">
       <DependentUpon>CarouselItem.xaml</DependentUpon>

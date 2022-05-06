@@ -21,6 +21,18 @@ namespace TiltedControls
             return pixels;
         }
 
+        public enum PickerModes
+        {
+            File,
+            Folder
+        }
+
+        public enum PickerViews
+        {
+            Grid,
+            List
+        }
+
         public enum CarouselTypes
         {
             Wheel, Column, Row
