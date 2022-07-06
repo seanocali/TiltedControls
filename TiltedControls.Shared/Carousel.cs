@@ -1728,21 +1728,34 @@ namespace TiltedControls
         {
             if (ItemTemplate != null)
             {
+                int w = 0;
+                int h = 0;
                 FrameworkElement element = ItemTemplate.LoadContent() as FrameworkElement;
                 if (ItemContentStyle != null)
                 {
                     var descendants = element.FindDescendants();
-                    var child = descendants.Where(x => x.GetType() == ItemContentStyle.TargetType).FirstOrDefault() as FrameworkElement;
-                    if (child != null)
+                    var targetTypeChild = descendants.Where(x => x.GetType() == ItemContentStyle.TargetType).FirstOrDefault() as FrameworkElement;
+                    if (targetTypeChild != null)
                     {
-                        Convert.ChangeType(child, ItemContentStyle.TargetType);
-                        child.Style = ItemContentStyle;
-                        child.Tag = true;
+                        Convert.ChangeType(targetTypeChild, ItemContentStyle.TargetType);
+                        targetTypeChild.Style = ItemContentStyle;
+                        targetTypeChild.Tag = true;
+                        if (Double.IsNaN(targetTypeChild.Width) || Double.IsNaN(targetTypeChild.Height))
+                        {
+                            if (!Double.IsInfinity(targetTypeChild.MaxWidth) && !Double.IsInfinity(targetTypeChild.MaxHeight))
+                            {
+                                w = Convert.ToInt32(targetTypeChild.MaxWidth + targetTypeChild.Margin.Left + targetTypeChild.Margin.Right);
+                                h = Convert.ToInt32(targetTypeChild.MaxHeight + targetTypeChild.Margin.Top + targetTypeChild.Margin.Bottom);
+                            }
+                        }
+                        else
+                        {
+                            w = Convert.ToInt32(targetTypeChild.Width + targetTypeChild.Margin.Left + targetTypeChild.Margin.Right);
+                            h = Convert.ToInt32(targetTypeChild.Height + targetTypeChild.Margin.Top + targetTypeChild.Margin.Bottom);
+                        }
                     }
                 }
                 element.DataContext = Items[playlistIdx];
-                int w = 0;
-                int h = 0;
                 if (Double.IsNaN(element.Height) || Double.IsNaN(element.Width))
                 {
                     if (!Double.IsInfinity(element.MaxWidth) && !Double.IsInfinity(element.MaxHeight))
@@ -1775,8 +1788,7 @@ namespace TiltedControls
 
                 if (w == 0 || h == 0)
                 {
-                    Trace.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) must be set.");
-                    return null;
+                    Trace.WriteLine("Tilted Carousel: Item Height and Width (or MaxHeight and MaxWidth) not set.");
                 }
 
                 if (_maxItemWidth < element.MaxWidth) { _maxItemWidth = w; }
