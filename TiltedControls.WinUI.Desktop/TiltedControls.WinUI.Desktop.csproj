@@ -12,8 +12,8 @@
       <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
       <PackageReference Include="CommunityToolkit.WinUI.UI.Animations" Version="7.1.2" />
       <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
-      <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.0.1" />
-      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22579-preview" />
+      <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.220727.1-experimental1" />
+      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.25179-preview" />
   </ItemGroup>
 
   <Import Project="..\TiltedControls.Shared\TiltedControls.Shared.projitems" Label="Shared" />

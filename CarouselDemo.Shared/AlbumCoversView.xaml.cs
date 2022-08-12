@@ -53,8 +53,7 @@ namespace CarouselDemo
             postersFile = new FileInfo("TestData/AlbumCoverLinks.txt");
 #else
             var dir = new DirectoryInfo(System.AppDomain.CurrentDomain.BaseDirectory);
-            var parent = dir.Parent.FullName;
-            postersFile = new FileInfo(Path.Combine(parent, "TestData/AlbumCoverLinks.txt"));
+            postersFile = new FileInfo(Path.Combine(dir.FullName, "TestData", "AlbumCoverLinks.txt"));
 #endif
             if (postersFile.Exists)
             {

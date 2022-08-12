@@ -136,12 +136,20 @@ namespace TiltedControls
             {
                 foreach (var pair in _controllers)
                 {
+#if NETFX_CORE
                     if (pair.Value == null)
+#else
+                    if (pair.Key != null)
+#endif
                     {
                         var rawOnlyController = pair.Key;
-                        var model = _rawControllers[pair.Key];
-                        rawOnlyController.GetCurrentReading(model.Buttons, model.Switches, model.Axes);
-                        await ParseRawReading(model);
+                        if (_rawControllers.ContainsKey(rawOnlyController))
+                        {
+                            var model = _rawControllers[pair.Key];
+                            rawOnlyController.GetCurrentReading(model.Buttons, model.Switches, model.Axes);
+                            await ParseRawReading(model);
+                        }
+
                     }
                 }
                 await Task.Delay(50);
@@ -197,6 +205,7 @@ namespace TiltedControls
                 _controllers[raw] = gamepad;
             }
 
+#if NETFX_CORE
             if (_controllers.Values.Any(x => x == null))
             {
                 StartRawPolling();
@@ -205,6 +214,19 @@ namespace TiltedControls
             {
                 StopRawPolling();
             }
+
+#else
+            if (_controllers.Any())
+            {
+                StartRawPolling();
+            }
+            else
+            {
+                StopRawPolling();
+            }
+#endif
+
+
         }
 
         private static void RawGameController_RawGameControllerRemoved(object sender, RawGameController e)
@@ -336,10 +358,14 @@ namespace TiltedControls
             {
                 VendorId = raw.HardwareVendorId;
                 ProductId = raw.HardwareProductId;
+#if NETFX_CORE
                 await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
                     OnLastInputTypeChanged();
                 });
+#else
+                OnLastInputTypeChanged();
+#endif
             }
         }
 

@@ -20,12 +20,24 @@ namespace InputPromptDemo
             }
         }
 
+        public bool MonochromeAvailable
+        {
+            get
+            {
+#if NETFX_CORE
+                return true;
+#else
+                return false;
+#endif
+            }
+        }
+
         private MonochromeModes _monochrome;
         public MonochromeModes Monochrome
         {
             get { return _monochrome; }
-            set 
-            { 
+            set
+            {
                 _monochrome = value;
                 OnPropertyChanged(nameof(Monochrome));
             }
@@ -36,8 +48,8 @@ namespace InputPromptDemo
         public string VendorId
         {
             get { return _vendorId; }
-            set 
-            { 
+            set
+            {
                 if (value != _vendorId)
                 {
                     _vendorId = value;

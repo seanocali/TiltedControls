@@ -96,7 +96,7 @@ namespace TiltedControls
                 {
                     _refreshQueued = false;
                     string rootFolderName = null;
-                    string themeName = null;
+                    string themeName = "";
                     string productName = null;
                     string keyName = null;
                     var key = ReverseAxes ? GetReverseAxis(GamepadKey) : GamepadKey;
@@ -106,7 +106,11 @@ namespace TiltedControls
                     rootFolderName = vendorId != null ? GetVendorName((ushort)vendorId) : null;
                     productName = vendorId != null && productId != null ? GetProductName((ushort)vendorId, productId) : null;
 
+#if NETFX_CORE
                     string monochromeFontName = Monochrome != MonochromeModes.None ? GetMonochromeFontName(rootFolderName, productName, Monochrome == MonochromeModes.Force) : null;
+#else
+                    string monochromeFontName = null;
+#endif
                     if (monochromeFontName != null)
                     {
 
@@ -133,7 +137,9 @@ namespace TiltedControls
                         if (rootFolderName == null)
                         {
                             rootFolderName = "Keyboard";
+#if NETFX_CORE
                             themeName = Monochrome != MonochromeModes.None ? "Monochrome" : "";
+#endif
                             themeName += Theme == ApplicationTheme.Dark ? "Dark." : "Light.";
                             keyName = MappedKeyboardKey != null ? MappedKeyboardKey : GetDefaultKeyboardKeyName(key);
                         }
@@ -149,13 +155,17 @@ namespace TiltedControls
 
         private FontFamily LoadAndGetFont(string requestedFont)
         {
+            string fontBase = "";
+#if !NETFX_CORE
+            fontBase = System.AppDomain.CurrentDomain.BaseDirectory;
+#endif
             switch (requestedFont)
             {
                 case "xboxone":
-                    if (_xboxOneMonochromeFont == null) { _xboxOneMonochromeFont = new FontFamily("/TiltedControls/Resources/Fonts/xboxone.ttf#xboxone"); }
+                    if (_xboxOneMonochromeFont == null) { _xboxOneMonochromeFont = new FontFamily(fontBase + "/TiltedControls/Resources/Fonts/xboxone.ttf#xboxone"); }
                     return _xboxOneMonochromeFont;
                 case "ps4":
-                    if (_ps4MonochromeFont == null) { _ps4MonochromeFont = new FontFamily("/TiltedControls/Resources/Fonts/ps4.ttf#ps4"); }
+                    if (_ps4MonochromeFont == null) { _ps4MonochromeFont = new FontFamily(fontBase + "/TiltedControls/Resources/Fonts/ps4.ttf#ps4"); }
                     return _ps4MonochromeFont;
             }
             return null;
@@ -623,11 +633,16 @@ namespace TiltedControls
         public static readonly DependencyProperty GamepadKeyProperty = DependencyProperty.Register(nameof(GamepadKey), typeof(GamepadInputTypes), typeof(InputPrompt),
             new PropertyMetadata(GamepadInputTypes.None, OnMapPropertyChanged));
 
+
         public MonochromeModes Monochrome
         {
             get
             {
+#if NETFX_CORE
                 return (MonochromeModes)base.GetValue(MonochromeProperty);
+#else
+                return MonochromeModes.None;
+#endif
             }
             set
             {
