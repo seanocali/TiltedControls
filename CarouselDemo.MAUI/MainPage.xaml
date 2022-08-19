@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:tilted="clr-namespace:TiltedControls;assembly=TiltedControls.MAUI"
+             xmlns:local="using:CarouselDemo"
+             x:Class="CarouselDemo.MAUI.MainPage">
+
+    <tilted:Carousel x:Name="myCarousel"
+                                 ItemsSource="{Binding Items, Mode=OneWay}"
+                                 SelectedIndex="{Binding PageViewModel.SelectedIndex, Mode=TwoWay}"
+                                 CarouselType="Row"
+                                 WheelAlignment="{Binding PageViewModel.WheelAlignment, Mode=OneWay}"
+                                 NavigationSpeed="{Binding PageViewModel.NavigationSpeed, Mode=OneWay}"
+                                 FliptychDegrees="{Binding PageViewModel.FliptychDegrees, Mode=OneWay}"
+                                 SelectedItemScale="{Binding PageViewModel.SelectedItemScale, Mode=OneWay}"
+                                 AdditionalItemsToScale="{Binding PageViewModel.AdditionalItemsToScale, Mode=OneWay}"
+                                 Density="24"
+                                 ItemGap="{Binding PageViewModel.ItemGap, Mode=OneWay}"
+                                 AdditionalItemsToWarp="{Binding PageViewModel.AdditionalItemsToWarp, Mode=OneWay}"
+                                 WarpIntensity="{Binding PageViewModel.WarpIntensity, Mode=OneWay}"
+                                 WarpCurve="{Binding PageViewModel.WarpCurve, Mode=OneWay}"
+                                 ZIndexUpdateWaitsForAnimation="{Binding PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=OneWay}" >
+        <tilted:Carousel.ItemTemplate>
+            <DataTemplate x:DataType="local:ItemModel">
+                <tilted:CarouselItem x:Name="carouselItem"
+                                                 WidthRequest="100" HeightRequest="40" >
+                    <Grid  Background="{Binding BackgroundColor}">
+                        <Label Text="{Binding Text}" />
+                    </Grid>
+                </tilted:CarouselItem>
+            </DataTemplate>
+        </tilted:Carousel.ItemTemplate>
+
+    </tilted:Carousel>
+</ContentPage>
