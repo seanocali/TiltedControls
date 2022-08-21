@@ -71,7 +71,7 @@ namespace CarouselDemo
         }
 
 #if NETFX_CORE
-        public static void WheelChanged(Carousel carousel, PointerPoint point)
+        public static void WheelChanged(ICarousel carousel, PointerPoint point)
 #else
         public static void WheelChanged(Carousel carousel, PointerPoint point)
 #endif
@@ -90,7 +90,7 @@ namespace CarouselDemo
             }
         }
 
-        internal static void KeyDown(Carousel carousel, VirtualKey key)
+        internal static void KeyDown(ICarousel carousel, VirtualKey key)
         {
             if (carousel != null && carousel.AreItemsLoaded)
             {

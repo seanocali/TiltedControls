@@ -891,6 +891,8 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\InputPromptImages\Valve\Vive-TrackpadUp.svg" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)CarouselUno.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ICarousel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StringCaseConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Carousel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CarouselItem.xaml.cs">

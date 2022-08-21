@@ -43,7 +43,7 @@ namespace TiltedControls
     /// <remarks>
     /// Visual tree contains an empty ContentControl for tab indexing and keyboard focus.
     /// </remarks>
-    public class Carousel : ContentControl
+    public class Carousel : ContentControl, ICarousel
     {
         #region CONSTRUCTOR & INITIALIZATION METHODS
 

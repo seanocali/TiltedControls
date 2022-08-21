@@ -151,7 +151,7 @@
                         Press Enter to animate selection.
                     </TextBlock>
                 </Grid>
-                <tilted:Carousel x:Name="myCarousel"
+                <tilted:CarouselUno x:Name="myCarousel"
                                  ItemsSource="{x:Bind PageViewModel.Items}"
                                  SelectedIndex="{x:Bind PageViewModel.SelectedIndex, Mode=TwoWay}"
                                  CarouselType="{x:Bind PageViewModel.CarouselType, Mode=OneWay}"
@@ -166,11 +166,11 @@
                                  WarpIntensity="{x:Bind PageViewModel.WarpIntensity, Mode=OneWay}"
                                  WarpCurve="{x:Bind PageViewModel.WarpCurve, Mode=OneWay}"
                                  ZIndexUpdateWaitsForAnimation="{x:Bind PageViewModel.ZIndexUpdateWaitsForAnimation, Mode=OneWay}" >
-                    <tilted:Carousel.RenderTransform>
+                    <tilted:CarouselUno.RenderTransform>
                         <TranslateTransform X="{x:Bind PageViewModel.OffsetX, Mode=OneWay}"
                                             Y="{x:Bind PageViewModel.OffsetY, Mode=OneWay}"/>
-                    </tilted:Carousel.RenderTransform>
-                    <tilted:Carousel.ItemTemplate>
+                    </tilted:CarouselUno.RenderTransform>
+                    <tilted:CarouselUno.ItemTemplate>
                         <DataTemplate x:DataType="local:ItemModel">
                             <tilted:CarouselItem x:Name="carouselItem"
                                                  RenderTransformOrigin="0.5, 0.5"
@@ -178,7 +178,11 @@
                                 <Grid BorderBrush="Black"
                                                  BorderThickness="1"
                                                  Background="{Binding BackgroundColor}">
-                                    <TextBlock Text="{Binding Text}" />
+                                    <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+                                        <Rectangle Fill="Black" Opacity="0.5"/>
+                                        <TextBlock Text="{Binding Text}" Foreground="White" Margin="1 0"/>
+                                    </Grid>
+
                                 </Grid>
                                 <UserControl.Resources>
                                     <Storyboard x:Key="SelectionAnimation">
@@ -201,8 +205,8 @@
                                 </UserControl.RenderTransform>
                             </tilted:CarouselItem>
                         </DataTemplate>
-                    </tilted:Carousel.ItemTemplate>
-                </tilted:Carousel>
+                    </tilted:CarouselUno.ItemTemplate>
+                </tilted:CarouselUno>
             </Grid>
 
         </Grid>
