@@ -1,6 +1,4 @@
-﻿
-#if NETFX_CORE
-using Microsoft.Toolkit.Uwp.UI;
+﻿using Microsoft.Toolkit.Uwp.UI;
 using Microsoft.Toolkit.Uwp.UI.Animations.Expressions;
 using Windows.UI;
 using Windows.UI.Composition;
@@ -12,20 +10,6 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Media.Media3D;
 using EF = Microsoft.Toolkit.Uwp.UI.Animations.Expressions.ExpressionFunctions;
-#else
-using CommunityToolkit.WinUI.UI;
-using CommunityToolkit.WinUI.UI.Animations.Expressions;
-using Microsoft.UI;
-using Microsoft.UI.Composition;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Hosting;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
-using Microsoft.UI.Xaml.Media.Animation;
-using Microsoft.UI.Xaml.Media.Media3D;
-using EF = CommunityToolkit.WinUI.UI.Animations.Expressions.ExpressionFunctions;
-#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -34,6 +18,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using static TiltedControls.Common;
+
 
 namespace TiltedControls
 {
@@ -79,6 +64,8 @@ namespace TiltedControls
             _cancelTokenSource = new CancellationTokenSource();
             var cancellationToken = _cancelTokenSource.Token;
             CreateContainers();
+            _activeVerticalScrollAnimations = new Dictionary<Visual, float>();
+            _activeHorizontalScrollAnimations = new Dictionary<Visual, float>();
             _elementsToLoadCount = Density;
             var items = new FrameworkElement[Density];
             if (Items != null && Items.Count() > 0)
@@ -175,8 +162,8 @@ namespace TiltedControls
             _dynamicContainerGrid.Height = _height;
             _dynamicGridVisual = ElementCompositionPreview.GetElementVisual(_dynamicContainerGrid);
             _dynamicGridVisual.CenterPoint = new Vector3(Convert.ToSingle(_width / 2), Convert.ToSingle(_height / 2), 0);
-            ElementCompositionPreview.SetIsTranslationEnabled(_dynamicContainerGrid, true);
-            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
+            CarouselRotationAngle = _dynamicGridVisual.RotationAngleInDegrees;
+            //AddImplicitWheelRotationAnimation(_dynamicGridVisual);
             _itemsLayerGrid = new Grid { HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
             _dynamicContainerGrid.Children.Add(_itemsLayerGrid);
             _root.Children.Add(_dynamicContainerGrid);
@@ -326,6 +313,8 @@ namespace TiltedControls
         bool _deltaDirectionIsReverse;
         protected bool _uIItemsCreated;
         volatile int _elementsToLoadCount;
+        Dictionary<Visual, float> _activeVerticalScrollAnimations;
+        Dictionary<Visual, float> _activeHorizontalScrollAnimations;
 
         #endregion
 
@@ -660,7 +649,7 @@ namespace TiltedControls
         })));
 
         /// <summary>
-        /// For carousel configurations with overlapping items. When this is disabled, the ZIndex of items update immediately upon interaction. 
+        /// For Carousel configurations with overlapping items. When this is disabled, the ZIndex of items update immediately upon interaction. 
         /// Enable this so that it updates only after the animation is halfway complete (NavigationSpeed / 2).
         /// </summary>
         public bool ZIndexUpdateWaitsForAnimation
@@ -734,7 +723,7 @@ namespace TiltedControls
             new PropertyMetadata(4, OnCaptionPropertyChanged));
 
         /// <summary>
-        /// Sets the type of carousel. Chose a Column, a Row, or a Wheel.
+        /// Sets the type of Carousel. Chose a Column, a Row, or a Wheel.
         /// </summary>
         public CarouselTypes CarouselType
         {
@@ -1019,7 +1008,7 @@ namespace TiltedControls
         })));
 
         /// <summary>
-        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// Use a ManipulationDelta event to update this value to control the Carousel with a dragging gesture or analog stick of a gamepade.
         /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
         /// Use ManipulationStarted and ManipulationCompleted events accordingly.
         /// 
@@ -1042,7 +1031,7 @@ namespace TiltedControls
             })));
 
         /// <summary>
-        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// Use a ManipulationDelta event to update this value to control the Carousel with a dragging gesture or analog stick of a gamepade.
         /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
         /// Use ManipulationStarted and ManipulationCompleted events accordingly.
         /// </summary>
@@ -1063,7 +1052,7 @@ namespace TiltedControls
             })));
 
         /// <summary>
-        /// Use a ManipulationDelta event to update this value to control the carousel with a dragging gesture or analog stick of a gamepade.
+        /// Use a ManipulationDelta event to update this value to control the Carousel with a dragging gesture or analog stick of a gamepade.
         /// It is important to call StartManipulationMode() and StopManipulationMode before and after (respectively) updating this with a ManipulationDelta.
         /// Use ManipulationStarted and ManipulationCompleted events accordingly.
         /// </summary>
@@ -1102,20 +1091,15 @@ namespace TiltedControls
         #endregion
 
         #region ANIMATION METHODS
-        private void AddImplicitWheelSnapToAnimation(Visual visual)
+        private void StartWheelSnapToAnimation(Visual visual, float degrees)
         {
             if (NavigationSpeed != 0)
             {
-                ImplicitAnimationCollection implicitAnimations = visual.Compositor.CreateImplicitAnimationCollection();
-                visual.ImplicitAnimations = implicitAnimations;
-                int duration = (NavigationSpeed / 2 < 500) ? NavigationSpeed / 2 : 500;
+                int duration = (NavigationSpeed < 500) ? NavigationSpeed : 500;
                 var animationRotate = visual.Compositor.CreateScalarKeyFrameAnimation();
-                var easing = animationRotate.Compositor.CreateLinearEasingFunction();
-                animationRotate.InsertExpressionKeyFrame(1f, "this.FinalValue", easing);
-                animationRotate.Target = "RotationAngleInDegrees";
+                animationRotate.InsertKeyFrame(1f, degrees);
                 animationRotate.Duration = TimeSpan.FromMilliseconds(duration);
-                implicitAnimations["RotationAngleInDegrees"] = animationRotate;
-                visual.ImplicitAnimations = implicitAnimations;
+                visual.StartAnimation("RotationAngleInDegrees", animationRotate);
             }
         }
 
@@ -1214,41 +1198,41 @@ namespace TiltedControls
                     selectionAreaThreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
                 }
 
-                    offset = visual.GetReference().Offset;
-                    scaleThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / selectionAreaThreshold : offset.Y / selectionAreaThreshold;
+                offset = visual.GetReference().Offset;
+                scaleThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / selectionAreaThreshold : offset.Y / selectionAreaThreshold;
 
-                    distanceAsPercentOfSelectionAreaThreshold = EF.Abs(scaleThresholdDistanceRaw);
+                distanceAsPercentOfSelectionAreaThreshold = EF.Abs(scaleThresholdDistanceRaw);
 
-                    distanceIsNegativeValue = scaleThresholdDistanceRaw < 0;
-                    isWithinScaleThreshold = isXaxisNavigation ? offset.X > -selectionAreaThreshold & offset.X < selectionAreaThreshold : offset.Y > -selectionAreaThreshold & offset.Y < selectionAreaThreshold;
+                distanceIsNegativeValue = scaleThresholdDistanceRaw < 0;
+                isWithinScaleThreshold = isXaxisNavigation ? offset.X > -selectionAreaThreshold & offset.X < selectionAreaThreshold : offset.Y > -selectionAreaThreshold & offset.Y < selectionAreaThreshold;
 
-                    StartScaleAnimation(element, distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold);
+                StartScaleAnimation(element, distanceAsPercentOfSelectionAreaThreshold, isWithinScaleThreshold);
 
-                    if (WarpIntensity != 0)
+                if (WarpIntensity != 0)
+                {
+                    var warpItemsthreshold = isXaxisNavigation ? AdditionalItemsToWarp * (_maxItemWidth + ItemGap) : AdditionalItemsToWarp * (_maxItemHeight + ItemGap);
+                    if (warpItemsthreshold == 0)
                     {
-                        var warpItemsthreshold = isXaxisNavigation ? AdditionalItemsToWarp * (_maxItemWidth + ItemGap) : AdditionalItemsToWarp * (_maxItemHeight + ItemGap);
-                        if (warpItemsthreshold == 0)
+                        warpItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
+                    }
+                    using (ScalarNode warpThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / warpItemsthreshold : offset.Y / warpItemsthreshold)
+                    using (ScalarNode distanceAsPercentOfWarpThreshold = EF.Abs(warpThresholdDistanceRaw))
+                    using (BooleanNode isWithinWarpThreshold = isXaxisNavigation ? offset.X > -warpItemsthreshold & offset.X < warpItemsthreshold : offset.Y > -warpItemsthreshold & offset.Y < warpItemsthreshold)
+                    using (ScalarNode y = WarpIntensity - (distanceAsPercentOfWarpThreshold * WarpIntensity))
+                    using (ScalarNode WarpOffset = Convert.ToSingle(-WarpCurve) * warpThresholdDistanceRaw * warpThresholdDistanceRaw + WarpIntensity)
+                    using (ScalarNode finalWarpValue = EF.Conditional(isWithinWarpThreshold, y * EF.Abs(y) * (float)WarpCurve, 0))
+                    {
+                        if (isXaxisNavigation)
                         {
-                            warpItemsthreshold = isXaxisNavigation ? _maxItemWidth + ItemGap : _maxItemHeight + ItemGap;
+                            visual.StartAnimation("Translation.Y", finalWarpValue);
                         }
-                        using (ScalarNode warpThresholdDistanceRaw = this.isXaxisNavigation ? offset.X / warpItemsthreshold : offset.Y / warpItemsthreshold)
-                        using (ScalarNode distanceAsPercentOfWarpThreshold = EF.Abs(warpThresholdDistanceRaw))
-                        using (BooleanNode isWithinWarpThreshold = isXaxisNavigation ? offset.X > -warpItemsthreshold & offset.X < warpItemsthreshold : offset.Y > -warpItemsthreshold & offset.Y < warpItemsthreshold)
-                        using (ScalarNode y = WarpIntensity - (distanceAsPercentOfWarpThreshold * WarpIntensity))
-                        using (ScalarNode WarpOffset = Convert.ToSingle(-WarpCurve) * warpThresholdDistanceRaw * warpThresholdDistanceRaw + WarpIntensity)
-                        using (ScalarNode finalWarpValue = EF.Conditional(isWithinWarpThreshold, y * EF.Abs(y) * (float)WarpCurve, 0))
+                        else
                         {
-                            if (isXaxisNavigation)
-                            {
-                                visual.StartAnimation("Translation.Y", finalWarpValue);
-                            }
-                            else
-                            {
-                                visual.StartAnimation("Translation.X", finalWarpValue);
-                            }
+                            visual.StartAnimation("Translation.X", finalWarpValue);
                         }
                     }
-                
+                }
+
             }
 
             // Fliptych
@@ -1489,7 +1473,7 @@ namespace TiltedControls
         #region NAVIGATION METHODS
 
         /// <summary>
-        /// This must be called before updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
+        /// This must be called before updating the Carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
         /// </summary>
         public void StartManipulationMode()
         {
@@ -1500,7 +1484,7 @@ namespace TiltedControls
         }
 
         /// <summary>
-        /// This must be called after updating the carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
+        /// This must be called after updating the Carousel with a ManipulationData event. MMVM implementations can use the trigger property to call it.
         /// </summary>
         public async void StopManipulationMode()
         {
@@ -1544,6 +1528,16 @@ namespace TiltedControls
                     }
                 }
 
+                for (int i = (Density - 1); i > -1; i--)
+                {
+                    int idx = Modulus(((Density - 1) - i), Density);
+                    if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
+                    {
+                        var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                        itemElementVisual.Offset = new Vector3(itemElementVisual.Offset.X, itemElementVisual.Offset.Y + _scrollValue, itemElementVisual.Offset.Z);
+                    }
+                }
+
                 while (newValue > _currentColumnYPosTick + threshold)
                 {
                     ChangeSelection(true);
@@ -1556,7 +1550,7 @@ namespace TiltedControls
                     Interlocked.Add(ref _currentColumnYPosTick, -threshold);
                 }
 
-                ClearImplicitOffsetAnimations(0, _scrollValue);
+                // ClearImplicitOffsetAnimations(0, _scrollValue);
             }
         }
 
@@ -1595,6 +1589,16 @@ namespace TiltedControls
                     }
                 }
 
+                for (int i = (Density - 1); i > -1; i--)
+                {
+                    int idx = Modulus(((Density - 1) - i), Density);
+                    if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
+                    {
+                        var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                        itemElementVisual.Offset = new Vector3(itemElementVisual.Offset.X + _scrollValue, itemElementVisual.Offset.Y, itemElementVisual.Offset.Z);
+                    }
+                }
+
                 while (newValue > _currentRowXPosTick + threshold)
                 {
                     ChangeSelection(true);
@@ -1607,7 +1611,6 @@ namespace TiltedControls
                     Interlocked.Add(ref _currentRowXPosTick, -threshold);
                 }
 
-                ClearImplicitOffsetAnimations(_scrollValue, 0);
             }
         }
 
@@ -1674,7 +1677,7 @@ namespace TiltedControls
                             break;
                     }
                 }
-                ClearImplicitOffsetAnimations(0, 0, true);
+                // ClearImplicitOffsetAnimations(0, 0, true);
             }
         }
 
@@ -1683,11 +1686,9 @@ namespace TiltedControls
             var selectedIdx = Modulus(((Density - 1) - (displaySelectedIndex)), Density);
             if (CarouselType == CarouselTypes.Wheel)
             {
-                AddImplicitWheelSnapToAnimation(_dynamicGridVisual);
-                _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
-                var animation = (ScalarKeyFrameAnimation)_dynamicGridVisual.ImplicitAnimations["RotationAngleInDegrees"];
-                await Task.Delay(animation.Duration);
-                _dynamicGridVisual.ImplicitAnimations.Clear();
+                //var animation = (ScalarKeyFrameAnimation)_dynamicGridVisual.ImplicitAnimations["RotationAngleInDegrees"];
+                //await Task.Delay(animation.Duration);
+                StartWheelSnapToAnimation(_dynamicGridVisual, _currentWheelTick);
                 _currentWheelTick = _currentWheelTick % 360;
                 _dynamicGridVisual.RotationAngleInDegrees = _currentWheelTick;
                 CarouselRotationAngle = _currentWheelTick;
@@ -1702,7 +1703,7 @@ namespace TiltedControls
                 if (_itemsLayerGrid != null && _itemsLayerGrid.Children[j] is FrameworkElement itemElement)
                 {
                     var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    AddStandardImplicitItemAnimation(itemElementVisual);
+                    //AddStandardImplicitItemAnimation(itemElementVisual);
                     if (CarouselType == CarouselTypes.Column)
                     {
                         var currentX = itemElementVisual.Offset.X;
@@ -1715,7 +1716,7 @@ namespace TiltedControls
                     }
                 }
             }
-            AddImplicitWheelRotationAnimation(_dynamicGridVisual);
+            //AddImplicitWheelRotationAnimation(_dynamicGridVisual);
             CarouselPositionY = 0;
             _currentColumnYPosTick = 0;
             CarouselPositionX = 0;
@@ -1833,9 +1834,7 @@ namespace TiltedControls
 
         void PositionElement(FrameworkElement element, int index, float elementWidth, float elementHeight)
         {
-            ElementCompositionPreview.SetIsTranslationEnabled(element, true);
             var elementVisual = ElementCompositionPreview.GetElementVisual(element);
-            if (elementVisual.ImplicitAnimations != null) { elementVisual.ImplicitAnimations.Clear(); }
             elementVisual.CenterPoint = new Vector3((elementWidth / 2), (elementHeight / 2), 0);
             var offsetX = GetOffsetX(index);
             var offsetY = GetOffsetY(index);
@@ -1844,11 +1843,12 @@ namespace TiltedControls
             {
                 elementVisual.RotationAngleInDegrees = GetRotation(index);
             }
-            AddStandardImplicitItemAnimation(elementVisual);
+            //AddStandardImplicitItemAnimation(elementVisual);
         }
 
-        void UpdateItemInCarouselSlot(int carouselIdx, int sourceIdx, bool loFi)
+        List<Visual> UpdateItemInCarouselSlot(int carouselIdx, int sourceIdx, bool loFi)
         {
+            var output = new List<Visual>();
             int idx = Modulus(((Density - 1) - carouselIdx), Density);
             if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement element)
             {
@@ -1861,8 +1861,7 @@ namespace TiltedControls
                     var elementVisual = ElementCompositionPreview.GetElementVisual(element);
                     UIElement precedingItemElement = loFi ? _itemsLayerGrid.Children[Modulus(idx - 1, Density)] : _itemsLayerGrid.Children[(idx + 1) % Density];
                     var precedingItemElementVisual = ElementCompositionPreview.GetElementVisual(precedingItemElement);
-
-                    if (elementVisual.ImplicitAnimations != null) { elementVisual.ImplicitAnimations.Clear(); }
+                    output.Add(elementVisual);
 
                     switch (CarouselType)
                     {
@@ -1893,7 +1892,7 @@ namespace TiltedControls
                             break;
                     }
                     elementVisual.Offset = new System.Numerics.Vector3((float)translateX, (float)translateY, 0);
-                    AddStandardImplicitItemAnimation(elementVisual);
+                    //AddStandardImplicitItemAnimation(elementVisual);
 
                     if (!IsCarouselMoving)
                     {
@@ -1903,6 +1902,7 @@ namespace TiltedControls
 
                 }
             }
+            return output;
         }
 
         /// <summary>
@@ -1960,12 +1960,12 @@ namespace TiltedControls
                         UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
                         break;
                     case CarouselTypes.Column:
-                        UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
-                        ScrollVerticalColumn(scrollbackwards);
+                        var shiftedVItems = UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
+                        ScrollVerticalColumn(scrollbackwards, shiftedVItems);
                         break;
                     case CarouselTypes.Row:
-                        UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
-                        ScrollHorizontalRow(scrollbackwards);
+                        var shiftedHItems = UpdateItemInCarouselSlot(carouselIdx, startIdx, loFi);
+                        ScrollHorizontalRow(scrollbackwards, shiftedHItems);
                         break;
                 }
             }
@@ -2050,30 +2050,84 @@ namespace TiltedControls
 
         private void RotateWheel(bool clockwise)
         {
+            //_dynamicGridVisual.StopAnimation("RotationAngleInDegrees");
+            //_dynamicGridVisual.RotationAngleInDegrees = CarouselRotationAngle;
             float endAngle = (clockwise) ? degrees : -degrees;
-            var newVal = _dynamicGridVisual.RotationAngleInDegrees + endAngle;
-            _dynamicGridVisual.RotationAngleInDegrees = newVal;
-            CarouselRotationAngle = _dynamicGridVisual.RotationAngleInDegrees;
+            var newVal = CarouselRotationAngle + endAngle;
+            var rotationAnimation = _dynamicGridVisual.Compositor.CreateScalarKeyFrameAnimation();
+            var navSpeed = NavigationSpeed > 0 ? NavigationSpeed : 1;
+            rotationAnimation.Duration = TimeSpan.FromMilliseconds(navSpeed);
+            rotationAnimation.InsertKeyFrame(1f, newVal);
+            rotationAnimation.StopBehavior = AnimationStopBehavior.LeaveCurrentValue;
+            CarouselRotationAngle = newVal;
             _currentWheelTick += endAngle;
+            _dynamicGridVisual.StartAnimation("RotationAngleInDegrees", rotationAnimation);
+            //_dynamicGridVisual.RotationAngleInDegrees = newVal;
         }
 
-        void ScrollVerticalColumn(bool scrollUp)
+        void ScrollVerticalColumn(bool scrollUp, List<Visual> dontAnimate)
         {
-            long endPosition = (scrollUp) ? -(_maxItemHeight + ItemGap) : (_maxItemHeight + ItemGap);
+            long scrollAmount = (scrollUp) ? -(_maxItemHeight + ItemGap) : (_maxItemHeight + ItemGap);
             for (int i = (Density - 1); i > -1; i--)
             {
                 int idx = Modulus(((Density - 1) - i), Density);
                 if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
                 {
                     var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
-                    var currentX = itemElementVisual.Offset.X;
-                    var currentY = itemElementVisual.Offset.Y;
-                    itemElementVisual.Offset = new Vector3(currentX, currentY + endPosition, 0);
+                    float finalValue;
+                    if (dontAnimate.Contains(itemElementVisual))
+                    {
+                        finalValue = itemElementVisual.Offset.Y + scrollAmount;
+                    }
+                    else
+                    {
+                        finalValue = _activeVerticalScrollAnimations.ContainsKey(itemElementVisual)
+                            ? _activeVerticalScrollAnimations[itemElementVisual] + scrollAmount : itemElementVisual.Offset.Y + scrollAmount;
+                    }
+                    var scrollAnimation = itemElementVisual.Compositor.CreateScalarKeyFrameAnimation();
+                    scrollAnimation.StopBehavior = AnimationStopBehavior.SetToFinalValue;
+                    //scrollAnimation.StopBehavior = AnimationStopBehavior.SetToFinalValue;
+                    var duration = NavigationSpeed > 0 ? NavigationSpeed : 1;
+                    scrollAnimation.Duration = TimeSpan.FromMilliseconds(duration);
+                    scrollAnimation.InsertKeyFrame(1f, finalValue);
+                    itemElementVisual.StartAnimation("Offset.Y", scrollAnimation);
+                    _activeVerticalScrollAnimations[itemElementVisual] = finalValue;
                 }
             }
         }
 
-        void ScrollHorizontalRow(bool scrollLeft)
+        void ScrollHorizontalRow(bool scrollLeft, List<Visual> dontAnimate)
+        {
+            long scrollAmount = (scrollLeft) ? -(_maxItemWidth + ItemGap) : (_maxItemWidth + ItemGap);
+            for (int i = (Density - 1); i > -1; i--)
+            {
+                int idx = Modulus(((Density - 1) - i), Density);
+                if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
+                {
+                    var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                    float finalValue;
+                    if (dontAnimate.Contains(itemElementVisual))
+                    {
+                        finalValue = itemElementVisual.Offset.X + scrollAmount;
+                    }
+                    else
+                    {
+                        finalValue = _activeHorizontalScrollAnimations.ContainsKey(itemElementVisual)
+                            ? _activeHorizontalScrollAnimations[itemElementVisual] + scrollAmount : itemElementVisual.Offset.X + scrollAmount;
+                    }
+                    var scrollAnimation = itemElementVisual.Compositor.CreateScalarKeyFrameAnimation();
+                    scrollAnimation.StopBehavior = AnimationStopBehavior.SetToFinalValue;
+                    //scrollAnimation.StopBehavior = AnimationStopBehavior.SetToFinalValue;
+                    var duration = NavigationSpeed > 0 ? NavigationSpeed : 1;
+                    scrollAnimation.Duration = TimeSpan.FromMilliseconds(duration);
+                    scrollAnimation.InsertKeyFrame(1f, finalValue);
+                    itemElementVisual.StartAnimation("Offset.X", scrollAnimation);
+                    _activeHorizontalScrollAnimations[itemElementVisual] = finalValue;
+                }
+            }
+        }
+
+        void ScrollHorizontalRowOLD(bool scrollLeft)
         {
             long endPosition = (scrollLeft) ? -(_maxItemWidth + ItemGap) : (_maxItemWidth + ItemGap);
             for (int i = (Density - 1); i > -1; i--)
@@ -2187,7 +2241,7 @@ namespace TiltedControls
         }
 
         /// <summary>
-        /// Raises when the carousel items are loaded into the visual tree.
+        /// Raises when the Carousel items are loaded into the visual tree.
         /// </summary>
         public event EventHandler ItemsLoaded;
 

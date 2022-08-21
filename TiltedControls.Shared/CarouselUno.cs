@@ -1589,6 +1589,16 @@ namespace TiltedControls
                     }
                 }
 
+                for (int i = (Density - 1); i > -1; i--)
+                {
+                    int idx = Modulus(((Density - 1) - i), Density);
+                    if (_itemsLayerGrid != null && _itemsLayerGrid.Children[idx] is FrameworkElement itemElement)
+                    {
+                        var itemElementVisual = ElementCompositionPreview.GetElementVisual(itemElement);
+                        itemElementVisual.Offset = new Vector3(itemElementVisual.Offset.X + _scrollValue, itemElementVisual.Offset.Y, itemElementVisual.Offset.Z);
+                    }
+                }
+
                 while (newValue > _currentRowXPosTick + threshold)
                 {
                     ChangeSelection(true);
