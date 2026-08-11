@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net5.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net9.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>TiltedControls.WinUI.Desktop</RootNamespace>
-    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
-      <PackageReference Include="CommunityToolkit.WinUI" Version="7.1.2" />
-      <PackageReference Include="CommunityToolkit.WinUI.UI.Animations" Version="7.1.2" />
-      <PackageReference Include="CommunityToolkit.WinUI.UI.Controls" Version="7.1.2" />
-      <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.2.220727.1-experimental1" />
-      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.25179-preview" />
+      <PackageReference Include="CommunityToolkit.WinUI.Animations" Version="8.2.251219" />
+      <PackageReference Include="CommunityToolkit.WinUI.Extensions" Version="8.2.251219" />
+      <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.3.2-experimentalA" />
+      <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
   </ItemGroup>
 
   <Import Project="..\TiltedControls.Shared\TiltedControls.Shared.projitems" Label="Shared" />
